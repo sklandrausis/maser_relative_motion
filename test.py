@@ -3,8 +3,6 @@ import os
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy.table import Table, Row
-from astropy.io import ascii
 
 
 def compute_weight_of_edge(node1, node2, data):
@@ -78,20 +76,16 @@ def print_group(group, graph):
 def create_output(groups, graph):
     index = 0
     header = []
-    files = []
-    ras = []
-    decs = []
-    flux1 = []
-
     data = []
-    for group in groups:
-        filestmp = [nx.get_node_attributes(graph, 'file')[g] for g in group]
-        rastmp = [nx.get_node_attributes(graph, 'ra')[g] for g in group]
-        decstmp = [nx.get_node_attributes(graph, 'dec')[g] for g in group]
-        flux1stmp = [nx.get_node_attributes(graph, 'flux1')[g] for g in group]
 
-        if len(set(filestmp)) == len(["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]):
-            order = [filestmp.index(ind) for ind in ["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]]
+    for group in groups:
+        files= [nx.get_node_attributes(graph, 'file')[g] for g in group]
+        ras = [nx.get_node_attributes(graph, 'ra')[g] for g in group]
+        decs = [nx.get_node_attributes(graph, 'dec')[g] for g in group]
+        flux1s = [nx.get_node_attributes(graph, 'flux1')[g] for g in group]
+
+        if len(set(files)) == len(["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]):
+            order = [files.index(ind) for ind in ["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]]
 
             ras_tmp = []
             dec_tmp = []
@@ -99,25 +93,26 @@ def create_output(groups, graph):
             flux1s_tmp = []
 
             for ind in order:
-                files_tmp.append(filestmp[ind])
-                ras_tmp.append(rastmp[ind])
-                dec_tmp.append(decstmp[ind])
-                flux1s_tmp.append(flux1stmp[ind])
+                files_tmp.append(files[ind])
+                ras_tmp.append(ras[ind])
+                dec_tmp.append(decs[ind])
+                flux1s_tmp.append(flux1s[ind])
 
             index += 1
-            filestmp = files_tmp
-            rastmp = ras_tmp
-            decstmp = dec_tmp
-            flux1stmp = flux1s_tmp
+            files = files_tmp
+            ras = ras_tmp
+            decs = dec_tmp
+            flux1s = flux1s_tmp
 
             if index == 1:
-                for file in filestmp:
+                for file in files:
                     header.append("ra" + "_" + file)
                     header.append("dec" + "_" + file)
+                    header.append("flux1" + "_" + file)
 
             data_tmp = []
-            for file_index in range(0, len(filestmp)):
-                data_tmp.extend([rastmp[file_index], decstmp[file_index], flux1stmp[file_index]])
+            for file_index in range(0, len(files)):
+                data_tmp.extend([ras[file_index], decs[file_index], flux1s[file_index]])
 
             data.append(data_tmp)
 
@@ -131,6 +126,7 @@ def main():
     nodes = [node for node in range(number_of_poins)]
     pos = {node: (data[node]["ra"], data[node]["dec"]) for node in nodes}
     labels = {node: str(data[node]["velocity"]) + "_" + data[node]["file"] for node in nodes}
+    radiuss = [data[node]["flux1"] * 25 for node in nodes]
 
     for node in nodes:
         graph.add_node(node, velocity=data[node]["velocity"], label=data[node]["velocity"],
@@ -165,7 +161,7 @@ def main():
     print("Single maser count ", number_of_conected_components - total_group_count)
 
     fig, ax = plt.subplots()
-    nx.draw(graph, with_labels=False, pos=pos, cmap="jet", node_color=[vel["velocity"] for vel in data], ax=ax)
+    nx.draw(graph, with_labels=False, pos=pos, cmap="jet", node_color=[vel["velocity"] for vel in data], ax=ax, node_size=radiuss)
     nx.draw_networkx_labels(graph, pos, labels=labels, font_size=6, ax=ax)
     plt.axis('on')
     ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
