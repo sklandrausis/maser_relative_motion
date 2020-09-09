@@ -4,6 +4,20 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
+from parsers.configparser_ import ConfigParser
+
+
+def get_configs(section, key):
+    """
+
+    :param section: configuration file secti
+    :param key: configuration file sections
+    :return: configuration file section key
+    """
+    config_file_path = "config/config.cfg"
+    config = ConfigParser(config_file_path)
+    return config.get_config(section, key)
+
 
 def compute_weight_of_edge(node1, node2, data):
     ra1 = data[node1]["ra"]
@@ -34,8 +48,10 @@ def compere_velocities(node1, node2, data):
 
 
 def get_data():
-    data_files = os.listdir("/home/janis/PycharmProjects/test/data_files/")
-    order = [data_files.index(ind) for ind in ["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]]
+    file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
+    data_file_path = get_configs("paths", "dataFiles")
+    data_files = os.listdir(data_file_path)
+    order = [data_files.index(ind) for ind in file_order]
     data_file_tmp = []
 
     for ind in order:
@@ -44,7 +60,7 @@ def get_data():
     data = []
 
     for file in data_files:
-        data_tmp = np.loadtxt("/home/janis/PycharmProjects/test/data_files/" + file, usecols=(0, 1, 2, 3, 4, 5), unpack=True, dtype=np.float)
+        data_tmp = np.loadtxt(data_file_path + file, usecols=(0, 1, 2, 3, 4, 5), unpack=True, dtype=np.float)
         rows = data_tmp.shape[1]
         for r in range(rows):
             row = data_tmp[:, r]
@@ -54,11 +70,12 @@ def get_data():
 
 
 def print_group(group, graph):
+    file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
     velocities = [nx.get_node_attributes(graph,'velocity')[g] for g in group]
     files = [nx.get_node_attributes(graph,'file')[g] for g in group]
 
-    if len(set(files)) == len(["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]):
-        order = [files.index(ind) for ind in ["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]]
+    if len(set(files)) == len(file_order):
+        order = [files.index(ind) for ind in file_order]
 
         velocities_tmp = []
         files_tmp = []
@@ -75,30 +92,35 @@ def print_group(group, graph):
 
 def create_output(groups, graph):
     index = 0
-    header = []
+    header = ['vel']
     data = []
+    file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
 
     for group in groups:
-        files= [nx.get_node_attributes(graph, 'file')[g] for g in group]
+        files = [nx.get_node_attributes(graph, 'file')[g] for g in group]
         ras = [nx.get_node_attributes(graph, 'ra')[g] for g in group]
         decs = [nx.get_node_attributes(graph, 'dec')[g] for g in group]
         flux1s = [nx.get_node_attributes(graph, 'flux1')[g] for g in group]
+        velocities = [nx.get_node_attributes( graph, 'velocity' )[g] for g in group]
 
-        if len(set(files)) == len(["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]):
-            order = [files.index(ind) for ind in ["el032.dat", "em064c.dat", "em064d.dat", "es066.dat", "ea063.dat"]]
+        if len(set(files)) == len(file_order):
+            order = [files.index(ind) for ind in file_order]
 
             ras_tmp = []
             dec_tmp = []
             files_tmp = []
             flux1s_tmp = []
+            velocities_tmp = []
 
             for ind in order:
                 files_tmp.append(files[ind])
                 ras_tmp.append(ras[ind])
                 dec_tmp.append(decs[ind])
                 flux1s_tmp.append(flux1s[ind])
+                velocities_tmp.append( velocities[ind] )
 
             index += 1
+            velocities = velocities_tmp
             files = files_tmp
             ras = ras_tmp
             decs = dec_tmp
@@ -110,7 +132,7 @@ def create_output(groups, graph):
                     header.append("dec" + "_" + file)
                     header.append("flux1" + "_" + file)
 
-            data_tmp = []
+            data_tmp = [velocities[-1]]
             for file_index in range(0, len(files)):
                 data_tmp.extend([ras[file_index], decs[file_index], flux1s[file_index]])
 
