@@ -97,6 +97,10 @@ def main():
         length = []
         ls_tmp = []
 
+        vel_for_group = [velocity[gi] for gi in group]
+        sum_of_vel = sum(vel_for_group)
+        #print(sum_of_vel)
+
         for index in range(0, len(ras)):
             #print(group)
             #print(ras[index])
@@ -105,12 +109,18 @@ def main():
                 dec_diff = [decs[index][gi] - decs[0][gi] for gi in group]
                 sum_ra_diff = sum(ra_diff)
                 sum_dec_diff = sum(dec_diff)
+                length = np.sqrt(sum_ra_diff ** 2 + sum_dec_diff ** 2)
+                #print(length)
 
             ra_for_group = [ras[index][gi] for gi in group]
             sum_of_ra = sum(ra_for_group)
             dec_for_group = [decs[index][gi] for gi in group]
             sum_of_dec = sum(dec_for_group)
-            print(sum_of_ra)
+
+            print(sum_of_dec)
+
+
+            #print(sum_of_ra)
 
             #print(sum(ra_diff), len(ra_diff), ra_diff)
         print("\n\n")

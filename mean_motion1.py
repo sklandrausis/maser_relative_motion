@@ -98,6 +98,7 @@ for j in range(len(lm)):
                 wek_xf13 += x3[i]
                 wek_yf13 += y3[i]
                 suma_vel13 += v1[i]
+                #print(suma_vel13)
                 #         i1max = max(i1)
                 k13 += 1
                 #          print xx13, yy13, x1[i]
@@ -111,6 +112,7 @@ for j in range(len(lm)):
                 wek_xf12 += x2[i]
                 wek_yf12 += y2[i]
                 suma_vel12 += v1[i]
+                #print(suma_vel12)
                 k12 += 1
                 #          print xx13, yy13, x1[i]
                 length12 = sqrt( xx12 ** 2 + yy12 ** 2 )
@@ -120,7 +122,7 @@ for j in range(len(lm)):
     #          print length
 
 
-    print(wek_x13)
+    #print(wek_x13)
 
     #print( k12, k13 )
 
