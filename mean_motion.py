@@ -2,7 +2,7 @@ import sys
 from astropy.io import ascii
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
+from matplotlib.patches import Ellipse, Circle
 import matplotlib.cm as cm
 from matplotlib.collections import PatchCollection
 
@@ -81,135 +81,102 @@ def main():
     groups_indexies = [set(g) for g in groups_indexies if len(g) > 0]
     print("Groups ", groups_indexies)
 
-    ls = []
-    lstex = []
-    linearity = []
-
     plt.figure()
     ax1 = plt.subplot(111, aspect='equal')
-    #print(ras[2], ras[0],  ras[2] - ras[0])
-    for group in groups_indexies:
-        sum_of_ra_diff = []
-        sum_of_dec_diff = []
-        sum_of_ra = []
-        sum_of_dec = []
-        sum_of_vel = []
-        length = []
-        ls_tmp = []
+    spots_parameters = []
+    vectors_parameters = []
 
+    for group in groups_indexies:
+        number_of_elements_in_group = len(group)
+        sum_of_ra_diffs = []
+        sum_of_dec_diffs = []
+        sum_of_ras = []
+        sum_of_decs = []
+        lengths = []
+        ls_tmp = []
         vel_for_group = [velocity[gi] for gi in group]
         sum_of_vel = sum(vel_for_group)
-        #print(sum_of_vel)
+        flux_for_group = []
 
         for index in range(0, len(ras)):
-            #print(group)
-            #print(ras[index])
             if index != 0:
                 ra_diff = [ras[index][gi] - ras[0][gi] for gi in group]
                 dec_diff = [decs[index][gi] - decs[0][gi] for gi in group]
                 sum_ra_diff = sum(ra_diff)
                 sum_dec_diff = sum(dec_diff)
+                sum_of_ra_diffs.append(sum_ra_diff/number_of_elements_in_group)
+                sum_of_dec_diffs.append(sum_dec_diff/number_of_elements_in_group)
                 length = np.sqrt(sum_ra_diff ** 2 + sum_dec_diff ** 2)
-                #print(length)
 
             ra_for_group = [ras[index][gi] for gi in group]
             sum_of_ra = sum(ra_for_group)
             dec_for_group = [decs[index][gi] for gi in group]
             sum_of_dec = sum(dec_for_group)
+            sum_of_ras.append(sum_of_ra)
+            sum_of_decs.append(sum_of_dec)
+            flux_for_group_tmp = [fluxs[index][gi] for gi in group]
+            flux_for_group.extend(flux_for_group_tmp)
 
-            print(sum_of_dec)
+        coords = (sum_of_ras[0]/number_of_elements_in_group, sum_of_decs[0]/number_of_elements_in_group)
+        spot_parameters = {"coords": coords, "vel": sum_of_vel / number_of_elements_in_group,
+                           "radius": 3 * np.log10(max(flux_for_group) * 1000.)}
+        spots_parameters.append(spot_parameters)
+        vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs}
+        vectors_parameters.append(vector_parameters)
 
+    vector_colors = ["black", "grey", "blue", "yellow", "red"]
+    vector_color_index = 0
+    vector_count = len(vectors_parameters[0]["sum_of_ra_diffs"])
+    for spt_index in range(0, len(spots_parameters)):
+        spt = spots_parameters[spt_index]
+        spot = Circle(spt["coords"], angle=0, lw=0.5, radius=spt["radius"])
+        ax1.add_artist(spot)
+        spot_color = cm.jet((spt["vel"] - min(velocity)) / velocity_range, 1)
+        spot.set_facecolor(spot_color)
 
-            #print(sum_of_ra)
+        vect = vectors_parameters[spt_index]
+        vect_ra = vect["sum_of_ra_diffs"]
+        vect_dec = vect["sum_of_dec_diffs"]
 
-            #print(sum(ra_diff), len(ra_diff), ra_diff)
-        print("\n\n")
+        for vec in range(vector_count):
+            plt.annotate("", xy=spt["coords"], xycoords='data',
+                         xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] + (20 * vect_dec[vec])),
+                         textcoords='data',
+                         arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+            vector_color_index += 1
 
-
-
-
-
-
-
-
-
-
-
-        '''
-
-
-            
-
-            dec_for_group = [decs[index][gi] for gi in group]
-            sum_of_dec.append(sum(dec_for_group) / len(group))
-
-            ls_tmp.append(sum(ra_for_group) / len(group))
-            ls_tmp.append(sum(dec_for_group) / len(group))
-
-            flux_for_group = [fluxs[index][gi] for gi in group]
-            ls_tmp.append(max(flux_for_group))
-
-
-
-            sum_of_ra_diff.append( sum( ra_diff_tmp ) )
-
-
-            sum_of_dec_diff.append( sum( dec_diff_tmp ) )
-
-            length.append( np.sqrt( np.array( sum_of_ra_diff ) ** 2 + np.array( sum_of_dec_diff ) ** 2 ) )
-
-            ls_tmp.append( sum( ra_diff_tmp ) / len( group ) )
-            ls_tmp.append( sum( dec_diff_tmp ) / len( group ) )
-
-        ls_tmp.append(length)
-        ls_tmp.append(np.array(length, dtype=object) /len(group))
-
-        for i in range(0, len(sum_of_ra_diff)):
-            ax1.annotate("", xy=(sum_of_ra[i] / len( group ), sum_of_dec[i] / len( group )), xycoords='data',
-                          xytext=(sum_of_ra[i] / len( group ) + (20 * sum_of_ra_diff[i] / len( group )),
-                                  sum_of_dec[i] / len( group ) + (20 * sum_of_dec_diff[i] / len( group ))),
-                          textcoords='data', arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3"))
-
-        #plt.annotate( "", xy=(wek_x13 / k13, wek_y13 / k13), xycoords='data',
-                  #xytext=(wek_x13 / k13 + (20 * xx13 / k13), wek_y13 / k13 + (20 * yy13 / k13)),
-                  #textcoords='data', arrowprops=dict(arrowstyle="<-", connectionstyle="arc3" ) )
-
-        ls.append(ls_tmp)
-    for group_index in range(0, len(groups_indexies)):
-        #print(ls[group_index][9])
-        ellipse = Ellipse((ls[group_index][1], ls[group_index][2]), angle=0, lw=0.5, width=3*np.log10(ls[group_index][9]*1000.), height=3*np.log10(ls[group_index][9]*1000.))
-        ax1.add_artist(ellipse)
-        collor = cm.jet((ls[group_index][0] - min(velocity)) / velocity_range, 1)
-        ellipse.set_facecolor(collor)
+            if vector_color_index == len(vector_colors):
+                vector_color_index = 0
 
     # vector legend
     plt.annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
-              arrowprops=dict( arrowstyle="<-", connectionstyle="arc3"))
+                  arrowprops=dict( arrowstyle="<-", connectionstyle="arc3"))
     plt.text(105, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='k')
     plt.text(110, -170, "5.8 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
 
-    plt.annotate( "", xy=(-60, -150), xycoords='data', xytext=(-60 + (20 * 3), -150), textcoords='data',
-              arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3"))
+    plt.annotate("", xy=(-60, -150), xycoords='data', xytext=(-60 + (20 * 3), -150), textcoords='data',
+                  arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3"))
     plt.text(-5, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='grey')
     plt.text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
 
-    patches = []
-    colors = velocity
-    p = PatchCollection( patches, cmap=cm.jet)
-    p.set_array(np.array(colors))
-    ax1.add_collection(p)
-    plt.colorbar(p)
     plt.text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
     plt.text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
     plt.text(100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
-    ax1.set_xlim(150, -350)
-    ax1.set_ylim(-200, 300)
+    patches = []
+    colors = velocity
+    p = PatchCollection(patches, cmap=cm.jet)
+    p.set_array(np.array(colors))
+    ax1.add_collection(p)
+    plt.colorbar(p)
+    all_ra = [ellipse["coords"][0] for ellipse in spots_parameters]
+    all_dec = [ellipse["coords"][1] for ellipse in spots_parameters]
+    ax1.set_xlim(max(all_ra) + 50, min(all_ra) - 50)
+    ax1.set_ylim(min(all_dec) - 50, max(all_dec) + 50)
     plt.xlabel('$\\Delta$ RA [mas]', fontsize=12)
     plt.ylabel('$\\Delta$ Dec [mas]', fontsize=12)
     plt.title("G78: SW excluded", size=12)
     plt.grid(True)
     plt.show()
-    '''
     sys.exit(0)
 
 

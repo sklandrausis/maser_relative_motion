@@ -138,14 +138,16 @@ for j in range(len(lm)):
          (wek_x13 + xx13) / k13, (wek_y13 + yy13) / k13, fluxa[:, 0].max(), fluxa[:, 1].max(), fluxa[:, 2].max()] )
     #
     #   lstex.append([suma_vel12/k12, wek_x12/k12, wek_y12/k12, xx12/(3033.0/365.0), yy12/(3033.0/365.0), xx13/(3776.0/365.0), yy13/(3776.0/365.0)] )
+    print("arrow", (wek_x12 / k12, wek_y12 / k12))
     annotate( "", xy=(wek_x12 / k12, wek_y12 / k12), xycoords='data',
               xytext=(wek_x12 / k12 + (20 * xx12 / k12), wek_y12 / k12 + (20 * yy12 / k12)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3" ) )
+    print( "arrow", (wek_x13 / k13, wek_y13 / k13))
     annotate( "", xy=(wek_x13 / k13, wek_y13 / k13), xycoords='data',
               xytext=(wek_x13 / k13 + (20 * xx13 / k13), wek_y13 / k13 + (20 * yy13 / k13)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
 
-    #print(ls13[j][11])
+    #print(3 * log10( ls13[j][11] * 1000.))
     el = Ellipse((ls13[j][1], ls13[j][2]), width=3 * log10( ls13[j][11] * 1000.),
                   height=3 * log10(ls13[j][11] * 1000.), angle=0, lw=0.5)
     ax1.add_artist( el )
@@ -230,7 +232,7 @@ plt.text( 100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center"
 # plt.text(35, 220, "G23.207-00.377", size=12, rotation=0.0, ha="left", va="center", color='k')
 plt.title( "G78: SW excluded", size=12 )
 # grid()
-#show()
+show()
 sys.exit(0)
 
 # PLOT 2 - subtracted avera, avedec
