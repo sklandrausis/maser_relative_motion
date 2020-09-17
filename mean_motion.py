@@ -93,7 +93,6 @@ def main():
         sum_of_ras = []
         sum_of_decs = []
         lengths = []
-        ls_tmp = []
         vel_for_group = [velocity[gi] for gi in group]
         sum_of_vel = sum(vel_for_group)
         flux_for_group = []
@@ -124,9 +123,10 @@ def main():
         vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs}
         vectors_parameters.append(vector_parameters)
 
-    vector_colors = ["black", "grey", "blue", "yellow", "red"]
+    vector_colors = ["black", "grey", "blue", "yellow"]
     vector_color_index = 0
     vector_count = len(vectors_parameters[0]["sum_of_ra_diffs"])
+    vector_names = [str(n) + "-1" for n in range(2, vector_count +2, +1)]
     for spt_index in range(0, len(spots_parameters)):
         spt = spots_parameters[spt_index]
         spot = Circle(spt["coords"], angle=0, lw=0.5, radius=spt["radius"])
@@ -139,13 +139,13 @@ def main():
         vect_dec = vect["sum_of_dec_diffs"]
 
         for vec in range(vector_count):
-            plt.annotate("", xy=spt["coords"], xycoords='data',
+            plt.annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
                          xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] + (20 * vect_dec[vec])),
                          textcoords='data',
                          arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
             vector_color_index += 1
 
-            if vector_color_index == len(vector_colors):
+            if vector_color_index == vector_count:
                 vector_color_index = 0
 
     # vector legend
