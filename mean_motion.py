@@ -2,7 +2,7 @@ import sys
 from astropy.io import ascii
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse, Circle
+from matplotlib.patches import Circle
 import matplotlib.cm as cm
 from matplotlib.collections import PatchCollection
 
@@ -81,8 +81,7 @@ def main():
     groups_indexies = [set(g) for g in groups_indexies if len(g) > 0]
     print("Groups ", groups_indexies)
 
-    plt.figure()
-    ax1 = plt.subplot(111, aspect='equal')
+    fig, (ax1, ax2) = plt.subplots(1, 2)
     spots_parameters = []
     vectors_parameters = []
 
@@ -120,7 +119,8 @@ def main():
         spot_parameters = {"coords": coords, "vel": sum_of_vel / number_of_elements_in_group,
                            "radius": 3 * np.log10(max(flux_for_group) * 1000.)}
         spots_parameters.append(spot_parameters)
-        vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs}
+        vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs,
+                             "sum_of_ras": sum_of_ras, "sum_of_decs": sum_of_decs}
         vectors_parameters.append(vector_parameters)
 
     vector_colors = ["black", "grey", "blue", "yellow"]
@@ -129,53 +129,66 @@ def main():
     vector_names = [str(n) + "-1" for n in range(2, vector_count +2, +1)]
     for spt_index in range(0, len(spots_parameters)):
         spt = spots_parameters[spt_index]
-        spot = Circle(spt["coords"], angle=0, lw=0.5, radius=spt["radius"])
-        ax1.add_artist(spot)
-        spot_color = cm.jet((spt["vel"] - min(velocity)) / velocity_range, 1)
-        spot.set_facecolor(spot_color)
+        spot_color = cm.jet((spt["vel"] - min( velocity )) / velocity_range, 1)
+        ax1.add_patch(Circle(spt["coords"], angle=0, lw=0.5, radius=spt["radius"], facecolor=spot_color))
+        ax2.add_patch(Circle(spt["coords"], angle=0, lw=0.5, radius=spt["radius"], facecolor=spot_color))
 
         vect = vectors_parameters[spt_index]
         vect_ra = vect["sum_of_ra_diffs"]
         vect_dec = vect["sum_of_dec_diffs"]
+        vect2_ra = vect["sum_of_ras"]
+
+        avera = np.mean([vect_ra[i] for i in range(0, len(vect_ra)) if vect2_ra[i] > -1240.0])
+        avede = np.mean([vect_dec[i] for i in range(0, len(vect_dec)) if vect2_ra[i] > -1240.0])
 
         for vec in range(vector_count):
-            plt.annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
+            ax1.annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
                          xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] + (20 * vect_dec[vec])),
                          textcoords='data',
                          arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+
+            ax2.annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
+                         xytext=((spt["coords"][0] + (20 * vect_ra[vec]) - 20 * avera), (spt["coords"][1] + (20 * vect_dec[vec]) - 20 * avede)),
+                         textcoords='data',
+                         arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+
             vector_color_index += 1
 
             if vector_color_index == vector_count:
                 vector_color_index = 0
 
     # vector legend
-    plt.annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
+    #plot 1
+    ax1.annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
                   arrowprops=dict( arrowstyle="<-", connectionstyle="arc3"))
-    plt.text(105, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='k')
-    plt.text(110, -170, "5.8 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
-
-    plt.annotate("", xy=(-60, -150), xycoords='data', xytext=(-60 + (20 * 3), -150), textcoords='data',
+    ax1.text(105, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='k')
+    ax1.text(110, -170, "5.8 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
+    ax1.annotate("", xy=(-60, -150), xycoords='data', xytext=(-60 + (20 * 3), -150), textcoords='data',
                   arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3"))
-    plt.text(-5, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='grey')
-    plt.text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
+    ax1.text(-5, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='grey')
+    ax1.text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
+    ax1.text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
+    ax1.text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
+    ax1.text(100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
+    ax1.set_title("G78: SW excluded", size=12)
 
-    plt.text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
-    plt.text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
-    plt.text(100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
-    patches = []
-    colors = velocity
-    p = PatchCollection(patches, cmap=cm.jet)
-    p.set_array(np.array(colors))
-    ax1.add_collection(p)
+    #plot 2
+    ax2.text(105, -135, "Systemic motions", size=8)
+
+    # for all plots
+    p = PatchCollection([], cmap=cm.jet)
+    p.set_array(velocity)
+
+    all_ra = [spot["coords"][0] for spot in spots_parameters]
+    all_dec = [spot["coords"][1] for spot in spots_parameters]
+    for ax in [ax1, ax2]:
+        ax.set_xlim(max(all_ra) + 50, min(all_ra) - 50)
+        ax.set_ylim(min(all_dec) - 50, max(all_dec) + 50)
+        ax.grid(True)
+        ax.add_collection(PatchCollection([], cmap=cm.jet))
+        ax.set_xlabel('$\\Delta$ RA [mas]', fontsize=12)
+        ax.set_ylabel('$\\Delta$ Dec [mas]', fontsize=12)
     plt.colorbar(p)
-    all_ra = [ellipse["coords"][0] for ellipse in spots_parameters]
-    all_dec = [ellipse["coords"][1] for ellipse in spots_parameters]
-    ax1.set_xlim(max(all_ra) + 50, min(all_ra) - 50)
-    ax1.set_ylim(min(all_dec) - 50, max(all_dec) + 50)
-    plt.xlabel('$\\Delta$ RA [mas]', fontsize=12)
-    plt.ylabel('$\\Delta$ Dec [mas]', fontsize=12)
-    plt.title("G78: SW excluded", size=12)
-    plt.grid(True)
     plt.show()
     sys.exit(0)
 

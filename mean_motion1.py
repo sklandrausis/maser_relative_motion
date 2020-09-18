@@ -125,27 +125,25 @@ for j in range(len(lm)):
     #print(wek_x13)
 
     #print( k12, k13 )
-
-    fluxa = array( flux )
-    ls13.append(
-        [suma_vel13 / k13, wek_x13 / k13, wek_y13 / k13, xx13, yy13, xx13 / k13, yy13 / k13, length13, length13 / k13,
-         wek_xf13 / k13, wek_yf13 / k13, fluxa.max()] )
-    ls12.append(
-        [suma_vel12 / k12, wek_x12 / k12, wek_y12 / k12, xx12, yy12, xx12 / k12, yy12 / k12, length12, length12 / k12,
-         wek_xf12 / k12, wek_yf12 / k12, fluxa.max()] )
-    linearity.append(
-        [suma_vel12 / k12, 0, wek_x12 / k12, wek_y12 / k12, 865, (wek_x12 + xx12) / k12, (wek_y12 + yy12) / k12, 1585,
-         (wek_x13 + xx13) / k13, (wek_y13 + yy13) / k13, fluxa[:, 0].max(), fluxa[:, 1].max(), fluxa[:, 2].max()] )
-    #
-    #   lstex.append([suma_vel12/k12, wek_x12/k12, wek_y12/k12, xx12/(3033.0/365.0), yy12/(3033.0/365.0), xx13/(3776.0/365.0), yy13/(3776.0/365.0)] )
-    print("arrow", (wek_x12 / k12, wek_y12 / k12))
-    annotate( "", xy=(wek_x12 / k12, wek_y12 / k12), xycoords='data',
-              xytext=(wek_x12 / k12 + (20 * xx12 / k12), wek_y12 / k12 + (20 * yy12 / k12)),
-              textcoords='data', arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3" ) )
-    print( "arrow", (wek_x13 / k13, wek_y13 / k13))
-    annotate( "", xy=(wek_x13 / k13, wek_y13 / k13), xycoords='data',
-              xytext=(wek_x13 / k13 + (20 * xx13 / k13), wek_y13 / k13 + (20 * yy13 / k13)),
-              textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
+    if k13 != 0:
+        fluxa = array( flux )
+        ls13.append(
+            [suma_vel13 / k13, wek_x13 / k13, wek_y13 / k13, xx13, yy13, xx13 / k13, yy13 / k13, length13, length13 / k13,
+             wek_xf13 / k13, wek_yf13 / k13, fluxa.max()] )
+        ls12.append(
+            [suma_vel12 / k12, wek_x12 / k12, wek_y12 / k12, xx12, yy12, xx12 / k12, yy12 / k12, length12, length12 / k12,
+             wek_xf12 / k12, wek_yf12 / k12, fluxa.max()] )
+        linearity.append(
+            [suma_vel12 / k12, 0, wek_x12 / k12, wek_y12 / k12, 865, (wek_x12 + xx12) / k12, (wek_y12 + yy12) / k12, 1585,
+             (wek_x13 + xx13) / k13, (wek_y13 + yy13) / k13, fluxa[:, 0].max(), fluxa[:, 1].max(), fluxa[:, 2].max()] )
+        #
+        #   lstex.append([suma_vel12/k12, wek_x12/k12, wek_y12/k12, xx12/(3033.0/365.0), yy12/(3033.0/365.0), xx13/(3776.0/365.0), yy13/(3776.0/365.0)] )
+        annotate( "", xy=(wek_x12 / k12, wek_y12 / k12), xycoords='data',
+                  xytext=(wek_x12 / k12 + (20 * xx12 / k12), wek_y12 / k12 + (20 * yy12 / k12)),
+                  textcoords='data', arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3" ) )
+        annotate( "", xy=(wek_x13 / k13, wek_y13 / k13), xycoords='data',
+                  xytext=(wek_x13 / k13 + (20 * xx13 / k13), wek_y13 / k13 + (20 * yy13 / k13)),
+                  textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
 
     #print(3 * log10( ls13[j][11] * 1000.))
     el = Ellipse((ls13[j][1], ls13[j][2]), width=3 * log10( ls13[j][11] * 1000.),
@@ -183,6 +181,7 @@ selecteddec12 = []
 selecteddec13 = []
 
 for j in range( len( ls13) ):
+    print(ls13[j][1])
     if ls13[j][1] > -200.0:
         selectedra13.append( ls13[j][5] )
         selecteddec13.append( ls13[j][6] )
@@ -232,8 +231,6 @@ plt.text( 100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center"
 # plt.text(35, 220, "G23.207-00.377", size=12, rotation=0.0, ha="left", va="center", color='k')
 plt.title( "G78: SW excluded", size=12 )
 # grid()
-show()
-sys.exit(0)
 
 # PLOT 2 - subtracted avera, avedec
 ax2 = plt.subplot( 223, aspect='equal' )
@@ -242,6 +239,7 @@ for j in range( len( lm ) ):
     annotate( "", xy=(ls12[j][1], ls12[j][2]), xycoords='data', xytext=(
     (ls12[j][1] + (20 * ls12[j][5]) - 20 * avera12), (ls12[j][2] + (20 * ls12[j][6]) - 20 * avedec12)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3" ) )
+
     annotate( "", xy=(ls13[j][1], ls13[j][2]), xycoords='data', xytext=(
     (ls13[j][1] + (20 * ls13[j][5]) - 20 * avera13), (ls13[j][2] + (20 * ls13[j][6]) - 20 * avedec13)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
@@ -280,6 +278,9 @@ plt.text( 100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center"
 plt.text( 100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k' )
 # plt.text(35, 220, "G23.207-00.377", size=12, rotation=0.0, ha="left", va="center", color='k')
 
+#show()
+#sys.exit(0)
+
 # PLOT 3 - excluding the two largest dispacement, commented in lm   !!! can be revuved
 ax3 = plt.subplot( 222, aspect='equal' )
 # ax1.plot(x1n, y1n, c="r", ls="", marker=".")
@@ -295,18 +296,6 @@ ax3 = plt.subplot( 222, aspect='equal' )
 ls13 = []
 ls12 = []
 lstex = []
-
-lm = [
-    [2, -2, 2, -2],
-    [-97, -103, 85, 78],
-    [-152, -167, 109, 100],
-    [-167, -170, 110, 102],
-    [-93, -97, 95, 92],
-    [-71, -75, 95, 90],
-    [84, 77, 112, 104],
-    [38, 32, 143, 138],
-    [123, 120, 110, 104]
-]
 
 for j in range( len( lm ) ):
     xx13 = 0
@@ -362,7 +351,7 @@ for j in range( len( lm ) ):
     #          print flux
     #          print length
 
-    print( k12, k13 )
+    #print( k12, k13 )
 
     fluxa = array( flux )
     ls13.append(
