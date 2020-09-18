@@ -181,7 +181,6 @@ selecteddec12 = []
 selecteddec13 = []
 
 for j in range( len( ls13) ):
-    print(ls13[j][1])
     if ls13[j][1] > -200.0:
         selectedra13.append( ls13[j][5] )
         selecteddec13.append( ls13[j][6] )

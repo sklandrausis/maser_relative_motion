@@ -85,13 +85,14 @@ def main():
     spots_parameters = []
     vectors_parameters = []
 
+    lengths = {}
+    average_lengths = {}
     for group in groups_indexies:
         number_of_elements_in_group = len(group)
         sum_of_ra_diffs = []
         sum_of_dec_diffs = []
         sum_of_ras = []
         sum_of_decs = []
-        lengths = []
         vel_for_group = [velocity[gi] for gi in group]
         sum_of_vel = sum(vel_for_group)
         flux_for_group = []
@@ -105,6 +106,14 @@ def main():
                 sum_of_ra_diffs.append(sum_ra_diff/number_of_elements_in_group)
                 sum_of_dec_diffs.append(sum_dec_diff/number_of_elements_in_group)
                 length = np.sqrt(sum_ra_diff ** 2 + sum_dec_diff ** 2)
+                if str(index + 1) + "-" + "1" in lengths.keys():
+                    lengths[str(index + 1) + "-" + "1"].append(length)
+                    average_lengths[str(index + 1) + "-" + "1"].append(length/number_of_elements_in_group)
+                else:
+                    lengths[str(index + 1) + "-" + "1"] = []
+                    lengths[str(index + 1) + "-" + "1"].append(length)
+                    average_lengths[str(index + 1) + "-" + "1"] = []
+                    average_lengths[str(index + 1) + "-" + "1"].append(length/number_of_elements_in_group)
 
             ra_for_group = [ras[index][gi] for gi in group]
             sum_of_ra = sum(ra_for_group)
@@ -119,6 +128,7 @@ def main():
         spot_parameters = {"coords": coords, "vel": sum_of_vel / number_of_elements_in_group,
                            "radius": 3 * np.log10(max(flux_for_group) * 1000.)}
         spots_parameters.append(spot_parameters)
+
         vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs,
                              "sum_of_ras": sum_of_ras, "sum_of_decs": sum_of_decs}
         vectors_parameters.append(vector_parameters)
@@ -127,7 +137,12 @@ def main():
     vector_color_index = 0
     vector_count = len(vectors_parameters[0]["sum_of_ra_diffs"])
     vector_names = [str(n) + "-1" for n in range(2, vector_count +2, +1)]
-    for spt_index in range(0, len(spots_parameters)):
+
+    for epoch_index in range(0, len(vector_names)):
+        print("max lenght in epoch" + vector_names[epoch_index] + ": " + str(np.max(lengths[vector_names[epoch_index]])))
+        print("max average lenght in epoch" + vector_names[epoch_index] + ": " + str(np.max(average_lengths[vector_names[epoch_index]])))
+
+    for spt_index in range(0, len(spots_parameters)-1):
         spt = spots_parameters[spt_index]
         spot_color = cm.jet((spt["vel"] - min( velocity )) / velocity_range, 1)
         ax1.add_patch(Circle(spt["coords"], angle=0, lw=0.5, radius=spt["radius"], facecolor=spot_color))
@@ -142,6 +157,7 @@ def main():
         avede = np.mean([vect_dec[i] for i in range(0, len(vect_dec)) if vect2_ra[i] > -1240.0])
 
         for vec in range(vector_count):
+
             ax1.annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
                          xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] + (20 * vect_dec[vec])),
                          textcoords='data',
