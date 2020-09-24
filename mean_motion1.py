@@ -37,7 +37,7 @@ v1mx = v1.max()
 # (0,0) is the brighted spot in 2004
 
 # PLOT 1
-ax1 = plt.subplot(111, aspect='equal')
+ax1 = plt.subplot(221, aspect='equal')
 # ax1.plot(x1n, y1n, c="r", ls="", marker=".")
 # ax1.plot(x2n, y2n, c="b", ls="", marker=".")
 
@@ -153,6 +153,7 @@ for j in range(len(lm)):
     #   print c
     el.set_facecolor( c )
 
+
 #print(ls13)
 patches = []
 colors = v1
@@ -232,7 +233,7 @@ plt.title( "G78: SW excluded", size=12 )
 # grid()
 
 # PLOT 2 - subtracted avera, avedec
-ax2 = plt.subplot( 223, aspect='equal' )
+ax2 = plt.subplot(222, aspect='equal' )
 
 for j in range( len( lm ) ):
     annotate( "", xy=(ls12[j][1], ls12[j][2]), xycoords='data', xytext=(
@@ -281,7 +282,7 @@ plt.text( 100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center"
 #sys.exit(0)
 
 # PLOT 3 - excluding the two largest dispacement, commented in lm   !!! can be revuved
-ax3 = plt.subplot( 222, aspect='equal' )
+ax3 = plt.subplot(223, aspect='equal' )
 # ax1.plot(x1n, y1n, c="r", ls="", marker=".")
 # ax1.plot(x2n, y2n, c="b", ls="", marker=".")
 
@@ -367,7 +368,7 @@ for j in range( len( lm ) ):
               xytext=(wek_x13 / k13 + (20 * xx13 / k13), wek_y13 / k13 + (20 * yy13 / k13)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
 
-    el = Ellipse( [ls13[j][1], ls13[j][2]], width=3 * log10( ls13[j][11] * 1000. ),
+    el = Ellipse( (ls13[j][1], ls13[j][2]), width=3 * log10( ls13[j][11] * 1000. ),
                   height=3 * log10( ls13[j][11] * 1000. ), angle=0, lw=0.5 )
     ax3.add_artist( el )
     c = cm.jet( (ls13[j][0] - v1mi) / dv, 1 )
@@ -443,9 +444,8 @@ plt.text( 100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center"
 plt.title( "G78: SW and 2 largest exc.", size=12 )
 # grid()
 
-
 # PLOT 4 - subtracted avera, avedec from PLOT 3
-ax4 = plt.subplot( 224, aspect='equal' )
+ax4 = plt.subplot(224, aspect='equal' )
 
 for j in range( len( lm ) ):
     annotate( "", xy=(ls12[j][1], ls12[j][2]), xycoords='data', xytext=(
@@ -455,7 +455,7 @@ for j in range( len( lm ) ):
     (ls13[j][1] + (20 * ls13[j][5]) - 20 * avera13), (ls13[j][2] + (20 * ls13[j][6]) - 20 * avedec13)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
 
-    el = Ellipse( [ls13[j][1], ls13[j][2]], width=3 * log10( ls13[j][11] * 1000. ),
+    el = Ellipse( (ls13[j][1], ls13[j][2]), width=3 * log10( ls13[j][11] * 1000. ),
                   height=3 * log10( ls13[j][11] * 1000. ), angle=0, lw=0.5 )
     ax4.add_artist( el )
     c = cm.jet( (ls13[j][0] - v1mi) / dv, 1 )
