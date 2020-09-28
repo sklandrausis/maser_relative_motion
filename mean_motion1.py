@@ -203,12 +203,13 @@ avera12 = selra12.mean()
 #print( "mean value of ave DEC shift epoch 12:", seldec12.mean() )
 avedec12 = seldec12.mean()
 
-#savetxt( "positionanglemotion_three_13_averaged.dat", ls13,
-         #fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
-#savetxt( "positionanglemotion_three_12_averaged.dat", ls12,
-         #fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
-#savetxt( "positionanglemotion_three_linearity.dat", linearity,
-        # fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
+print(ls13)
+savetxt( "positionanglemotion_three_13_averaged.dat", ls13,
+         fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
+savetxt( "positionanglemotion_three_12_averaged.dat", ls12,
+         fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
+savetxt( "positionanglemotion_three_linearity.dat", linearity,
+        fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
 
 # vector legend
 annotate( "", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',

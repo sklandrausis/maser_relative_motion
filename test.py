@@ -101,7 +101,7 @@ def create_output(groups, graph):
         ras = [nx.get_node_attributes(graph, 'ra')[g] for g in group]
         decs = [nx.get_node_attributes(graph, 'dec')[g] for g in group]
         flux1s = [nx.get_node_attributes(graph, 'flux1')[g] for g in group]
-        velocities = [nx.get_node_attributes( graph, 'velocity' )[g] for g in group]
+        velocities = [nx.get_node_attributes(graph, 'velocity')[g] for g in group]
 
         if len(set(files)) == len(file_order):
             order = [files.index(ind) for ind in file_order]

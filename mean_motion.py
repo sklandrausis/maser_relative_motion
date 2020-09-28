@@ -12,13 +12,28 @@ from parsers.configparser_ import ConfigParser
 def get_configs(section, key):
     """
 
-    :param section: configuration file secti
+    :param section: configuration file section
     :param key: configuration file sections
     :return: configuration file section key
     """
     config_file_path = "config/config.cfg"
     config = ConfigParser(config_file_path)
     return config.get_config(section, key)
+
+
+def create_mean_motion_data(spots_parameters, epoch_count,
+                            ra_differences, dec_differences, mean_ra_differences, mean_dec_differences,
+                            lengths, average_lengths):
+    data = []
+    epoch_names = [str(n) + "-1" for n in range(2, epoch_count + 2, +1)]
+    for epoch_name in epoch_names:
+        for spt_index in range(0, len(spots_parameters)):
+            spt = spots_parameters[spt_index]
+            data.append([spt["vel"], spt["coords"][0], spt["coords"][1],
+                         ra_differences[epoch_name][spt_index], dec_differences[epoch_name][spt_index],
+                         mean_ra_differences[epoch_name][spt_index], mean_dec_differences[epoch_name][spt_index],
+                         lengths[epoch_name][spt_index], average_lengths[epoch_name][spt_index], epoch_name])
+    return np.array(data, dtype=object)
 
 
 def main():
@@ -92,6 +107,8 @@ def main():
     average_lengths = {}
     mean_ra_differences = {}
     mean_dec_differences = {}
+    ra_differences = {}
+    dec_differences = {}
     for group in groups_indexies:
         number_of_elements_in_group = len(group)
         sum_of_ra_diffs = []
@@ -116,6 +133,8 @@ def main():
                     average_lengths[str(index + 1) + "-" + "1"].append(length/number_of_elements_in_group)
                     mean_ra_differences[str(index + 1) + "-" + "1"].append(sum_ra_diff/number_of_elements_in_group)
                     mean_dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff/number_of_elements_in_group)
+                    ra_differences[str(index + 1) + "-" + "1"].append(sum_ra_diff)
+                    dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff)
                 else:
                     lengths[str(index + 1) + "-" + "1"] = []
                     lengths[str(index + 1) + "-" + "1"].append(length)
@@ -125,6 +144,10 @@ def main():
                     mean_ra_differences[str(index + 1) + "-" + "1"].append(sum_ra_diff/number_of_elements_in_group)
                     mean_dec_differences[str(index + 1) + "-" + "1"] = []
                     mean_dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff/number_of_elements_in_group)
+                    ra_differences[str(index + 1) + "-" + "1"] = []
+                    ra_differences[str(index + 1) + "-" + "1"].append(sum_ra_diff)
+                    dec_differences[str(index + 1) + "-" + "1"] = []
+                    dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff)
 
             ra_for_group = [ras[index][gi] for gi in group]
             sum_of_ra = sum(ra_for_group)
@@ -143,6 +166,14 @@ def main():
         vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs,
                              "sum_of_ras": sum_of_ras, "sum_of_decs": sum_of_decs}
         vectors_parameters.append(vector_parameters)
+
+    epoch_count = len(mean_ra_differences.keys())
+    mean_motion_data = create_mean_motion_data(spots_parameters, epoch_count,
+                                               ra_differences, dec_differences,
+                                               mean_ra_differences, mean_dec_differences, lengths, average_lengths)
+    header = ["vel", "ra1", "dec1", "ra_diff", "dec_diff",
+              "avg_ra_diff", "avg_dec_diff", "length", "avg_length", "epoch"]
+    np.savetxt('output/output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s", header=",".join(header))
 
     vector_colors = ["black", "grey", "blue", "yellow"]
     vector_color_index = 0
