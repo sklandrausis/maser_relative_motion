@@ -21,18 +21,24 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
-def create_mean_motion_data(spots_parameters, epoch_count,
-                            ra_differences, dec_differences, mean_ra_differences, mean_dec_differences,
-                            lengths, average_lengths):
+def create_mean_motion_data(spots_parameters, epoch_count, ra_differences, dec_differences,
+                            mean_ra_differences, mean_dec_differences,
+                            lengths, average_lengths, vectors_parameters, fluxes):
     data = []
     epoch_names = [str(n) + "-1" for n in range(2, epoch_count + 2, +1)]
     for epoch_name in epoch_names:
+        second_coords_index = int(epoch_name.split("-")[0]) - 1
         for spt_index in range(0, len(spots_parameters)):
+            flux = fluxes[spt_index]
             spt = spots_parameters[spt_index]
-            data.append([spt["vel"], spt["coords"][0], spt["coords"][1],
+            vec = vectors_parameters[spt_index]
+            ras = vec["sum_of_ras"]
+            decs = vec["sum_of_decs"]
+            data.append([spt["vel"], ras[0], decs[0],
                          ra_differences[epoch_name][spt_index], dec_differences[epoch_name][spt_index],
                          mean_ra_differences[epoch_name][spt_index], mean_dec_differences[epoch_name][spt_index],
-                         lengths[epoch_name][spt_index], average_lengths[epoch_name][spt_index], epoch_name])
+                         lengths[epoch_name][spt_index], average_lengths[epoch_name][spt_index],
+                         ras[second_coords_index], decs[second_coords_index], flux, epoch_name])
     return np.array(data, dtype=object)
 
 
@@ -109,6 +115,8 @@ def main():
     mean_dec_differences = {}
     ra_differences = {}
     dec_differences = {}
+    fluxes = []
+    fluxes2 = {}
     for group in groups_indexies:
         number_of_elements_in_group = len(group)
         sum_of_ra_diffs = []
@@ -128,6 +136,7 @@ def main():
                 sum_of_ra_diffs.append(sum_ra_diff/number_of_elements_in_group)
                 sum_of_dec_diffs.append(sum_dec_diff/number_of_elements_in_group)
                 length = np.sqrt(sum_ra_diff ** 2 + sum_dec_diff ** 2)
+                flux_for_group_tmp = [fluxs[index][gi] for gi in group]
                 if str(index + 1) + "-" + "1" in lengths.keys():
                     lengths[str(index + 1) + "-" + "1"].append(length)
                     average_lengths[str(index + 1) + "-" + "1"].append(length/number_of_elements_in_group)
@@ -135,6 +144,7 @@ def main():
                     mean_dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff/number_of_elements_in_group)
                     ra_differences[str(index + 1) + "-" + "1"].append(sum_ra_diff)
                     dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff)
+                    #fluxes2[str(index + 1) + "-" + "1"].append(sum_ra_diff)
                 else:
                     lengths[str(index + 1) + "-" + "1"] = []
                     lengths[str(index + 1) + "-" + "1"].append(length)
@@ -158,21 +168,23 @@ def main():
             flux_for_group_tmp = [fluxs[index][gi] for gi in group]
             flux_for_group.extend(flux_for_group_tmp)
 
+        fluxes.append(max(flux_for_group))
         coords = (sum_of_ras[0]/number_of_elements_in_group, sum_of_decs[0]/number_of_elements_in_group)
         spot_parameters = {"coords": coords, "vel": sum_of_vel / number_of_elements_in_group,
                            "radius": 3 * np.log10(max(flux_for_group) * 1000.)}
         spots_parameters.append(spot_parameters)
 
         vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs,
-                             "sum_of_ras": sum_of_ras, "sum_of_decs": sum_of_decs}
+                             "sum_of_ras": np.array(sum_of_ras) / number_of_elements_in_group, "sum_of_decs": np.array(sum_of_decs)/ number_of_elements_in_group}
         vectors_parameters.append(vector_parameters)
 
     epoch_count = len(mean_ra_differences.keys())
     mean_motion_data = create_mean_motion_data(spots_parameters, epoch_count,
                                                ra_differences, dec_differences,
-                                               mean_ra_differences, mean_dec_differences, lengths, average_lengths)
+                                               mean_ra_differences, mean_dec_differences,
+                                               lengths, average_lengths, vectors_parameters, fluxes)
     header = ["vel", "ra1", "dec1", "ra_diff", "dec_diff",
-              "avg_ra_diff", "avg_dec_diff", "length", "avg_length", "epoch"]
+              "avg_ra_diff", "avg_dec_diff", "length", "avg_length", "ra2", "dec2", "flux", "epoch"]
     np.savetxt('output/output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s", header=",".join(header))
 
     vector_colors = ["black", "grey", "blue", "yellow"]

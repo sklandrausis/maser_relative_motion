@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf8 -*-
-import sys
 from pylab import *
 from matplotlib.patches import Ellipse
 from matplotlib import rc
@@ -145,7 +144,6 @@ for j in range(len(lm)):
                   xytext=(wek_x13 / k13 + (20 * xx13 / k13), wek_y13 / k13 + (20 * yy13 / k13)),
                   textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
 
-    #print(3 * log10( ls13[j][11] * 1000.))
     el = Ellipse((ls13[j][1], ls13[j][2]), width=3 * log10( ls13[j][11] * 1000.),
                   height=3 * log10(ls13[j][11] * 1000.), angle=0, lw=0.5)
     ax1.add_artist( el )
@@ -203,7 +201,8 @@ avera12 = selra12.mean()
 #print( "mean value of ave DEC shift epoch 12:", seldec12.mean() )
 avedec12 = seldec12.mean()
 
-print(ls13)
+print(ls12)
+
 savetxt( "positionanglemotion_three_13_averaged.dat", ls13,
          fmt="%.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f %+.3f" )
 savetxt( "positionanglemotion_three_12_averaged.dat", ls12,
@@ -245,7 +244,7 @@ for j in range( len( lm ) ):
     (ls13[j][1] + (20 * ls13[j][5]) - 20 * avera13), (ls13[j][2] + (20 * ls13[j][6]) - 20 * avedec13)),
               textcoords='data', arrowprops=dict( arrowstyle="<-", connectionstyle="arc3" ) )
 
-    el = Ellipse( [ls13[j][1], ls13[j][2]], width=3 * log10( ls13[j][11] * 1000. ),
+    el = Ellipse( (ls13[j][1], ls13[j][2]), width=3 * log10( ls13[j][11] * 1000. ),
                   height=3 * log10( ls13[j][11] * 1000. ), angle=0, lw=0.5 )
     ax2.add_artist( el )
     c = cm.jet( (ls13[j][0] - v1mi) / dv, 1 )
