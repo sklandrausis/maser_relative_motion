@@ -162,15 +162,19 @@ def main():
 
             ra_for_group = [ras[index][gi] for gi in group]
             sum_of_ra = sum(ra_for_group)
+            sum_of_ras.append(sum_of_ra)
+
             dec_for_group = [decs[index][gi] for gi in group]
             sum_of_dec = sum(dec_for_group)
-            sum_of_ras.append(sum_of_ra)
             sum_of_decs.append(sum_of_dec)
-            flux_for_group_tmp = [fluxs[index][gi] for gi in group]
-            flux_for_group.extend(flux_for_group_tmp)
 
+            flux_for_group_tmp = [fluxs[index][gi] for gi in group]
+            flux_for_group.append(max(flux_for_group_tmp))
+
+        #print("ras", np.array(sum_of_ras) / number_of_elements_in_group, "\n\n\n", "flux", np.array(flux_for_group))
         linearity_for_group.extend(np.array(sum_of_ras) / number_of_elements_in_group)
         linearity_for_group.extend(np.array(sum_of_decs) / number_of_elements_in_group)
+        linearity_for_group.extend(np.array(flux_for_group))
         linearity.append(linearity_for_group)
         fluxes.append(max(flux_for_group))
         coords = (sum_of_ras[0]/number_of_elements_in_group, sum_of_decs[0]/number_of_elements_in_group)
@@ -193,6 +197,7 @@ def main():
     header2 = ["vel"]
     header2.extend(["x" + str(i) for i in range(0, len(sum_of_ras))])
     header2.extend(["y" + str(i) for i in range(0, len(sum_of_decs))])
+    header2.extend(["i" + str(i) for i in range(0, len(sum_of_decs))])
     np.savetxt("output/positionanglemotion_linearity.dat", np.array(linearity), delimiter=",", header=",".join(header2))
 
     vector_colors = ["black", "grey", "blue", "yellow"]
