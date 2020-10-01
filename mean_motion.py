@@ -117,6 +117,7 @@ def main():
     dec_differences = {}
     fluxes = []
     fluxes2 = {}
+    linearity = []
     for group in groups_indexies:
         number_of_elements_in_group = len(group)
         sum_of_ra_diffs = []
@@ -125,6 +126,7 @@ def main():
         sum_of_decs = []
         vel_for_group = [velocity[gi] for gi in group]
         sum_of_vel = sum(vel_for_group)
+        linearity_for_group = [sum_of_vel/number_of_elements_in_group]
         flux_for_group = []
 
         for index in range(0, len(ras)):
@@ -136,7 +138,6 @@ def main():
                 sum_of_ra_diffs.append(sum_ra_diff/number_of_elements_in_group)
                 sum_of_dec_diffs.append(sum_dec_diff/number_of_elements_in_group)
                 length = np.sqrt(sum_ra_diff ** 2 + sum_dec_diff ** 2)
-                flux_for_group_tmp = [fluxs[index][gi] for gi in group]
                 if str(index + 1) + "-" + "1" in lengths.keys():
                     lengths[str(index + 1) + "-" + "1"].append(length)
                     average_lengths[str(index + 1) + "-" + "1"].append(length/number_of_elements_in_group)
@@ -168,6 +169,9 @@ def main():
             flux_for_group_tmp = [fluxs[index][gi] for gi in group]
             flux_for_group.extend(flux_for_group_tmp)
 
+        linearity_for_group.extend(np.array(sum_of_ras) / number_of_elements_in_group)
+        linearity_for_group.extend(np.array(sum_of_decs) / number_of_elements_in_group)
+        linearity.append(linearity_for_group)
         fluxes.append(max(flux_for_group))
         coords = (sum_of_ras[0]/number_of_elements_in_group, sum_of_decs[0]/number_of_elements_in_group)
         spot_parameters = {"coords": coords, "vel": sum_of_vel / number_of_elements_in_group,
@@ -186,6 +190,10 @@ def main():
     header = ["vel", "ra1", "dec1", "ra_diff", "dec_diff",
               "avg_ra_diff", "avg_dec_diff", "length", "avg_length", "ra2", "dec2", "flux", "epoch"]
     np.savetxt('output/output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s", header=",".join(header))
+    header2 = ["vel"]
+    header2.extend(["x" + str(i) for i in range(0, len(sum_of_ras))])
+    header2.extend(["y" + str(i) for i in range(0, len(sum_of_decs))])
+    np.savetxt("output/positionanglemotion_linearity.dat", np.array(linearity), delimiter=",", header=",".join(header2))
 
     vector_colors = ["black", "grey", "blue", "yellow"]
     vector_color_index = 0

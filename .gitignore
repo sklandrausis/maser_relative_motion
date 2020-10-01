@@ -155,6 +155,11 @@ g78_new_motion.pdf
 positionanglemotion_three_12_averaged.dat
 positionanglemotion_three_13_averaged.dat
 positionanglemotion_three_linearity.dat
+linearity_errors_fitted_cm.dat
+linearity_errors_fitted_tex_cm.dat
+linearity_errors_fitted_tex_sort.dat
+G78_linearity_with_errors_org.pdf
+
 
 
 
