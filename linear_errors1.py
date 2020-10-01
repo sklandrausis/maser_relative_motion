@@ -4,6 +4,8 @@ from scipy.optimize import curve_fit
 
 q, t1, x1, y1, t2, x2, y2, t3, x3, y3, i1, i2, i3 = loadtxt("positionanglemotion_three_linearity.dat", unpack=True)
 
+print(x1, "\n\n")
+
 
 #subtrack the CMs
 #Centres of motions (CMs) for each epoch
@@ -14,10 +16,14 @@ epy1 = y1.mean()
 epy2 = y2.mean()
 epy3 = y3.mean()
 
+print(epx1, "\n\n")
+
+'''
 print( 'PM relative to centres:')
 print( 'ra dec epoch 1 mean', x1.mean(), y1.mean())
 print('ra dec epoch 2 mean', x2.mean(), y2.mean())
 print('ra dec epoch 3 mean', x3.mean(), y3.mean())
+'''
 
 # subtrack the CMs
 x1 = x1-epx1
@@ -26,6 +32,9 @@ x2 = x2-epx2
 y2 = y2-epy2
 x3 = x3-epx3
 y3 = y3-epy3
+
+
+print(x1, "\n\n")
 
 f1, a1 = subplots(6, 2, sharex=True, squeeze=False)
 f1.subplots_adjust(hspace=0.0, top=0.95, bottom=0.05, left=0.05, right=0.95)
@@ -42,10 +51,8 @@ lstex = []
 lsvel = []
 
 for r in range(6):
- print(t3[r])
  tt = array([t1[r], t2[r], t3[r]])
  xx = array([x1[r], x2[r], x3[r]])
- print(xx)
  yy = array([y1[r], y2[r], y3[r]])
 # erx = [erx2mas[r], erx2mas[r], erx2mas[r]]
 # ery = [ery2mas[r], ery2mas[r], ery2mas[r]]
@@ -84,7 +91,6 @@ for r in range(6):
 
 # a1[r][0].plot(15*t3[r], 15*t3[r]*(c[0]-sqrt(diag(m)[0]))+c[1], ls="", marker="+", color="grey")
 # a1[r][1].plot(15*t3[r], 15*t3[r]*(cdec[0]-sqrt(diag(mdec)[0]))+cdec[1], ls="", marker="+", color="grey")
-
  ls.append([q[r],i1[r],x1[r],y1[r],t3[r]*c[0]+c[1],t3[r]*cdec[0]+cdec[1],t3[r]*(c[0]+sqrt(diag(m)[0]))+c[1],t3[r]*(cdec[0]+sqrt(diag(mdec)[0]))+cdec[1],t3[r]*(c[0]-sqrt(diag(m)[0]))+c[1],t3[r]*(cdec[0]-sqrt(diag(mdec)[0]))+cdec[1],20*t3[r]*c[0]+c[1],20*t3[r]*cdec[0]+cdec[1],20*t3[r]*(c[0]+sqrt(diag(m)[0]))+c[1],20*t3[r]*(cdec[0]+sqrt(diag(mdec)[0]))+cdec[1],20*t3[r]*(c[0]-sqrt(diag(m)[0]))+c[1],20*t3[r]*(cdec[0]-sqrt(diag(mdec)[0]))+cdec[1]])
 
  lstex.append([q[r],x1[r],y1[r],(t3[r]*c[0]+c[1]-x1[r])/(3886.0/365.0), (t3[r]*(c[0]+sqrt(diag(m)[0]))+c[1]-x1[r]-(t3[r]*c[0]+c[1]-x1[r]))/(3886.0/365.0),
@@ -108,8 +114,8 @@ lstexsort = sorted(lstex, key = lambda lstex: lstex[0])
 savetxt ("linearity_errors_fitted_tex_sort.dat", lstexsort, fmt="%.2f ""&"" %+.3f ""&"" %+.3f ""&"" %+.2f ""$\pm$"" %.2f ""&"" %+.2f ""$\pm$"" %.2f ""&"" %.3f ""&"" %.3f ""&"" %.3f ""\\\\""")
 
 als = array(lsvel)
-print("max vel", als.max(), "mas/yr", (als.max()*1.64*150e6)/(365*24*3600), "km/s")
-print("max vel", als.min(), "mas/yr", (als.min()*1.64*150e6)/(365*24*3600), "km/s")
+#print("max vel", als.max(), "mas/yr", (als.max()*1.64*150e6)/(365*24*3600), "km/s")
+#print("max vel", als.min(), "mas/yr", (als.min()*1.64*150e6)/(365*24*3600), "km/s")
 
 
 xlabel("Days")
