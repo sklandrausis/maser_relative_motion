@@ -114,9 +114,6 @@ def main():
     lstexsort = sorted(lstex, key=lambda lstex: lstex[0])
     header1 = ["vel", "f", "x1", "y1", "x2", "y2", "errxmin", "errymin", "errxmax", "errymax", "xlong2", "ylong2",
                "errxminlong", "erryminlong", "errxmaxlong", "errymaxlong"]
-    #header1.extend(["x" + str(i) for i in range(0, len(x))])
-    #header1.extend(["y" + str(i) for i in range(0, len(x))])
-    #header1.extend(["errxmin", "errymin", "errxmax", "errymax", "xlong2", "ylong2", "errxminlong", "erryminlong", "errxmaxlong", "errymaxlong"])
     np.savetxt("output/linearity_errors_fitted_cm.dat", np.array(ls), delimiter=",", fmt="%s", header=",".join(header1))
     np.savetxt("output/linearity_errors_fitted_tex_cm.dat", np.array(lstex))
     np.savetxt("output/linearity_errors_fitted_tex_sort.dat", np.array(lstexsort))
