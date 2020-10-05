@@ -116,7 +116,6 @@ def main():
     ra_differences = {}
     dec_differences = {}
     fluxes = []
-    fluxes2 = {}
     linearity = []
     for group in groups_indexies:
         number_of_elements_in_group = len(group)
@@ -145,7 +144,6 @@ def main():
                     mean_dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff/number_of_elements_in_group)
                     ra_differences[str(index + 1) + "-" + "1"].append(sum_ra_diff)
                     dec_differences[str(index + 1) + "-" + "1"].append(sum_dec_diff)
-                    #fluxes2[str(index + 1) + "-" + "1"].append(sum_ra_diff)
                 else:
                     lengths[str(index + 1) + "-" + "1"] = []
                     lengths[str(index + 1) + "-" + "1"].append(length)
@@ -171,7 +169,6 @@ def main():
             flux_for_group_tmp = [fluxs[index][gi] for gi in group]
             flux_for_group.append(max(flux_for_group_tmp))
 
-        #print("ras", np.array(sum_of_ras) / number_of_elements_in_group, "\n\n\n", "flux", np.array(flux_for_group))
         linearity_for_group.extend(np.array(sum_of_ras) / number_of_elements_in_group)
         linearity_for_group.extend(np.array(sum_of_decs) / number_of_elements_in_group)
         linearity_for_group.extend(np.array(flux_for_group))
@@ -251,6 +248,7 @@ def main():
 
     # vector legend
     #plot 1
+    dates = [date.split("-")[1].strip() for date in get_configs("parameters", "dates").split(",")]
     sub_plots[0].annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
                           arrowprops=dict( arrowstyle="<-", connectionstyle="arc3"))
     sub_plots[0].text(105, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='k')
@@ -259,16 +257,10 @@ def main():
                           arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3"))
     sub_plots[0].text(-5, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='grey')
     sub_plots[0].text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
-    sub_plots[0].text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
-    sub_plots[0].text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
-    sub_plots[0].text(100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
-    sub_plots[0].set_title("G78: SW excluded", size=12)
+    sub_plots[0].set_title("G78: SW excluded", size=12, y=1.0, pad=-14)
 
     #plot 2
     sub_plots[1].text(105, -135, "Systemic motions", size=8)
-    sub_plots[1].text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
-    sub_plots[1].text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
-    sub_plots[1].text(100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
 
     #plot 3
     sub_plots[2].annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
@@ -279,16 +271,10 @@ def main():
                           arrowprops=dict(arrowstyle="<-", color="grey", connectionstyle="arc3"))
     sub_plots[2].text(-5, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='grey')
     sub_plots[2].text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
-    sub_plots[2].text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
-    sub_plots[2].text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
-    sub_plots[2].text( 100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
-    sub_plots[2].set_title("G78: SW and 2 largest exc.", size=12)
+    sub_plots[2].set_title("G78: SW and 2 largest exc.", size=12, y=1.0, pad=-14)
 
     #plot 4
     sub_plots[3].text(105, -135, "Systemic motions", size=8)
-    sub_plots[3].text(100, 220, "31/Oct/2019", size=12, rotation=0.0, ha="left", va="center", color='k')
-    sub_plots[3].text(100, 250, "31/Oct/2011", size=12, rotation=0.0, ha="left", va="center", color='grey')
-    sub_plots[3].text(100, 280, "11/Mar/2009", size=12, rotation=0.0, ha="left", va="center", color='k')
 
     # for all plots
     p = PatchCollection([], cmap=cm.jet)
@@ -303,6 +289,13 @@ def main():
         ax.add_collection(PatchCollection([], cmap=cm.jet))
         ax.set_xlabel('$\\Delta$ RA [mas]', fontsize=12)
         ax.set_ylabel('$\\Delta$ Dec [mas]', fontsize=12)
+
+        date_x = 100
+        data_y = 220
+        for date in dates:
+            ax.text(date_x, data_y, date, size=12, rotation=0.0, ha="left", va="center", color='k')
+            data_y += 20
+
     plt.colorbar(p)
     plt.tight_layout()
     plt.show()

@@ -9,8 +9,6 @@ import numpy as np
 
 
 def main():
-    output_header = ["vel", "f", "x1", "y1", "x2", "y2", "errxmin", "errymin", "errxmax", "errymax", "xlong2", "ylong2",
-                     "errxminlong", "erryminlong", "errxmaxlong", "errymaxlong"]
     output_file = "output/linearity_errors_fitted_cm.dat"
     output_data = ascii.read(output_file)
     v1 = output_data["vel"]
@@ -45,7 +43,7 @@ def main():
     for i in range(len(x1)):
         leng = np.sqrt((x1[i] - xlong2[i]) ** 2 + (y1[i] - ylong2[i]) ** 2)
         lengreal = np.sqrt((x1[i] - x2[i]) ** 2 + (y1[i] - y2[i]) ** 2)
-        lsreal.append( [lengreal] )
+        lsreal.append([lengreal])
         ls.append([leng])
         ax1.annotate("", xy=(x1[i], y1[i]), xycoords='data', xytext=(errxmaxlong[i], errymaxlong[i]), textcoords='data',
                      arrowprops=dict( arrowstyle="-", color="grey", connectionstyle="arc3", alpha=0.5))
@@ -72,8 +70,10 @@ def main():
                  arrowprops=dict(arrowstyle="<-", connectionstyle="arc3"))
     plt.text(110, -195, "0.3 mas yr$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
     plt.text(100, -230, "6 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
-    ax1.annotate( "", xy=(150, 210), xycoords='data', xytext=(50, 210), textcoords='data', size=7,
-                  arrowprops=dict(arrowstyle="-", connectionstyle="arc3"))
+    ax1.annotate("", xy=(150, 210), xycoords='data', xytext=(50, 210), textcoords='data', size=7,
+                 arrowprops=dict(arrowstyle="-", connectionstyle="arc3"))
+
+    #6 mas x 4.18 kpc = 25.08 AU = 376.2e7
     plt.text(125, 220, "418 AU", size=8, rotation=0.0, ha="left", va="center", color='k')
     plt.plot(0, 0, marker='+', c='k')
 
