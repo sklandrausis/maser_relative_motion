@@ -41,9 +41,11 @@ def main():
     ax1 = plt.subplot( 111, aspect='equal' )
 
     ls = []
+    lsreal = []
     for i in range(len(x1)):
         leng = np.sqrt((x1[i] - xlong2[i]) ** 2 + (y1[i] - ylong2[i]) ** 2)
         lengreal = np.sqrt((x1[i] - x2[i]) ** 2 + (y1[i] - y2[i]) ** 2)
+        lsreal.append( [lengreal] )
         ls.append([leng])
         ax1.annotate("", xy=(x1[i], y1[i]), xycoords='data', xytext=(errxmaxlong[i], errymaxlong[i]), textcoords='data',
                      arrowprops=dict( arrowstyle="-", color="grey", connectionstyle="arc3", alpha=0.5))
@@ -54,18 +56,17 @@ def main():
         ax1.annotate("", xy=(x1[i], y1[i]), xycoords='data', xytext=(xlong2[i], ylong2[i]), textcoords='data', size=7,
                      arrowprops=dict(arrowstyle="<-", color="black", connectionstyle="arc3"))
         el = Circle((x1[i], y1[i]), radius=3 * np.log10(f[i] * 1000.), angle=0, lw=0.5)
-        print(x1[i], y1[i])
         ax1.add_artist(el)
         c = cm.jet((v1[i] - v1mi) / dv, 1)
         el.set_facecolor(c)
 
-    als = np.array(ls)
     patches = []
     colors = v1
     p = PatchCollection(patches, cmap=cm.jet)
     p.set_array(np.array(colors))
     ax1.add_collection(p)
     plt.colorbar(p)
+    als = np.array(ls)
 
     ax1.annotate("", xy=(50, -210), xycoords='data', xytext=(50 + als.max() / 2, -210), textcoords='data', size=7,
                  arrowprops=dict(arrowstyle="<-", connectionstyle="arc3"))
@@ -83,6 +84,9 @@ def main():
     plt.text(-275, 270, "$V_{LSR}$ (km s$^{-1}$)", size=12, rotation=0.0, ha="left", va="center", color='k')
     plt.title("G78", size=12)
 
+    alsreal = np.array(lsreal)
+    print("max lenght is ", als.max())
+    print("max lenght is ", alsreal.max())
     plt.show()
     sys.exit(0)
 
