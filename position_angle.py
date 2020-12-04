@@ -9,7 +9,7 @@ import numpy as np
 
 
 def main():
-    output_file = "output/linearity_errors_fitted_cm.dat"
+    output_file = "output2/linearity_errors_fitted_cm.dat"
     output_data = ascii.read(output_file)
     v1 = output_data["vel"]
     f = output_data["f"]

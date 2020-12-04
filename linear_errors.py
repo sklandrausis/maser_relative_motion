@@ -32,7 +32,7 @@ def convert_datetime_object_to_mjd(time):
 
 
 def main():
-    output_file = "output/positionanglemotion_linearity.dat"
+    output_file = "output2/positionanglemotion_linearity.dat"
     output_data = ascii.read(output_file)
     output_data_headers = output_data.keys()
     velocity = output_data["vel"]
@@ -99,7 +99,7 @@ def main():
                       (3886.0 / 365.0), (mjd[-1] * cdec[0] + cdec[1] - y[r][0]) / (3886.0 / 365.0),
                       (mjd[-1] * (cdec[0] + np.sqrt(np.diag(mdec)[0])) + cdec[1] - y[r][0] -
                        (mjd[-1] * cdec[0] + cdec[1] - y[r][0])) /
-                      (3886.0 / 365.0), i[r][0], i[r][1], i[r][2], i[r][3], i[r][4]])
+                      (3886.0 / 365.0), i[r][0], i[r][1], i[r][2]])
 
     plt.xlabel("Days")
     a1[3][0].set_ylabel("Shifts in RA [mas]")
@@ -114,9 +114,9 @@ def main():
     lstexsort = sorted(lstex, key=lambda lstex: lstex[0])
     header1 = ["vel", "f", "x1", "y1", "x2", "y2", "errxmin", "errymin", "errxmax", "errymax", "xlong2", "ylong2",
                "errxminlong", "erryminlong", "errxmaxlong", "errymaxlong"]
-    np.savetxt("output/linearity_errors_fitted_cm.dat", np.array(ls), delimiter=",", fmt="%s", header=",".join(header1))
-    np.savetxt("output/linearity_errors_fitted_tex_cm.dat", np.array(lstex))
-    np.savetxt("output/linearity_errors_fitted_tex_sort.dat", np.array(lstexsort))
+    np.savetxt("output2/linearity_errors_fitted_cm.dat", np.array(ls), delimiter=",", fmt="%s", header=",".join(header1))
+    np.savetxt("output2/linearity_errors_fitted_tex_cm.dat", np.array(lstex))
+    np.savetxt("output2/linearity_errors_fitted_tex_sort.dat", np.array(lstexsort))
 
     plt.show()
     sys.exit(0)

@@ -44,7 +44,7 @@ def create_mean_motion_data(spots_parameters, epoch_count, ra_differences, dec_d
 
 def main():
     plt.rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
-    output_file = "output/output.dat"
+    output_file = "output2/output.dat"
     output_data = ascii.read(output_file)
     output_data_headers = output_data.keys()
     velocity = output_data["vel"]
@@ -190,12 +190,12 @@ def main():
                                                lengths, average_lengths, vectors_parameters, fluxes)
     header = ["vel", "ra1", "dec1", "ra_diff", "dec_diff",
               "avg_ra_diff", "avg_dec_diff", "length", "avg_length", "ra2", "dec2", "flux", "epoch"]
-    np.savetxt('output/output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s", header=",".join(header))
+    np.savetxt('output2/output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s", header=",".join(header))
     header2 = ["vel"]
     header2.extend(["x" + str(i) for i in range(0, len(sum_of_ras))])
     header2.extend(["y" + str(i) for i in range(0, len(sum_of_decs))])
     header2.extend(["i" + str(i) for i in range(0, len(sum_of_decs))])
-    np.savetxt("output/positionanglemotion_linearity.dat", np.array(linearity), delimiter=",", header=",".join(header2))
+    np.savetxt("output2/positionanglemotion_linearity.dat", np.array(linearity), delimiter=",", header=",".join(header2))
 
     vector_colors = ["black", "grey", "blue", "yellow"]
     vector_color_index = 0

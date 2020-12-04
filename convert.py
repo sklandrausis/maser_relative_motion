@@ -26,7 +26,7 @@ def main(input_file, output_file, ref_vel):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Visualize pulsar data')
+    parser = argparse.ArgumentParser(description='convert')
     parser.add_argument('input_file_name', type=str, help='Input file name')
     parser.add_argument('output_file_name', type=str, help='Output file name')
     parser.add_argument('--rev_vel', type=float, help='Reference maser velocity', default=-4944.5)

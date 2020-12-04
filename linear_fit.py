@@ -40,7 +40,7 @@ def main():
     ras = []
     decs = []
     fluxes = []
-    output_file = "output/output.dat"
+    output_file = "output2/output.dat"
     output_data = ascii.read(output_file)
     output_data_headers = output_data.keys()
     velocity = output_data["vel"]

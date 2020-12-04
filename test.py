@@ -30,10 +30,10 @@ def compute_weight_of_edge(node1, node2, data):
 def compere_velocities(node1, node2, data):
     vel1 = data[node1]["velocity"]
     vel2 = data[node2]["velocity"]
-    a1 = vel1 - 0.02
-    b1 = vel1 + 0.02
-    a2 = vel2 - 0.02
-    b2 = vel2 + 0.02
+    a1 = vel1 - 20
+    b1 = vel1 + 20
+    a2 = vel2 - 20
+    b2 = vel2 + 20
 
     if vel1 == vel2:
         return True
@@ -138,7 +138,7 @@ def create_output(groups, graph):
 
             data.append(data_tmp)
 
-    np.savetxt('output/output.dat', np.array(data), delimiter=",", header=",".join(header))
+    np.savetxt('output4/output.dat', np.array(data), delimiter=",", header=",".join(header))
 
 
 def main():
