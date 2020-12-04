@@ -15,6 +15,7 @@ def main(ispec_files_dir, input_files_dir):
     minorLocatory = MultipleLocator(20)
     minorLocatorvel = MultipleLocator(1)
 
+    minorLocatorvel = MultipleLocator(1)
     ispec_files = os.listdir(ispec_files_dir)
     input_files = os.listdir(input_files_dir)
 
@@ -28,6 +29,7 @@ def main(ispec_files_dir, input_files_dir):
     print(file_pairs)
 
     fig, ax = plt.subplots(nrows=2, ncols=5)
+
     for index in range(0, len(file_pairs)):
         title = file_pairs[index][0].split("_")[0].lower()
         ispec_file = ispec_files_dir + "/" + file_pairs[index][0]
@@ -60,9 +62,9 @@ def main(ispec_files_dir, input_files_dir):
             line = i1.argmax()
             print(i1.argmax(), v1[line], i1.max(), x3[line], y3[line], vm, vx, vm - vx)
 
-            rel = []
-            relra = 0
-            reldec = 0
+        rel = []
+        relra = 0
+        reldec = 0
         for i in range(len(x3)):
             el = Ellipse(((x3[i] - x3[line]) * np.cos(np.radians(y1[i])) * 15000, (y3[i] - y3[line]) * 1000),
                          width=10 * np.sqrt(i1[i]), height=10 * np.sqrt(i1[i]), angle=0, lw=2)
@@ -82,7 +84,7 @@ def main(ispec_files_dir, input_files_dir):
         ax[1][index].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
-
+        
     plt.subplots_adjust(top=0.95)
     plt.show()
 
