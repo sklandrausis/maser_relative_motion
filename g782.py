@@ -44,6 +44,7 @@ def main(ispec_files_dir, input_files_dir):
         v = v / 1000.0
         sm = s.max()
 
+        ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
         for i in range(len(v) - 1):
             if v[i] < vm or v[i] > vx:
                 c = (0, 0, 0)
@@ -55,9 +56,9 @@ def main(ispec_files_dir, input_files_dir):
             ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
             ax[0][index].set_title(title, size=12)
             ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
-            ax[0][index].set_ylabel('Flux density (Jy)', fontsize=12)
 
         rel = []
+        ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
         for i in range(len(ra)):
             el = Circle((ra[i], dec[i]), radius=10 * np.sqrt(i1[i]), angle=0, lw=2)
             ax[1][index].add_artist(el)
@@ -65,17 +66,19 @@ def main(ispec_files_dir, input_files_dir):
             el.set_facecolor(c)
             rel.append([ra[i], dec[i], v1[i]])
         ax[1][index].add_artist(
-            Circle((300, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
+            Circle((190, -85), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
         ax[1][index].annotate('1 Jy beam$^{-1}$', [290, -200], fontsize=12)
-        ax[1][index].set_aspect("equal")
+        ax[1][index].set_aspect("equal", adjustable='box')
         ax[1][index].set_xlim(ra.min() - 100, ra.max() + 100)
         ax[1][index].set_ylim(dec.min() - 100, dec.max() + 100)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
-        ax[1][index].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
+        ax[1][index].invert_xaxis()
+        ax[1][index].annotate('1 Jy beam$^{-1}$', [180, -85], fontsize=12)
 
-    plt.subplots_adjust(top=0.95)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
     plt.show()
 
 
