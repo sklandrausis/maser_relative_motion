@@ -27,7 +27,7 @@ def main(ispec_files_dir, input_files_dir):
                 file_pairs.append((ispec_files[i], input_files[j]))
     print(file_pairs)
 
-    fig, ax = plt.subplots(nrows=2, ncols=5)
+    fig, ax = plt.subplots(nrows=2, ncols=5, figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
 
     for index in range(0, len(file_pairs)):
         title = file_pairs[index][0].split("_")[0].lower()
@@ -66,16 +66,16 @@ def main(ispec_files_dir, input_files_dir):
             el.set_facecolor(c)
             rel.append([ra[i], dec[i], v1[i]])
         ax[1][index].add_artist(
-            Circle((190, -85), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
+            Circle((190, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
         ax[1][index].annotate('1 Jy beam$^{-1}$', [290, -200], fontsize=12)
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(ra.min() - 100, ra.max() + 100)
-        ax[1][index].set_ylim(dec.min() - 100, dec.max() + 100)
+        ax[1][index].set_xlim(-240, 240)
+        ax[1][index].set_ylim(-240, 240)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
         ax[1][index].invert_xaxis()
-        ax[1][index].annotate('1 Jy beam$^{-1}$', [180, -85], fontsize=12)
+        ax[1][index].annotate('1 Jy beam$^{-1}$', [180, -200], fontsize=12)
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
