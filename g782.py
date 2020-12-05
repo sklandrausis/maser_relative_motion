@@ -4,7 +4,7 @@ import argparse
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib import rc
-from matplotlib.patches import Ellipse
+from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
 import numpy as np
 
@@ -15,7 +15,6 @@ def main(ispec_files_dir, input_files_dir):
     minorLocatory = MultipleLocator(20)
     minorLocatorvel = MultipleLocator(1)
 
-    minorLocatorvel = MultipleLocator(1)
     ispec_files = os.listdir(ispec_files_dir)
     input_files = os.listdir(input_files_dir)
 
@@ -23,7 +22,7 @@ def main(ispec_files_dir, input_files_dir):
     for i in range(0, len(ispec_files)):
         for j in range(0, len(input_files)):
             name_ispec_file = ispec_files[i].split("_")[0].lower()
-            name_input_file = input_files[j].split("_")[0].lower()
+            name_input_file = input_files[j].split(".")[0].lower()
             if name_ispec_file == name_input_file:
                 file_pairs.append((ispec_files[i], input_files[j]))
     print(file_pairs)
@@ -35,7 +34,7 @@ def main(ispec_files_dir, input_files_dir):
         ispec_file = ispec_files_dir + "/" + file_pairs[index][0]
         input_file = input_files_dir + "/" + file_pairs[index][1]
 
-        ch, v10, i1, i2, x1, x2, x3, y1, y2, y3 = np.loadtxt(input_file, unpack=True)
+        ch, v10, i1, i2, ra, dec = np.loadtxt(input_file, unpack=True)
         v1 = v10 / 1000.
         dv = (v1.max() - v1.min())
         vm = v1.min()
@@ -48,7 +47,6 @@ def main(ispec_files_dir, input_files_dir):
         for i in range(len(v) - 1):
             if v[i] < vm or v[i] > vx:
                 c = (0, 0, 0)
-            #     print v[i]
             else:
                 c = cm.jet((v[i] - vm) / dv, 1)
 
@@ -59,23 +57,15 @@ def main(ispec_files_dir, input_files_dir):
             ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
             ax[0][index].set_ylabel('Flux density (Jy)', fontsize=12)
 
-            line = i1.argmax()
-            print(i1.argmax(), v1[line], i1.max(), x3[line], y3[line], vm, vx, vm - vx)
-
         rel = []
-        relra = 0
-        reldec = 0
-        for i in range(len(x3)):
-            el = Ellipse(((x3[i] - x3[line]) * np.cos(np.radians(y1[i])) * 15000, (y3[i] - y3[line]) * 1000),
-                         width=10 * np.sqrt(i1[i]), height=10 * np.sqrt(i1[i]), angle=0, lw=2)
+        for i in range(len(ra)):
+            el = Circle((ra[i], dec[i]), radius=10 * np.sqrt(i1[i]), angle=0, lw=2)
             ax[1][index].add_artist(el)
             c = cm.jet((v1[i] - vm) / dv, 1)
             el.set_facecolor(c)
-            relra = (x3[i] - x3[line]) * np.cos(np.radians(y1[i])) * 15000
-            reldec = (y3[i] - y3[line]) * (-1000)
-            rel.append([relra, reldec, v1[i]])
+            rel.append([ra[i], dec[i], v1[i]])
         ax[1][index].add_artist(
-            Ellipse((300, -200), width=10, height=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
+            Circle((300, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
         ax[1][index].annotate('1 Jy beam$^{-1}$', [290, -200], fontsize=12)
         ax[1][index].set_aspect("equal")
         ax[1][index].set_xlim(350, -50)
@@ -84,7 +74,7 @@ def main(ispec_files_dir, input_files_dir):
         ax[1][index].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
-        
+
     plt.subplots_adjust(top=0.95)
     plt.show()
 

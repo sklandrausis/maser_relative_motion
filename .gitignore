@@ -161,3 +161,13 @@ linearity_errors_fitted_tex_sort.dat
 G78_linearity_with_errors_org.pdf
 g78_new.jpg
 g78_new.pdf
+*.png
+ISPEC/
+data_files2/
+data_files3/
+data_files4/
+data_files_test/
+output2/
+output3/
+output4/
+
