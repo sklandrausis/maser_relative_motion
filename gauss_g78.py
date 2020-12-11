@@ -35,6 +35,13 @@ def get_all_channels_from_group(group):
     return channels
 
 
+def get_velocity_from_group(group):
+    velocities = []
+    for ch in group:
+        velocities.append(ch[1])
+    return velocities
+
+
 def get_configs(section, key):
     """
 
@@ -59,11 +66,33 @@ def main(input_files_dir):
         index = file_order.index(file)
         title = file.split(".")[0].upper() + "-" + dates[file.split(".")[0]]
         input_file = input_files_dir + "/" + file
-        groups = []
         channel, velocity, intensity, integral_intensity, ra, dec = np.loadtxt(input_file, unpack=True)
         velocity = velocity/1000
 
+        groups = []
+        group = [[channel[0], velocity[0], intensity[0], integral_intensity[0], ra[0], dec[0]]]
+        groups.append(group)
+
         all_chans = []
+        for j in range(1, len(channel)):
+            chan = [channel[j], velocity[j], intensity[j], integral_intensity[j], ra[j], dec[j]]
+            for group in groups:
+                tmp = group[-1]
+                vel_tmp = chan[1]
+                distance_tmp = np.abs(distance(chan[4], tmp[4], chan[5], tmp[5]))
+                velocities_for_group = get_velocity_from_group(group)
+                max_velocities_for_group = max(velocities_for_group)
+                min_velocities_for_group = min(velocities_for_group)
+                if distance_tmp >= 12 and (vel_tmp <= max_velocities_for_group + 0.65 or vel_tmp >=
+                                           min_velocities_for_group - 0.65):
+                    group.append(chan)
+                    break
+                else:
+                    new_group = [chan]
+                    groups.append(new_group)
+                    break
+
+        '''
         for j in range(0, len(channel)):
             chan = [channel[j], velocity[j], intensity[j], integral_intensity[j], ra[j], dec[j]]
             group = []
@@ -77,6 +106,7 @@ def main(input_files_dir):
 
             if len(group) >= 1:
                 groups.append(group)
+        '''
 
         '''
         test = []
