@@ -32,7 +32,7 @@ def get_all_channels_from_group(group):
     channels = []
     for ch in group:
         channels.append(ch[0])
-    return(channels)
+    return channels
 
 
 def get_configs(section, key):
@@ -70,7 +70,7 @@ def main(input_files_dir):
             for i in range(0, len(channel)):
                 if channel[i] not in get_all_channels_from_group(group):
                     if np.abs(velocity[i] - chan[1]) <= 0.65 and \
-                            np.abs(distance(ra[i], chan[4], dec[i], chan[5])) <= 10:
+                            np.abs(distance(ra[i], chan[4], dec[i], chan[5])) <= 12:
                         if [channel[i], velocity[i], intensity[i], integral_intensity[i], ra[i], dec[i]] not in all_chans:
                             all_chans.append([channel[i], velocity[i], intensity[i], integral_intensity[i], ra[i], dec[i]])
                             group.append([channel[i], velocity[i], intensity[i], integral_intensity[i], ra[i], dec[i]])
