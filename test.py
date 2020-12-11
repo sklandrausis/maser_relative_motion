@@ -1,5 +1,6 @@
 import sys
 import os
+import math
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +10,6 @@ from parsers.configparser_ import ConfigParser
 
 def get_configs(section, key):
     """
-
     :param section: configuration file secti
     :param key: configuration file sections
     :return: configuration file section key
@@ -38,6 +38,9 @@ def compere_velocities(node1, node2, data):
     if vel1 == vel2:
         return True
     else:
+        if math.isclose(vel1, vel2, rel_tol=100):
+            return True
+
         if a1 <= vel2 <= b1:
             return True
 
@@ -101,7 +104,7 @@ def create_output(groups, graph):
         ras = [nx.get_node_attributes(graph, 'ra')[g] for g in group]
         decs = [nx.get_node_attributes(graph, 'dec')[g] for g in group]
         flux1s = [nx.get_node_attributes(graph, 'flux1')[g] for g in group]
-        velocities = [nx.get_node_attributes(graph, 'velocity')[g] for g in group]
+        velocities = [nx.get_node_attributes( graph, 'velocity' )[g] for g in group]
 
         if len(set(files)) == len(file_order):
             order = [files.index(ind) for ind in file_order]
@@ -138,7 +141,7 @@ def create_output(groups, graph):
 
             data.append(data_tmp)
 
-    np.savetxt('output4/output.dat', np.array(data), delimiter=",", header=",".join(header))
+    np.savetxt('output3/output.dat', np.array(data), delimiter=",", header=",".join(header))
 
 
 def main():

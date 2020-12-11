@@ -1,5 +1,4 @@
 import sys
-import os
 import argparse
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
