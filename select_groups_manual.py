@@ -38,17 +38,10 @@ def main():
     fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16))
     ax[0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
 
-    for i in range(len(ra)):
-        el = Circle((ra[i], dec[i]), radius=10 * np.sqrt(intensity[i]), angle=0, lw=2)
-        ax[0].add_artist(el)
-        c = cm.jet((velocity[i] - vm) / dv, 1)
-        el.set_facecolor(c)
-        rel.append([ra[i], dec[i], velocity[i]])
-    ax[0].add_artist(
-        Circle((285, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
+    ax[0].scatter(ra, dec)
     ax[0].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
     ax[0].set_aspect("equal", adjustable='box')
-    ax[0].set_xlim(-240, 155)
+    ax[0].set_xlim(-200, 200)
     ax[0].set_ylim(-50, 345)
     ax[0].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
     ax[0].xaxis.set_minor_locator(minorLocatorx)
