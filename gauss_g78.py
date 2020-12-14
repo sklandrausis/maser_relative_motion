@@ -73,7 +73,8 @@ def main(input_files_dir):
         group = [[channel[0], velocity[0], intensity[0], integral_intensity[0], ra[0], dec[0]]]
         groups.append(group)
 
-        all_chans = []
+
+        '''
         for j in range(1, len(channel)):
             chan = [channel[j], velocity[j], intensity[j], integral_intensity[j], ra[j], dec[j]]
             for group in groups:
@@ -83,8 +84,7 @@ def main(input_files_dir):
                 velocities_for_group = get_velocity_from_group(group)
                 max_velocities_for_group = max(velocities_for_group)
                 min_velocities_for_group = min(velocities_for_group)
-                if distance_tmp >= 12 and (vel_tmp <= max_velocities_for_group + 0.65 or vel_tmp >=
-                                           min_velocities_for_group - 0.65):
+                if distance_tmp >= 12 and np.abs(tmp[1] - vel_tmp) <= 0.65:
                     group.append(chan)
                     break
                 else:
@@ -93,20 +93,22 @@ def main(input_files_dir):
                     break
 
         '''
+
+        all_chans = []
         for j in range(0, len(channel)):
             chan = [channel[j], velocity[j], intensity[j], integral_intensity[j], ra[j], dec[j]]
             group = []
             for i in range(0, len(channel)):
                 if channel[i] not in get_all_channels_from_group(group):
-                    if np.abs(velocity[i] - chan[1]) <= 0.65 and \
-                            np.abs(distance(ra[i], chan[4], dec[i], chan[5])) <= 12:
+                    if np.abs(velocity[i] - chan[1]) <= 0.9727272727272727 and \
+                            np.abs(distance(ra[i], chan[4], dec[i], chan[5])) <= 9.72072072072072:
                         if [channel[i], velocity[i], intensity[i], integral_intensity[i], ra[i], dec[i]] not in all_chans:
                             all_chans.append([channel[i], velocity[i], intensity[i], integral_intensity[i], ra[i], dec[i]])
                             group.append([channel[i], velocity[i], intensity[i], integral_intensity[i], ra[i], dec[i]])
 
             if len(group) >= 1:
                 groups.append(group)
-        '''
+        #'''
 
         '''
         test = []
@@ -124,6 +126,7 @@ def main(input_files_dir):
         sys.exit(0)
        
         '''
+
         print("Numbers of groups", len(groups), "Number of grouped chans", len(all_chans), "Total channals ", len(channel))
 
         for group in groups:
