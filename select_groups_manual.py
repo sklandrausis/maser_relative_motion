@@ -78,14 +78,18 @@ def main():
     cursor2.connect("add", lambda sel: sel.annotation.set_text(labels2[sel.target.index]))
 
     colors = ["b", "g", "r", "c", "m", "y", "k"]
+    selected_points = []
 
     def onpick1(event):
         global group_index
         ind = event.ind[0]
-        ax[1].plot(velocity[ind], intensity[ind], colors[group_index] + "x", markersize=10)
-        ax[0].plot(ra[ind], dec[ind], colors[group_index] + "x", markersize=10)
-        groups[group_index].append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
-        event.canvas.draw()
+        if [group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]] not in selected_points:
+            print("qqqq")
+            selected_points.append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
+            ax[1].plot(velocity[ind], intensity[ind], colors[group_index] + "x", markersize=10)
+            ax[0].plot(ra[ind], dec[ind], colors[group_index] + "x", markersize=10)
+            groups[group_index].append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
+            event.canvas.draw()
 
     def press(event):
         global group_index
