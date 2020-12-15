@@ -35,7 +35,7 @@ def main():
     fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16))
     ax[0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
 
-    scatter1 = ax[0].scatter(ra, dec)
+    scatter1 = ax[0].scatter(ra, dec, picker=5)
     ax[0].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
     ax[0].set_aspect("equal", adjustable='box')
     ax[0].set_xlim(-200, 200)
