@@ -84,7 +84,6 @@ def main():
         global group_index
         ind = event.ind[0]
         if [group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]] not in selected_points:
-            print("qqqq")
             selected_points.append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
             ax[1].plot(velocity[ind], intensity[ind], colors[group_index] + "x", markersize=10)
             ax[0].plot(ra[ind], dec[ind], colors[group_index] + "x", markersize=10)
