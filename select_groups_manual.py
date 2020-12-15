@@ -1,9 +1,9 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import rc, cm
-from matplotlib.patches import Circle
+from matplotlib import rc
 from matplotlib.ticker import MultipleLocator
+import mplcursors
 
 from parsers.configparser_ import ConfigParser
 
@@ -31,14 +31,11 @@ def main():
     title = file.split("/")[1].split(".")[0].upper() + "-" + dates[file.split("/")[1].split(".")[0]]
     channel, velocity, intensity, integral_intensity, ra, dec = np.loadtxt(file, unpack=True)
     velocity = velocity/1000
-    dv = (velocity.max() - velocity.min())
-    vm = velocity.min()
 
-    rel = []
     fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16))
     ax[0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
 
-    ax[0].scatter(ra, dec)
+    scatter1 = ax[0].scatter(ra, dec)
     ax[0].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
     ax[0].set_aspect("equal", adjustable='box')
     ax[0].set_xlim(-200, 200)
@@ -50,22 +47,40 @@ def main():
     ax[0].xaxis.set_minor_locator(minorLocatorvel)
     ax[0].set_title(title, size=12)
 
+    def create_labels1(velocity, intensity):
+        labels1 = []
+        for i in range(0, len(velocity)):
+            labels1.append("velocity is " + str(velocity[i]) + "\nintensity is " + str(intensity[i]))
+
+        return labels1
+
+    def create_labels2(ra, dec):
+        labels2 = []
+        for i in range(0, len(ra)):
+            labels2.append("RA is " + str(ra[i]) + "\nDEC is " + str(dec[i]))
+
+        return labels2
+
+    cursor1 = mplcursors.cursor(scatter1, hover=True, highlight=True)
+    labels1 = create_labels1(velocity, intensity)
+    cursor1.connect("add", lambda sel: sel.annotation.set_text(labels1[sel.target.index]))
+
     groups = [[]]
     global group_index
     group_index = 0
     group_indexes = [group_index]
-    ax[1].plot(velocity, intensity, ls="", marker="o", markersize=5, markerfacecolor="white", markeredgewidth=1, picker=5)
+    scatter2 = ax[1].scatter(velocity, intensity, picker=5)
     ax[1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
     ax[1].xaxis.set_minor_locator(minorLocatorvel)
     ax[1].set_ylabel('Flux density [Jy]', fontsize=12)
+    cursor2 = mplcursors.cursor(scatter2, hover=True, highlight=True)
+    labels2 = create_labels2(ra, dec)
+    cursor2.connect("add", lambda sel: sel.annotation.set_text(labels2[sel.target.index]))
 
     def onpick1(event):
         global group_index
         ind = event.ind[0]
-        this_line = event.artist
-        xdata = this_line.get_xdata()[ind]
-        ydata = this_line.get_ydata()[ind]
-        ax[1].plot(xdata, ydata, "rx", markersize=10)
+        ax[1].plot(velocity[ind], intensity[ind], "rx", markersize=10)
         groups[group_index].append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
         event.canvas.draw()
 
@@ -90,7 +105,6 @@ def main():
     fig.canvas.mpl_connect('pick_event', onpick1)
 
     plt.tight_layout()
-    #plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
 
     plt.show()
     print("Output file ", file.split("/")[1].split(".")[0] + ".groups")
