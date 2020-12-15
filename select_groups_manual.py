@@ -35,7 +35,7 @@ def main():
     fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16))
     ax[0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
 
-    scatter1 = ax[0].scatter(ra, dec, picker=5)
+    scatter1 = ax[0].scatter(ra, dec, picker=True)
     ax[0].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
     ax[0].set_aspect("equal", adjustable='box')
     ax[0].set_xlim(-200, 200)
@@ -69,7 +69,7 @@ def main():
     global group_index
     group_index = 0
     group_indexes = [group_index]
-    scatter2 = ax[1].scatter(velocity, intensity, picker=5)
+    scatter2 = ax[1].scatter(velocity, intensity, picker=True)
     ax[1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
     ax[1].xaxis.set_minor_locator(minorLocatorvel)
     ax[1].set_ylabel('Flux density [Jy]', fontsize=12)
@@ -77,7 +77,11 @@ def main():
     labels2 = create_labels2(ra, dec)
     cursor2.connect("add", lambda sel: sel.annotation.set_text(labels2[sel.target.index]))
 
-    colors = ["b", "g", "r", "c", "m", "y", "k"]
+    colors = ["b", "g", "r", "c", "m", "y", "k",
+              "b", "g", "r", "c", "m", "y", "k",
+              "b", "g", "r", "c", "m", "y", "k",
+              "b", "g", "r", "c", "m", "y", "k",
+              "b", "g", "r", "c", "m", "y", "k"]
     selected_points = []
 
     def onpick1(event):
