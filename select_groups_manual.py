@@ -1,4 +1,6 @@
 import sys
+from random import random
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -77,11 +79,7 @@ def main():
     labels2 = create_labels2(ra, dec)
     cursor2.connect("add", lambda sel: sel.annotation.set_text(labels2[sel.target.index]))
 
-    colors = ["b", "g", "r", "c", "m", "y", "k",
-              "b", "g", "r", "c", "m", "y", "k",
-              "b", "g", "r", "c", "m", "y", "k",
-              "b", "g", "r", "c", "m", "y", "k",
-              "b", "g", "r", "c", "m", "y", "k"]
+    colors = [(random(), random(), random())]
     selected_points = []
 
     def onpick1(event):
@@ -89,8 +87,8 @@ def main():
         ind = event.ind[0]
         if [group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]] not in selected_points:
             selected_points.append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
-            ax[1].plot(velocity[ind], intensity[ind], colors[group_index] + "x", markersize=10)
-            ax[0].plot(ra[ind], dec[ind], colors[group_index] + "x", markersize=10)
+            ax[1].plot(velocity[ind], intensity[ind],"x", markersize=10, c=colors[group_index])
+            ax[0].plot(ra[ind], dec[ind], "x", markersize=10, c=colors[group_index])
             groups[group_index].append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
             event.canvas.draw()
 
@@ -105,11 +103,27 @@ def main():
                 group_index = int(event.key)
                 groups.append([])
                 group_indexes.append(int(event.key))
+                colors.append((random(), random(), random()))
             else:
                 print("Wrong number")
 
         else:
-            print("Not digit")
+            if event.key == "shift":
+                print("group_index changed to ", group_index + 1)
+                group_index += 1
+                if group_index not in group_indexes:
+                    group_indexes.append(group_index)
+                    groups.append([])
+                    colors.append((random(), random(), random()))
+            elif event.key == "alt":
+                print("group_index changed to ", group_index - 1)
+                group_index -= 1
+                if group_index not in group_indexes:
+                    group_indexes.append(group_index)
+                    groups.append([])
+                    colors.append((random(), random(), random()))
+            else:
+                print("Not digit")
 
     fig.canvas.mpl_connect('key_press_event', press)
     fig.canvas.mpl_connect('pick_event', onpick1)
