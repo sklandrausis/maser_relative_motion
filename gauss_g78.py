@@ -50,7 +50,7 @@ def main():
                 files_in_order.append(f)
 
     minorLocatorvel = MultipleLocator(0.5)
-    fig, ax = plt.subplots(nrows=1, ncols=len(file_order), figsize=(16, 16))
+    fig, ax = plt.subplots(nrows=len(file_order), ncols=1, figsize=(16, 16))
 
     for file in files_in_order:
         index = files_in_order.index(file)
@@ -98,13 +98,14 @@ def main():
             except:
                 pass
 
-
-        ax[index].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
+        ax[index].set_ylabel('Flux density [Jy]', fontsize=12)
         ax[index].set_title(title, size=12)
         ax[index].xaxis.set_minor_locator(minorLocatorvel)
-    ax[0].set_ylabel('Flux density [Jy]', fontsize=12)
+
+    ax[-1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
+
     plt.tight_layout()
-    plt.subplots_adjust(top=0.97, bottom=0.08, wspace=0.18, hspace=0, left=0.05, right=0.99)
+    plt.subplots_adjust(top=0.97, bottom=0.06, wspace=0, hspace=0.5, left=0.05, right=0.99)
     plt.show()
 
 
