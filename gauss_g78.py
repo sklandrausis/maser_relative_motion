@@ -50,7 +50,7 @@ def main():
                 files_in_order.append(f)
 
     minorLocatorvel = MultipleLocator(0.5)
-    fig, ax = plt.subplots(nrows=len(file_order), ncols=1, figsize=(16, 16))
+    fig, ax = plt.subplots(nrows=len(file_order), ncols=1, figsize=(11.7, 8.3), dpi=300)
 
     for file in files_in_order:
         index = files_in_order.index(file)
@@ -106,7 +106,8 @@ def main():
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0.06, wspace=0, hspace=0.5, left=0.05, right=0.99)
-    plt.show()
+    #plt.show()
+    plt.savefig("gauss.eps", papertype='a4', orientation='portrait', format='eps', dpi=300)
 
 
 if __name__ == "__main__":
