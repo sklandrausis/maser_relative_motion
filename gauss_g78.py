@@ -39,6 +39,7 @@ def get_configs(section, key):
 
 
 def main():
+    dpi = 300
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
@@ -51,12 +52,13 @@ def main():
                 files_in_order.append(f)
 
     minorLocatorvel = MultipleLocator(0.5)
-    fig, ax = plt.subplots(nrows=len(file_order), ncols=1, figsize=(11.7, 8.3), dpi=300, sharex="all")
+    fig, ax = plt.subplots(nrows=len(file_order), ncols=1, figsize=(11.7, 8.3), dpi=dpi, sharex="all")
 
     colors = []
     group_index = []
     max_vel = []
     min_vel = []
+    print("\hline")
     for file in files_in_order:
         index = files_in_order.index(file)
         title = file.split(".")[0].upper() + "-" + dates[file.split(".")[0]]
@@ -74,17 +76,26 @@ def main():
             data[g] = dict()
             vel = []
             inten = []
+            ra_ = []
+            dec_ = []
             for ch in range(0, len(channel)):
                 if group[ch] == g:
                     vel.append(velocity[ch])
                     inten.append(intensity[ch])
+                    ra_.append(ra[ch])
+                    dec_.append(dec[ch])
 
             data[g]["vel"] = vel
             data[g]["inten"] = inten
+            data[g]["ra"] = ra_
+            data[g]["dec"] = dec_
 
         for g in groups:
+
             vel = data[g]["vel"]
             inten = data[g]["inten"]
+            ra_ = data[g]["ra"]
+            dec_ = data[g]["dec"]
 
             group_len = len(inten)
             p0 = [max(inten), min(vel) + 0.5 * (max(vel) - min(vel)), 0.2]
@@ -94,16 +105,12 @@ def main():
 
                 if group_len >= 3:
                     coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0)
+                    for k in range(0, len(vel)):
+                        print("{:3} & {:.3f} & {:.3f} & {:.3f} & {:.3f} & {:.3f} & {:.3f}\\\\".format(int(g), ra_[k], dec_[k], vel[k], coeff[0], inten[k], coeff[1]))
                     q = np.linspace(min(vel), max(vel), 1000)
                     hist_fit = gauss(q, *coeff)
 
                     ax[index].plot(q, hist_fit, 'k')
-
-                size = []
-                for j in range(0, len(vel)):
-                    for k in range(j + 1, len(vel)):
-                        dist = np.sqrt(((ra[j] - ra[k]) * 11281) ** 2 + ((dec[j] - dec[k]) * 1000) ** 2)
-                        size.append(dist)
 
                 ax[index].scatter(vel, inten, c=np.array([color]))
 
@@ -122,7 +129,8 @@ def main():
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0.06, wspace=0, hspace=0.05, left=0.05, right=0.99)
     #plt.show()
-    plt.savefig("gauss.eps", papertype='a4', orientation='portrait', format='eps', dpi=300)
+    plt.savefig("gauss.eps", papertype='a4', orientation='portrait', format='eps', dpi=dpi)
+    print("\hline")
 
 
 if __name__ == "__main__":
