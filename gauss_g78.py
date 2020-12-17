@@ -55,11 +55,15 @@ def main():
 
     colors = []
     group_index = []
+    max_vel = []
+    min_vel = []
     for file in files_in_order:
         index = files_in_order.index(file)
         title = file.split(".")[0].upper() + "-" + dates[file.split(".")[0]]
         group, channel, velocity, intensity, integral_intensity, ra, dec = np.loadtxt("groups/" + file, unpack=True)
         groups = list(set(group))
+        max_vel.append(max(velocity))
+        min_vel.append(min(velocity))
 
         data = dict()
         for g in groups:
@@ -108,9 +112,11 @@ def main():
 
         ax[index].set_ylabel('Flux density [Jy]', fontsize=12)
         ax[index].text(-5.5, 5, title, size=12)
-        ax[index].set_xlim(min(velocity), max(velocity))
         ax[index].xaxis.set_minor_locator(minorLocatorvel)
 
+    for file in files_in_order:
+        index = files_in_order.index(file)
+        ax[index].set_xlim(min(min_vel), max(max_vel))
     ax[-1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
 
     plt.tight_layout()
