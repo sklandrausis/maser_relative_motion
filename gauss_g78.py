@@ -116,7 +116,7 @@ def main():
 
     for file in files_in_order:
         index = files_in_order.index(file)
-        ax[index].set_xlim(min(min_vel), max(max_vel))
+        ax[index].set_xlim(min(min_vel) - 0.1, max(max_vel) + 0.1)
     ax[-1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
 
     plt.tight_layout()
