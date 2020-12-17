@@ -1,6 +1,7 @@
 import os
 import sys
-import argparse
+from random import random
+
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 from scipy.optimize import curve_fit
@@ -52,6 +53,8 @@ def main():
     minorLocatorvel = MultipleLocator(0.5)
     fig, ax = plt.subplots(nrows=len(file_order), ncols=1, figsize=(11.7, 8.3), dpi=300, sharex="all")
 
+    colors = []
+    group_index = []
     for file in files_in_order:
         index = files_in_order.index(file)
         title = file.split(".")[0].upper() + "-" + dates[file.split(".")[0]]
@@ -60,6 +63,10 @@ def main():
 
         data = dict()
         for g in groups:
+            if int(g) not in group_index:
+                group_index.append(int(g))
+                colors.append((random(), random(), random()))
+
             data[g] = dict()
             vel = []
             inten = []
@@ -77,6 +84,7 @@ def main():
 
             group_len = len(inten)
             p0 = [max(inten), min(vel) + 0.5 * (max(vel) - min(vel)), 0.2]
+            color = colors[int(g)]
 
             try:
 
@@ -93,7 +101,7 @@ def main():
                         dist = np.sqrt(((ra[j] - ra[k]) * 11281) ** 2 + ((dec[j] - dec[k]) * 1000) ** 2)
                         size.append(dist)
 
-                ax[index].scatter(vel, inten)
+                ax[index].scatter(vel, inten, c=np.array([color]))
 
             except:
                 pass
