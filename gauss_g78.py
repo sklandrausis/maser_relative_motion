@@ -101,7 +101,6 @@ def main():
             p0 = [max(inten), min(vel) + 0.5 * (max(vel) - min(vel)), 0.2]
             color = colors[int(g)]
 
-
             if group_len >= 3:
                 size = []
                 for j in range(0, len(vel)):
