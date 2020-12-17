@@ -101,21 +101,28 @@ def main():
             p0 = [max(inten), min(vel) + 0.5 * (max(vel) - min(vel)), 0.2]
             color = colors[int(g)]
 
-            try:
 
-                if group_len >= 3:
-                    coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0)
-                    for k in range(0, len(vel)):
-                        print("{:3} & {:.3f} & {:.3f} & {:.3f} & {:.3f} & {:.3f} & {:.3f}\\\\".format(int(g), ra_[k], dec_[k], vel[k], coeff[0], inten[k], coeff[1]))
-                    q = np.linspace(min(vel), max(vel), 1000)
-                    hist_fit = gauss(q, *coeff)
+            if group_len >= 3:
+                size = []
+                for j in range(0, len(vel)):
+                    for k in range(j + 1, len(vel)):
+                        dist = np.sqrt(((ra_[j] - ra_[k]) * 11281) ** 2 + ((dec_[j] - dec_[k]) * 1000) ** 2)
+                        size.append(dist)
 
-                    ax[index].plot(q, hist_fit, 'k')
+                line = np.array(inten).argmax()
+                coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0, maxfev=10000000)
 
-                ax[index].scatter(vel, inten, c=np.array([color]))
+                print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.6f(%.6f)\\\\" % \
+                      (g, (ra_[line] - 26.0495549) * 11281, (dec_[line] - 32.686039) * 1000, vel[line], coeff[1],
+                       coeff[2] * 2, inten[line], coeff[0], max(size), max(size) * 1.64,
+                       (vel[0] - vel[len(vel) - 1]) / max(size), (vel[0] - vel[len(vel) - 1]) / (max(size) * 1.64)))
 
-            except:
-                pass
+                q = np.linspace(min(vel), max(vel), 1000)
+                hist_fit = gauss(q, *coeff)
+
+                ax[index].plot(q, hist_fit, 'k')
+
+            ax[index].scatter(vel, inten, c=np.array([color]))
 
         ax[index].set_ylabel('Flux density [Jy]', fontsize=12)
         ax[index].text(-5.5, 5, title, size=12)
