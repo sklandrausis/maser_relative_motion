@@ -105,13 +105,13 @@ def main():
                 size = []
                 for j in range(0, len(vel)):
                     for k in range(j + 1, len(vel)):
-                        dist = np.sqrt(((ra_[j] - ra_[k]) * 11281) ** 2 + ((dec_[j] - dec_[k]) * 1000) ** 2)
+                        dist = np.sqrt((ra_[j] - ra_[k]) ** 2 + (dec_[j] - dec_[k]) ** 2)
                         size.append(dist)
 
                 line = np.array(inten).argmax()
                 coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0, maxfev=10000000)
 
-                print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.6f(%.6f)\\\\" % \
+                print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
                       (g, ra_[line], dec_[line], vel[line], coeff[1],
                        coeff[2] * 2, inten[line], coeff[0], max(size), max(size) * 1.64,
                        (vel[0] - vel[len(vel) - 1]) / max(size), (vel[0] - vel[len(vel) - 1]) / (max(size) * 1.64)))
