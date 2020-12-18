@@ -101,15 +101,18 @@ def main():
             p0 = [max(inten), min(vel) + 0.5 * (max(vel) - min(vel)), 0.2]
             color = colors[int(g)]
 
-            if group_len >= 3:
-                size = []
-                for j in range(0, len(vel)):
-                    for k in range(j + 1, len(vel)):
-                        dist = np.sqrt((ra_[j] - ra_[k]) ** 2 + (dec_[j] - dec_[k]) ** 2)
-                        size.append(dist)
+            size = []
+            for j in range(0, len(vel)):
+                for k in range(j + 1, len(vel)):
+                    dist = np.sqrt((ra_[j] - ra_[k]) ** 2 + (dec_[j] - dec_[k]) ** 2)
+                    size.append(dist)
 
-                line = np.array(inten).argmax()
-                coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0, maxfev=10000000)
+            line = np.array(inten).argmax()
+            if group_len >= 3:
+                try:
+                    coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0, maxfev=100000)
+                except:
+                    pass
 
                 print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
                       (g, ra_[line], dec_[line], vel[line], coeff[1],
@@ -120,6 +123,18 @@ def main():
                 hist_fit = gauss(q, *coeff)
 
                 ax[index].plot(q, hist_fit, 'k')
+
+            else:
+                if len(size) > 0:
+                    print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
+                          (g, ra_[line], dec_[line], vel[line], "-",
+                           "-", inten[line], "-", max(size), max(size) * 1.64,
+                           (vel[0] - vel[len(vel) - 1]) / max(size), (vel[0] - vel[len(vel) - 1]) / (max(size) * 1.64)))
+
+                else:
+                    print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" % \
+                          (g, ra_[line], dec_[line], vel[line], "-",
+                           "-", inten[line], "-", "-", "-"))
 
             ax[index].scatter(vel, inten, c=np.array([color]))
 
