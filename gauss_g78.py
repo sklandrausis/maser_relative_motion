@@ -101,7 +101,7 @@ def main():
 
             group_len = len(inten)
             p0 = [max(inten), min(vel) + 0.5 * (max(vel) - min(vel)), 0.2]
-            color = colors[int(g)]
+            color = colors[int(groups.index(g))]
 
             size = []
             for j in range(0, len(vel)):
