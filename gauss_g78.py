@@ -126,6 +126,16 @@ def main():
                 q = np.linspace(min(vel), max(vel), 1000)
                 hist_fit = gauss(q, *coeff)
                 ax[index].plot(q, hist_fit, 'k')
+                epoch_data[file.split(".")[0].upper()][g].append(ra_[line])
+                epoch_data[file.split(".")[0].upper()][g].append(dec_[line])
+                epoch_data[file.split(".")[0].upper()][g].append(vel[line])
+                epoch_data[file.split(".")[0].upper()][g].append(coeff[1])
+                epoch_data[file.split(".")[0].upper()][g].append(coeff[2] * 2)
+                epoch_data[file.split(".")[0].upper()][g].append(inten[line])
+                epoch_data[file.split(".")[0].upper()][g].append(coeff[0])
+                epoch_data[file.split(".")[0].upper()][g].append(max(size))
+                epoch_data[file.split(".")[0].upper()][g].append(max(size) * 1.64)
+                epoch_data[file.split(".")[0].upper()][g].append((vel[0] - vel[len(vel) - 1]) / max(size))
                 epoch_data[file.split(".")[0].upper()][g].append((vel[0] - vel[len(vel) - 1]) / (max(size) * 1.64))
 
             else:
@@ -156,30 +166,38 @@ def main():
     plt.savefig("gauss.eps", papertype='a4', orientation='portrait', format='eps', dpi=dpi)
     print("\hline")
 
-    plt.figure()
-    tmp = dict()
-    tmp2 = dict()
-    for epoch in epoch_data.keys():
-        parameter = []
-        data = epoch_data[epoch]
-        for group in data.keys():
-            if group not in tmp.keys():
-                tmp[group] = []
-                tmp2[group] = []
-            tmp[group].append(epoch)
-            tmp2[group].append(data[group][0])
-            parameter.append(data[group][0])
+    params = ['ra_[line]', 'dec_[line]', 'vel[line]', 'coeff[1]', 'coeff[2] * 2', 'inten[line]', 'coeff[0]',
+              'max(size)', 'max(size) * 1.64', '(vel[0] - vel[len(vel) - 1]) / max(size)',
+              '(vel[0] - vel[len(vel) - 1]) / (max(size) * 1.64))']
 
-        plt.scatter(data.keys(), parameter, label=epoch)
+    for param in params:
+        index = params.index(param)
+        plt.figure()
+        tmp = dict()
+        tmp2 = dict()
+        for epoch in epoch_data.keys():
+            parameter = []
+            data = epoch_data[epoch]
+            for group in data.keys():
+                if group not in tmp.keys():
+                    tmp[group] = []
+                    tmp2[group] = []
+                tmp[group].append(epoch)
+                tmp2[group].append(data[group][index])
+                parameter.append(data[group][index])
 
-    plt.legend()
-    plt.show()
+            plt.scatter(data.keys(), parameter, label=epoch)
 
-    plt.figure()
-    for key in tmp.keys():
-        plt.scatter(tmp[key], tmp2[key], label=key)
+        plt.legend()
+        plt.title(param)
 
-    plt.legend()
+        plt.figure()
+        for key in tmp.keys():
+            plt.scatter(tmp[key], tmp2[key], label=key)
+
+        plt.legend()
+        plt.title(param)
+
     plt.show()
 
 
