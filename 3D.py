@@ -1,6 +1,5 @@
 import sys
 import os
-from random import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,7 +15,7 @@ def main():
     for file in files:
         file_name = "groups/" + file
         epoch = file.split(".")[0]
-        group, channel, velocity, intensity, integral_intensity, ra, dec = np.loadtxt(file_name, unpack=True)
+        group, channel, velocity, ra, dec = np.loadtxt(file_name, unpack=True, usecols=(0, 1, 2, 5, 6))
         groups = list(set(group))
         global_groups += groups
         global_epochs.append(epoch)
@@ -30,14 +29,12 @@ def main():
                 data[g]["epoch"] = []
 
             vel = []
-            inten = []
             ra_ = []
             dec_ = []
             epoch_ = []
             for ch in range(0, len(channel)):
                 if group[ch] == g:
                     vel.append(velocity[ch])
-                    inten.append(intensity[ch])
                     ra_.append(ra[ch])
                     dec_.append(dec[ch])
                     epoch_.append(epoch)
@@ -49,12 +46,6 @@ def main():
 
     global_groups = list(set(global_groups))
     global_epochs = list(set(global_epochs))
-    epoch_colors = []
-    legends = []
-    for ge in global_epochs:
-        color = (random(), random(), random())
-        epoch_colors.append(color)
-        legends.append(ge + "\n" + str(color))
 
     for g in global_groups:
         vel = data[g]["vel"]
@@ -62,19 +53,32 @@ def main():
         dec_ = data[g]["dec"]
         epoch_ = data[g]["epoch"]
 
-        colors = []
+        vel_tmp = []
+        ra_tmp = []
+        dec_tmp = []
 
-        for e in epoch_:
-            colors.append(epoch_colors[global_epochs.index(e)])
+        for ge in global_epochs:
+            vel_tmp.append([])
+            ra_tmp.append([])
+            dec_tmp.append([])
+
+        for epoch_index in range(0, len(epoch_)):
+            index = global_epochs.index(epoch_[epoch_index])
+            vel_tmp[index].append(vel[epoch_index])
+            ra_tmp[index].append(ra_[epoch_index])
+            dec_tmp[index].append(dec_[epoch_index])
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.set_xlabel("RA")
         ax.set_ylabel("DEC")
         ax.set_zlabel("Velocity")
-        scatter = ax.scatter(ra_, dec_, vel, color=colors)
+        for ep in global_epochs:
+            index = global_epochs.index(ep)
+            ax.scatter(ra_tmp[index], dec_tmp[index], vel_tmp[index], label=ep)
+
         ax.set_title("Group index is " + str(int(g)))
-        ax.legend(handles=[scatter], loc="lower left", title=legends)
+        ax.legend()
 
     plt.show()
 
