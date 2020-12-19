@@ -59,6 +59,7 @@ def main():
     max_vel = []
     min_vel = []
     print("\hline")
+    epoch_data = dict()
     for file in files_in_order:
         index = files_in_order.index(file)
         title = file.split(".")[0].upper() + "-" + dates[file.split(".")[0]]
@@ -66,6 +67,7 @@ def main():
         groups = list(set(group))
         max_vel.append(max(velocity))
         min_vel.append(min(velocity))
+        epoch_data[file.split(".")[0].upper()] = []
 
         data = dict()
         for g in groups:
@@ -111,6 +113,7 @@ def main():
             if group_len >= 3:
                 try:
                     coeff, var_matrix = curve_fit(gauss, vel, inten, p0=p0, maxfev=100000)
+                    epoch_data[file.split(".")[0].upper()].append(coeff)
                 except:
                     pass
 
@@ -121,7 +124,6 @@ def main():
 
                 q = np.linspace(min(vel), max(vel), 1000)
                 hist_fit = gauss(q, *coeff)
-
                 ax[index].plot(q, hist_fit, 'k')
 
             else:
@@ -149,9 +151,31 @@ def main():
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0.06, wspace=0, hspace=0.05, left=0.05, right=0.99)
-    #plt.show()
     plt.savefig("gauss.eps", papertype='a4', orientation='portrait', format='eps', dpi=dpi)
     print("\hline")
+
+    a = []
+    b = []
+    c = []
+    for key in epoch_data.keys():
+        for group in epoch_data[key]:
+            a.append(group[0])
+            b.append(group[1])
+            c.append(group[2])
+
+    plt.figure()
+    plt.hist(a)
+    plt.title("a")
+
+    plt.figure()
+    plt.hist(b)
+    plt.title("b")
+
+    plt.figure()
+    plt.hist(c)
+    plt.title("c")
+
+    plt.show()
 
 
 if __name__ == "__main__":
