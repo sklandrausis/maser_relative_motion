@@ -36,7 +36,7 @@ def main():
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
 
-    group_number = 8
+    group_number = 5
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
 
