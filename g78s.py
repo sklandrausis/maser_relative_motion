@@ -28,30 +28,21 @@ def main():
     minorLocatorvel = MultipleLocator(1)
 
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
-    ispec_files = []
     input_files = []
-    file_pairs = []
 
     for file in file_order:
-        ispec_files.append(file.split(".")[0].upper() + "_FRING.ISPEC")
         input_files.append(file)
-        file_pairs.append((file.split(".")[0].upper() + "_FRING.ISPEC", file.split(".")[0] + ".groups"))
 
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
 
-    group_number = 5
+    group_number = 8
 
-    fig, ax = plt.subplots(nrows=2, ncols=len(file_pairs), figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
+    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
 
-    for index in range(0, len(file_pairs)):
-        title = file_pairs[index][0].split("_")[0].upper() + "-" + dates[file_pairs[index][1].split(".")[0]]
-        ispec_file = "ISPEC/" + "/" + file_pairs[index][0]
-        input_file = "groups/" + "/" + file_pairs[index][1]
-
-        nu, v, s = np.loadtxt(ispec_file, unpack=True)
-        v = v / 1000.0
-        sm = s.max()
+    for index in range(0, len(input_files)):
+        title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
+        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
 
         velocity = np.empty(0)
         intensity = np.empty(0)
@@ -71,14 +62,14 @@ def main():
 
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
-        for i in range(len(v) - 1):
-            if v[i] < vm or v[i] > vx:
+        for i in range(len(velocity) - 1):
+            if velocity[i] < vm or velocity[i] > vx:
                 c = (0, 0, 0)
             else:
-                c = cm.jet((v[i] - vm) / dv, 1)
+                c = cm.jet((velocity[i] - vm) / dv, 1)
 
-            ax[0][index].plot((v[i], v[i + 1]), (s[i], s[i + 1]), c=c, lw=2)
-            ax[0][index].set_xlim(-12, -2)
+            ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), c=c, lw=2)
+            ax[0][index].set_xlim(min(velocity), max(velocity))
             ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
             ax[0][index].set_title(title, size=12)
             ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
@@ -86,17 +77,17 @@ def main():
             rel = []
             ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
             for i in range(len(ra)):
-                el = Circle((ra[i], dec[i]), radius=10 * np.sqrt(intensity[i]), angle=0, lw=2)
+                el = Circle((ra[i], dec[i]), radius=np.sqrt(intensity[i]), angle=0, lw=2)
                 ax[1][index].add_artist(el)
                 c = cm.jet((velocity[i] - vm) / dv, 1)
                 el.set_facecolor(c)
                 rel.append([ra[i], dec[i], velocity[i]])
-            ax[1][index].add_artist(
-                Circle((285, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
-            ax[1][index].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
+            #ax[1][index].add_artist(
+                #Circle((285, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
+            #ax[1][index].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
             ax[1][index].set_aspect("equal", adjustable='box')
-            ax[1][index].set_xlim(-240, 155)
-            ax[1][index].set_ylim(-50, 345)
+            ax[1][index].set_xlim(min(ra) - 5, max(ra) + 5)
+            ax[1][index].set_ylim(min(dec) - 5, max(dec) + 5)
             ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
             ax[1][index].xaxis.set_minor_locator(minorLocatorx)
             ax[1][index].yaxis.set_minor_locator(minorLocatory)
