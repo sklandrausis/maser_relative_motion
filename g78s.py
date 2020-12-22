@@ -38,7 +38,7 @@ def main():
 
     group_number = 5
 
-    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
+    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16))
 
     for index in range(0, len(input_files)):
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
@@ -69,7 +69,7 @@ def main():
                 c = cm.jet((velocity[i] - vm) / dv, 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), c=c, lw=2)
-            ax[0][index].set_xlim(min(velocity), max(velocity))
+            ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
             ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
             ax[0][index].set_title(title, size=12)
             ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
@@ -77,7 +77,7 @@ def main():
             rel = []
             ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
             for i in range(len(ra)):
-                el = Circle((ra[i], dec[i]), radius=np.sqrt(intensity[i]), angle=0, lw=2)
+                el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
                 ax[1][index].add_artist(el)
                 c = cm.jet((velocity[i] - vm) / dv, 1)
                 el.set_facecolor(c)
