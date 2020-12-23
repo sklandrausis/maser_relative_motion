@@ -56,12 +56,13 @@ def main():
                 ra = np.append(ra, ra_tmp[i])
                 dec = np.append(dec, dec_tmp[i])
 
-        dv = (velocity.max() - velocity.min())
-        vm = velocity.min()
-        vx = velocity.max()
+        dv = (max(velocity) - min(velocity))
+        vm = min(velocity)
+        vx = max(velocity)
 
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
+        coord_range = max(abs(max(ra)) - abs(min(ra)), abs(max(dec)) - abs(min(dec)))
         for i in range(len(velocity) - 1):
             if velocity[i] < vm or velocity[i] > vx:
                 c = (0, 0, 0)
@@ -82,12 +83,11 @@ def main():
                 c = cm.jet((velocity[i] - vm) / dv, 1)
                 el.set_facecolor(c)
                 rel.append([ra[i], dec[i], velocity[i]])
-            #ax[1][index].add_artist(
-                #Circle((285, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
-            #ax[1][index].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
+
             ax[1][index].set_aspect("equal", adjustable='box')
-            ax[1][index].set_xlim(-162, -150)
-            ax[1][index].set_ylim(98, 110)
+            print(min(ra) - 0.5, min(ra) + coord_range, min(dec) - 0.5, min(dec) + coord_range)
+            ax[1][index].set_xlim(min(ra) - 0.5, min(ra) + coord_range * 8)
+            ax[1][index].set_ylim(min(dec) - 0.5, min(dec) + coord_range * 8)
             ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
             ax[1][index].xaxis.set_minor_locator(minorLocatorx)
             ax[1][index].yaxis.set_minor_locator(minorLocatory)
@@ -96,7 +96,6 @@ def main():
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
     plt.show()
-
 
 
 if __name__ == "__main__":
