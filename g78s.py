@@ -62,7 +62,7 @@ def main():
 
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
-        coord_range = max(abs(max(ra)) - abs(min(ra)), abs(max(dec)) - abs(min(dec)))
+        coord_range = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
         for i in range(len(velocity) - 1):
             if velocity[i] < vm or velocity[i] > vx:
                 c = (0, 0, 0)
@@ -86,8 +86,8 @@ def main():
 
             ax[1][index].set_aspect("equal", adjustable='box')
             print(min(ra) - 0.5, min(ra) + coord_range, min(dec) - 0.5, min(dec) + coord_range)
-            ax[1][index].set_xlim(min(ra) - 0.5, min(ra) + coord_range * 8)
-            ax[1][index].set_ylim(min(dec) - 0.5, min(dec) + coord_range * 8)
+            ax[1][index].set_xlim(min(ra) - 0.5, min(ra) + coord_range + 0.5)
+            ax[1][index].set_ylim(min(dec) - 0.5, min(dec) + coord_range + 0.5)
             ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
             ax[1][index].xaxis.set_minor_locator(minorLocatorx)
             ax[1][index].yaxis.set_minor_locator(minorLocatory)
