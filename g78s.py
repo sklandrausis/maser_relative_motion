@@ -40,15 +40,24 @@ def main():
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16))
 
+    coord_ranges = []
+    velocitys = []
+    vms = []
+    vxs = []
+    dvs = []
+    intensitys = []
+    ras = []
+    decs = []
+    avgs_ra = []
+    avgs_dec = []
     for index in range(0, len(input_files)):
-        title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
-
         velocity = np.empty(0)
         intensity = np.empty(0)
         ra = np.empty(0)
         dec = np.empty(0)
-        group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(input_file, unpack=True)
+        group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
+            input_file, unpack=True)
         for i in range(0, len(channel_tmp)):
             if group_tmp[i] == group_number:
                 velocity = np.append(velocity, velocity_tmp[i])
@@ -60,9 +69,31 @@ def main():
         vm = min(velocity)
         vx = max(velocity)
 
+        coord_range = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
+        coord_ranges.append(coord_range)
+        velocitys.append(velocity)
+        vms.append(vm)
+        vxs.append(vx)
+        dvs.append(dv)
+        intensitys.append(intensity)
+        ras.append(ra)
+        decs.append(dec)
+
+        avgs_ra.append(np.mean(ra))
+        avgs_dec.append(np.mean(dec))
+
+    for index in range(0, len(input_files)):
+        velocity = velocitys[index]
+        vm = vms[index]
+        vx = vxs[index]
+        dv = dvs[index]
+        intensity = intensitys[index]
+        dec = decs[index]
+        ra = ras[index]
+        coord_range = max(coord_ranges)
+        title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
-        coord_range = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
         for i in range(len(velocity) - 1):
             if velocity[i] < vm or velocity[i] > vx:
                 c = (0, 0, 0)
@@ -77,7 +108,7 @@ def main():
 
             rel = []
             ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
-            for i in range(len(ra)):
+            for i in range(0, len(ra)):
                 el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
                 ax[1][index].add_artist(el)
                 c = cm.jet((velocity[i] - vm) / dv, 1)
@@ -85,9 +116,8 @@ def main():
                 rel.append([ra[i], dec[i], velocity[i]])
 
             ax[1][index].set_aspect("equal", adjustable='box')
-            print(min(ra) - 0.5, min(ra) + coord_range, min(dec) - 0.5, min(dec) + coord_range)
-            ax[1][index].set_xlim(min(ra) - 0.5, min(ra) + coord_range + 0.5)
-            ax[1][index].set_ylim(min(dec) - 0.5, min(dec) + coord_range + 0.5)
+            ax[1][index].set_xlim(np.mean(avgs_ra) - (coord_range/2) - 0.5, np.mean(avgs_ra) + (coord_range/2) + 0.5)
+            ax[1][index].set_ylim(np.mean(avgs_dec) - (coord_range/2) - 0.5, np.mean(avgs_dec) + (coord_range/2) + 0.5)
             ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
             ax[1][index].xaxis.set_minor_locator(minorLocatorx)
             ax[1][index].yaxis.set_minor_locator(minorLocatory)
