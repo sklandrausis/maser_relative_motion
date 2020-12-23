@@ -98,7 +98,7 @@ def main():
         intensity = intensitys[index]
         dec = decs[index]
         ra = ras[index]
-        coord_range = max(coord_ranges)
+        #coord_range = max(coord_ranges)
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
@@ -123,6 +123,7 @@ def main():
                 el.set_facecolor(c)
                 rel.append([ra[i], dec[i], velocity[i]])
 
+            coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
             ax[1][index].set_aspect("equal", adjustable='box')
             ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5, np.mean((max(max_ra), min(min_ra))) + (coord_range/2) + 0.5)
             ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range/2) - 0.5, np.mean((max(max_dec), min(min_dec))) + (coord_range/2) + 0.5)
