@@ -50,6 +50,10 @@ def main():
     decs = []
     avgs_ra = []
     avgs_dec = []
+    max_ra = []
+    min_ra = []
+    min_dec = []
+    max_dec = []
     for index in range(0, len(input_files)):
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
         velocity = np.empty(0)
@@ -81,6 +85,10 @@ def main():
 
         avgs_ra.append(np.mean(ra))
         avgs_dec.append(np.mean(dec))
+        max_ra.append(np.max(ra))
+        min_ra.append(np.min(ra))
+        min_dec.append(np.min(dec))
+        max_dec.append(np.max(dec))
 
     for index in range(0, len(input_files)):
         velocity = velocitys[index]
@@ -116,8 +124,8 @@ def main():
                 rel.append([ra[i], dec[i], velocity[i]])
 
             ax[1][index].set_aspect("equal", adjustable='box')
-            ax[1][index].set_xlim(np.mean(avgs_ra) - (coord_range/2) - 0.5, np.mean(avgs_ra) + (coord_range/2) + 0.5)
-            ax[1][index].set_ylim(np.mean(avgs_dec) - (coord_range/2) - 0.5, np.mean(avgs_dec) + (coord_range/2) + 0.5)
+            ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5, np.mean((max(max_ra), min(min_ra))) + (coord_range/2) + 0.5)
+            ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range/2) - 0.5, np.mean((max(max_dec), min(min_dec))) + (coord_range/2) + 0.5)
             ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
             ax[1][index].xaxis.set_minor_locator(minorLocatorx)
             ax[1][index].yaxis.set_minor_locator(minorLocatory)
