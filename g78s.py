@@ -1,4 +1,5 @@
 import sys
+import argparse
 
 from matplotlib import rc, cm
 from matplotlib.patches import Circle
@@ -21,7 +22,7 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
-def main():
+def main(group_number):
     rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
     minorLocatorx = MultipleLocator(20)
     minorLocatory = MultipleLocator(20)
@@ -35,8 +36,6 @@ def main():
 
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
-
-    group_number = 5
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16))
 
@@ -63,7 +62,7 @@ def main():
         group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
             input_file, unpack=True)
         for i in range(0, len(channel_tmp)):
-            if group_tmp[i] == group_number:
+            if group_tmp[i] == int(group_number):
                 velocity = np.append(velocity, velocity_tmp[i])
                 intensity = np.append(intensity, intensity_tmp[i])
                 ra = np.append(ra, ra_tmp[i])
@@ -98,7 +97,6 @@ def main():
         intensity = intensitys[index]
         dec = decs[index]
         ra = ras[index]
-        #coord_range = max(coord_ranges)
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
@@ -138,5 +136,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='plot group')
+    parser.add_argument('group_number', type=int, help='group number')
+    args = parser.parse_args()
+    main(args.group_number)
     sys.exit(0)
