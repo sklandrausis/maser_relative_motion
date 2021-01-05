@@ -106,7 +106,7 @@ def main(group_number):
             else:
                 c = cm.jet((velocity[i] - vm) / dv, 1)
 
-            ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), c=c, lw=2)
+            ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
             ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
             ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
             ax[0][index].set_title(title, size=12)
