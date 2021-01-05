@@ -138,13 +138,7 @@ def main(group_numbers):
 
                 rel = []
                 ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
-
-                for k in range(0, len(ra)):
-                    el = Circle((ra[k], dec[k]), radius=np.sqrt(intensity[i]), angle=0, lw=2, hatch=symbol)
-                    ax[1][index].add_artist(el)
-                    c = cm.jet((velocity[k] - vm) / dv, 1)
-                    el.set_facecolor(c)
-                    rel.append([ra[k], dec[k], velocity[k]])
+                ax[1][index].scatter(ra, dec, s=np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
 
                 coord_range = max(max(data_dict[j][10]) - min(data_dict[j][11]), max(data_dict[j][12]) - min(data_dict[j][13]))
                 ax[1][index].set_aspect("equal", adjustable='box')
