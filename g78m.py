@@ -103,8 +103,8 @@ def main(group_numbers):
             vx = data_dict[j][3][index]
             dv = data_dict[j][4][index]
             intensity = data_dict[j][5][index]
-            dec = data_dict[j][6][index]
-            ra = data_dict[j][7][index]
+            ra = data_dict[j][6][index]
+            dec = data_dict[j][7][index]
             title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
             ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
@@ -123,23 +123,18 @@ def main(group_numbers):
 
                 rel = []
                 ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
-                #ax[1][index].scatter(ra, dec, marker=symbol, s=0.1 * np.sqrt(intensity[i]))
 
                 for k in range(0, len(ra)):
-                    el = Circle((ra[k], dec[k]),radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2, hatch=symbol)
-
+                    el = Circle((ra[k], dec[k]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2, hatch=symbol)
                     ax[1][index].add_artist(el)
                     c = cm.jet((velocity[k] - vm) / dv, 1)
                     el.set_facecolor(c)
                     rel.append([ra[k], dec[k], velocity[k]])
 
                 coord_range = max(max(data_dict[j][10]) - min(data_dict[j][11]), max(data_dict[j][12]) - min(data_dict[j][13]))
-                #coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
                 ax[1][index].set_aspect("equal", adjustable='box')
-                #ax[1][index].set_xlim(np.mean((max(data_dict[j][10]), min(data_dict[j][11]))) - (coord_range/2) - 0.5, np.mean((max(data_dict[j][10]), min(data_dict[j][11]))) + (coord_range/2) + 0.5)
-                #ax[1][index].set_ylim(np.mean((max(data_dict[j][12]), min(data_dict[j][13]))) - (coord_range/2) - 0.5, np.mean((max(data_dict[j][12]), min(data_dict[j][13]))) + (coord_range/2) + 0.5)
-                ax[1][index].set_xlim(min(ra) - 0.5, max(ra) + 0.5)
-                ax[1][index].set_ylim(min(dec) - 0.5, max(dec) + 0.5)
+                ax[1][index].set_xlim(np.mean((max(data_dict[j][10]), min(data_dict[j][11]))) - (coord_range/2) - 0.5, np.mean((max(data_dict[j][10]), min(data_dict[j][11]))) + (coord_range/2) + 0.5)
+                ax[1][index].set_ylim(np.mean((max(data_dict[j][12]), min(data_dict[j][13]))) - (coord_range/2) - 0.5, np.mean((max(data_dict[j][12]), min(data_dict[j][13]))) + (coord_range/2) + 0.5)
                 ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
                 ax[1][index].xaxis.set_minor_locator(minorLocatorx)
                 ax[1][index].yaxis.set_minor_locator(minorLocatory)
