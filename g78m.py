@@ -22,6 +22,16 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
+def check_if_group_is_in_file(file, group):
+    input_file = "groups/" + "/" + file
+    group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
+
+    if group not in group_nr:
+        return False
+    else:
+        return True
+
+
 def main(group_numbers):
     rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
     minorLocatorx = MultipleLocator(20)
@@ -36,6 +46,11 @@ def main(group_numbers):
 
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
+
+    for g in group_numbers:
+        for file in input_files:
+            if not check_if_group_is_in_file(file.split(".")[0] + ".groups", g):
+                input_files.remove(file)
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16))
 
@@ -125,7 +140,7 @@ def main(group_numbers):
                 ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
 
                 for k in range(0, len(ra)):
-                    el = Circle((ra[k], dec[k]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2, hatch=symbol)
+                    el = Circle((ra[k], dec[k]), radius=np.sqrt(intensity[i]), angle=0, lw=2, hatch=symbol)
                     ax[1][index].add_artist(el)
                     c = cm.jet((velocity[k] - vm) / dv, 1)
                     el.set_facecolor(c)
