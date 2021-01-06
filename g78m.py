@@ -12,7 +12,6 @@ from parsers.configparser_ import ConfigParser
 
 def get_configs(section, key):
     """
-
     :param section: configuration file secti
     :param key: configuration file sections
     :return: configuration file section key
@@ -57,13 +56,14 @@ def main(group_numbers):
     data_dict = dict()
     for index in range(0, len(input_files)):
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
-        velocity = np.empty(0)
-        intensity = np.empty(0)
-        ra = np.empty(0)
-        dec = np.empty(0)
+
         group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
             input_file, unpack=True)
         for j in group_numbers:
+            velocity = np.empty(0)
+            intensity = np.empty(0)
+            ra = np.empty(0)
+            dec = np.empty(0)
             if j not in data_dict.keys():
                 coord_ranges = []
                 velocitys = []
@@ -81,6 +81,7 @@ def main(group_numbers):
                 max_dec = []
                 data_dict[j] = [coord_ranges, velocitys, vms, vxs, dvs, intensitys, ras, decs,
                                 avgs_ra, avgs_dec, max_ra, min_ra, min_dec, max_dec]
+
             for i in range(0, len(channel_tmp)):
                 if group_tmp[i] == int(j):
                     velocity = np.append(velocity, velocity_tmp[i])
@@ -92,8 +93,8 @@ def main(group_numbers):
             vm = min(velocity)
             vx = max(velocity)
 
-            coord_range = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
-            data_dict[j][0].append(coord_range)
+            coord_range2 = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
+            data_dict[j][0].append(coord_range2)
             data_dict[j][1].append(velocity)
             data_dict[j][2].append(vm)
             data_dict[j][3].append(vx)
@@ -110,16 +111,34 @@ def main(group_numbers):
             data_dict[j][13].append(np.max(dec))
 
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
+
     for index in range(0, len(input_files)):
+        vms = []
+        vxs = []
+        coord_ranges = []
+        ra_maxs = []
+        ra_mins = []
+        dec_maxs = []
+        dec_mins = []
+
         for j in group_numbers:
             symbol = symbols[group_numbers.index(j)]
             velocity = data_dict[j][1][index]
             vm = data_dict[j][2][index]
+            vms.append(vm)
             vx = data_dict[j][3][index]
+            vxs.append(vx)
             dv = data_dict[j][4][index]
             intensity = data_dict[j][5][index]
             ra = data_dict[j][6][index]
             dec = data_dict[j][7][index]
+            coord_range = max(max(data_dict[j][10]) - min(data_dict[j][11]),
+                              max(data_dict[j][12]) - min(data_dict[j][13]))
+            coord_ranges.append(coord_range)
+            ra_maxs.append(max(ra))
+            ra_mins.append(min(ra))
+            dec_maxs.append(max(dec))
+            dec_mins.append(min(dec))
             title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
             ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
@@ -131,23 +150,25 @@ def main(group_numbers):
 
                 ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2,
                                      marker=symbol)
-                ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
                 ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
                 ax[0][index].set_title(title, size=12)
                 ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
 
                 rel = []
                 ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
-                ax[1][index].scatter(ra, dec, s=np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
+                ax[1][index].scatter(ra[i], dec[i], s=100 * np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
 
-                coord_range = max(max(data_dict[j][10]) - min(data_dict[j][11]), max(data_dict[j][12]) - min(data_dict[j][13]))
                 ax[1][index].set_aspect("equal", adjustable='box')
-                ax[1][index].set_xlim(np.mean((max(data_dict[j][10]), min(data_dict[j][11]))) - (coord_range/2) - 0.5, np.mean((max(data_dict[j][10]), min(data_dict[j][11]))) + (coord_range/2) + 0.5)
-                ax[1][index].set_ylim(np.mean((max(data_dict[j][12]), min(data_dict[j][13]))) - (coord_range/2) - 0.5, np.mean((max(data_dict[j][12]), min(data_dict[j][13]))) + (coord_range/2) + 0.5)
+
                 ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
                 ax[1][index].xaxis.set_minor_locator(minorLocatorx)
                 ax[1][index].yaxis.set_minor_locator(minorLocatory)
                 ax[1][index].invert_xaxis()
+
+        ax[0][index].set_xlim(min(vms) - 0.5, max(vxs) + 0.5)
+        coord_range_max = max(coord_ranges) + 125
+        ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max / 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max / 2) + 0.5)
+        ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max / 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max / 2) + 0.5)
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
