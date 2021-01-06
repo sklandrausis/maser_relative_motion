@@ -74,7 +74,6 @@ def main(group_numbers):
             ra = np.empty(0)
             dec = np.empty(0)
             if j not in data_dict.keys():
-                coord_ranges = []
                 velocitys = []
                 vms = []
                 vxs = []
@@ -88,7 +87,7 @@ def main(group_numbers):
                 min_ra = []
                 min_dec = []
                 max_dec = []
-                data_dict[j] = [coord_ranges, velocitys, vms, vxs, dvs, intensitys, ras, decs,
+                data_dict[j] = [velocitys, vms, vxs, dvs, intensitys, ras, decs,
                                 avgs_ra, avgs_dec, max_ra, min_ra, min_dec, max_dec]
 
             for i in range(0, len(channel_tmp)):
@@ -98,36 +97,29 @@ def main(group_numbers):
                     ra = np.append(ra, ra_tmp[i])
                     dec = np.append(dec, dec_tmp[i])
 
-            dv = (max(velocity) - min(velocity))
             vm = min(velocity)
             vx = max(velocity)
 
-            coord_range2 = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
-            data_dict[j][0].append(coord_range2)
-            data_dict[j][1].append(velocity)
-            data_dict[j][2].append(vm)
-            data_dict[j][3].append(vx)
-            data_dict[j][4].append(dv)
-            data_dict[j][5].append(intensity)
-            data_dict[j][6].append(ra)
-            data_dict[j][7].append(dec)
-
-            data_dict[j][8].append(np.mean(ra))
-            data_dict[j][9].append(np.mean(dec))
-            data_dict[j][10].append(abs(np.max(ra)))
-            data_dict[j][11].append(abs(np.min(ra)))
-            data_dict[j][12].append(abs(np.min(dec)))
-            data_dict[j][13].append(abs(np.max(dec)))
+            data_dict[j][0].append(velocity)
+            data_dict[j][1].append(vm)
+            data_dict[j][2].append(vx)
+            data_dict[j][3].append(intensity)
+            data_dict[j][4].append(ra)
+            data_dict[j][5].append(dec)
+            data_dict[j][6].append(np.mean(ra))
+            data_dict[j][7].append(np.mean(dec))
+            data_dict[j][8].append(abs(np.max(ra)))
+            data_dict[j][9].append(abs(np.min(ra)))
+            data_dict[j][10].append(abs(np.min(dec)))
+            data_dict[j][11].append(abs(np.max(dec)))
 
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
 
     vm_min = []
     vx_max = []
-    dv_avg = []
     for j in group_numbers:
-        vm_min.append(min(data_dict[j][2]))
-        vx_max.append(max(data_dict[j][3]))
-        dv_avg.append(max(data_dict[j][4]))
+        vm_min.append(min(data_dict[j][1]))
+        vx_max.append(max(data_dict[j][2]))
 
     for index in range(0, len(input_files)):
         vms = []
@@ -140,17 +132,16 @@ def main(group_numbers):
 
         for j in group_numbers:
             symbol = symbols[group_numbers.index(j)]
-            velocity = data_dict[j][1][index]
-            vm = data_dict[j][2][index]
+            velocity = data_dict[j][0][index]
+            vm = data_dict[j][1][index]
             vms.append(vm)
-            vx = data_dict[j][3][index]
+            vx = data_dict[j][2][index]
             vxs.append(vx)
-            dv = data_dict[j][4][index]
-            intensity = data_dict[j][5][index]
-            ra = data_dict[j][6][index]
-            dec = data_dict[j][7][index]
-            coord_range = max(max(data_dict[j][10]) - min(data_dict[j][11]),
-                              max(data_dict[j][13]) - min(data_dict[j][12]))
+            intensity = data_dict[j][3][index]
+            ra = data_dict[j][4][index]
+            dec = data_dict[j][5][index]
+            coord_range = max(max(data_dict[j][8]) - min(data_dict[j][9]),
+                              max(data_dict[j][11]) - min(data_dict[j][10]))
             coord_ranges.append(coord_range)
             ra_maxs.append(max(ra))
             ra_mins.append(min(ra))
@@ -171,12 +162,9 @@ def main(group_numbers):
                 ax[0][index].set_title(title, size=12)
                 ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
 
-                rel = []
                 ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
-                ax[1][index].scatter(ra[i], dec[i], s=100 * np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
-
+                ax[1][index].scatter(ra[i], dec[i], s=max(coord_ranges) * np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
                 ax[1][index].set_aspect("equal", adjustable='box')
-
                 ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
                 ax[1][index].xaxis.set_minor_locator(minorLocatorx)
                 ax[1][index].yaxis.set_minor_locator(minorLocatory)
