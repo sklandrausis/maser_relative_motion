@@ -112,6 +112,14 @@ def main(group_numbers):
 
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
 
+    vm_min = []
+    vx_max = []
+    dv_avg = []
+    for j in group_numbers:
+        vm_min.append(min(data_dict[j][2]))
+        vx_max.append(max(data_dict[j][3]))
+        dv_avg.append(max(data_dict[j][4]))
+
     for index in range(0, len(input_files)):
         vms = []
         vxs = []
@@ -143,10 +151,10 @@ def main(group_numbers):
             ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
             for i in range(len(velocity) - 1):
-                if velocity[i] < vm or velocity[i] > vx:
+                if velocity[i] < min(vm_min) or velocity[i] > max(vx_max):
                     c = (0, 0, 0)
                 else:
-                    c = cm.jet((velocity[i] - vm) / dv, 1)
+                    c = cm.jet((velocity[i] - min(vm_min)) / np.mean(dv_avg), 1)
 
                 ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2,
                                      marker=symbol)
