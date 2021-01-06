@@ -2,7 +2,6 @@ import sys
 import argparse
 
 from matplotlib import rc, cm
-from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,6 +41,16 @@ def main(group_numbers):
 
     for file in file_order:
         input_files.append(file)
+
+    v_max = []
+    v_min = []
+    for index in range(0, len(input_files)):
+        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
+        group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
+            input_file, unpack=True)
+
+        v_max.append(max(velocity_tmp))
+        v_min.append(min(velocity_tmp))
 
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
@@ -105,10 +114,10 @@ def main(group_numbers):
 
             data_dict[j][8].append(np.mean(ra))
             data_dict[j][9].append(np.mean(dec))
-            data_dict[j][10].append(np.max(ra))
-            data_dict[j][11].append(np.min(ra))
-            data_dict[j][12].append(np.min(dec))
-            data_dict[j][13].append(np.max(dec))
+            data_dict[j][10].append(abs(np.max(ra)))
+            data_dict[j][11].append(abs(np.min(ra)))
+            data_dict[j][12].append(abs(np.min(dec)))
+            data_dict[j][13].append(abs(np.max(dec)))
 
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
 
@@ -141,7 +150,7 @@ def main(group_numbers):
             ra = data_dict[j][6][index]
             dec = data_dict[j][7][index]
             coord_range = max(max(data_dict[j][10]) - min(data_dict[j][11]),
-                              max(data_dict[j][12]) - min(data_dict[j][13]))
+                              max(data_dict[j][13]) - min(data_dict[j][12]))
             coord_ranges.append(coord_range)
             ra_maxs.append(max(ra))
             ra_mins.append(min(ra))
@@ -151,10 +160,10 @@ def main(group_numbers):
             ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
             for i in range(len(velocity) - 1):
-                if velocity[i] < min(vm_min) or velocity[i] > max(vx_max):
+                if velocity[i] < min(v_min) or velocity[i] > max(v_max):
                     c = (0, 0, 0)
                 else:
-                    c = cm.jet((velocity[i] - min(vm_min)) / np.mean(dv_avg), 1)
+                    c = cm.jet((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
 
                 ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2,
                                      marker=symbol)
@@ -175,8 +184,8 @@ def main(group_numbers):
 
         ax[0][index].set_xlim(min(vms) - 0.5, max(vxs) + 0.5)
         coord_range_max = max(coord_ranges) + 125
-        ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max / 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max / 2) + 0.5)
-        ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max / 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max / 2) + 0.5)
+        ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max * 2) + 0.5)
+        ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max * 2) + 0.5)
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
