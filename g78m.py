@@ -55,10 +55,19 @@ def main(group_numbers):
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
 
+    bad_epoch_dict = {}
     for g in group_numbers:
         for file in input_files:
             if not check_if_group_is_in_file(file.split(".")[0] + ".groups", g):
-                input_files.remove(file)
+                if file not in bad_epoch_dict.keys():
+                    bad_epoch_dict[file] = 1
+                else:
+                    bad_epoch_dict[file] = +1
+
+    for file in bad_epoch_dict.keys():
+        if bad_epoch_dict[file] == len(group_numbers):
+            input_files.remove(file)
+            del dates[file.split(".")[0]]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16))
 
@@ -97,8 +106,12 @@ def main(group_numbers):
                     ra = np.append(ra, ra_tmp[i])
                     dec = np.append(dec, dec_tmp[i])
 
-            vm = min(velocity)
-            vx = max(velocity)
+            if len(velocity) == 0:
+                vm = 0
+                vx = 0
+            else:
+                vm = min(velocity)
+                vx = max(velocity)
 
             data_dict[j][0].append(velocity)
             data_dict[j][1].append(vm)
@@ -106,12 +119,20 @@ def main(group_numbers):
             data_dict[j][3].append(intensity)
             data_dict[j][4].append(ra)
             data_dict[j][5].append(dec)
-            data_dict[j][6].append(np.mean(ra))
-            data_dict[j][7].append(np.mean(dec))
-            data_dict[j][8].append(abs(np.max(ra)))
-            data_dict[j][9].append(abs(np.min(ra)))
-            data_dict[j][10].append(abs(np.min(dec)))
-            data_dict[j][11].append(abs(np.max(dec)))
+            if len(ra) == 0:
+                data_dict[j][6].append(0)
+                data_dict[j][7].append(0)
+                data_dict[j][8].append(0)
+                data_dict[j][9].append(0)
+                data_dict[j][10].append(0)
+                data_dict[j][11].append(0)
+            else:
+                data_dict[j][6].append(np.mean(ra))
+                data_dict[j][7].append(np.mean(dec))
+                data_dict[j][8].append(abs(np.max(ra)))
+                data_dict[j][9].append(abs(np.min(ra)))
+                data_dict[j][10].append(abs(np.min(dec)))
+                data_dict[j][11].append(abs(np.max(dec)))
 
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
 
@@ -143,10 +164,16 @@ def main(group_numbers):
             coord_range = max(max(data_dict[j][8]) - min(data_dict[j][9]),
                               max(data_dict[j][11]) - min(data_dict[j][10]))
             coord_ranges.append(coord_range)
-            ra_maxs.append(max(ra))
-            ra_mins.append(min(ra))
-            dec_maxs.append(max(dec))
-            dec_mins.append(min(dec))
+            if len(ra) == 0:
+                ra_maxs.append(0)
+                ra_mins.append(0)
+                dec_maxs.append(0)
+                dec_mins.append(0)
+            else:
+                ra_maxs.append(max(ra))
+                ra_mins.append(min(ra))
+                dec_maxs.append(max(dec))
+                dec_mins.append(min(dec))
             title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
             ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
 
