@@ -1,6 +1,7 @@
 import sys
 import argparse
 
+import matplotlib
 from matplotlib import rc, cm
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
@@ -69,7 +70,7 @@ def main(group_numbers):
             input_files.remove(file)
             del dates[file.split(".")[0]]
 
-    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16))
+    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=150)
 
     data_dict = dict()
     for index in range(0, len(input_files)):
