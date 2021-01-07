@@ -70,7 +70,7 @@ def main(group_numbers):
             input_files.remove(file)
             del dates[file.split(".")[0]]
 
-    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=150)
+    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
 
     data_dict = dict()
     for index in range(0, len(input_files)):
@@ -198,7 +198,7 @@ def main(group_numbers):
                 ax[1][index].yaxis.set_minor_locator(minorLocatory)
                 ax[1][index].invert_xaxis()
 
-        ax[0][index].set_xlim(min(vms) - 0.5, max(vxs) + 0.5)
+        ax[0][index].set_xlim(min(v_max) - 0.5, max(v_min) + 0.5)
         coord_range_max = max(coord_ranges) + 125
         ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max * 2) + 0.5)
         ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max * 2) + 0.5)
