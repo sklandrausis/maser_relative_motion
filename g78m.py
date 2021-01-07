@@ -210,8 +210,9 @@ def main(group_numbers):
         ax[0][index].set_xlim(min(v_min) - 0.5, max(v_max) + 0.5)
         coord_range_max = max(coord_ranges) + 125
         coord_range = max(abs(max(ra_max)) - abs(min(ra_min)), abs(max(dec_max)) - abs(min(dec_min)))
-        centre = (min(ra_min) + coord_range/2,
-                  min(dec_min) + coord_range/2)
+
+        centre = (min(ra_max) - (abs(max(ra_max)) - abs(min(ra_min)))/2,
+                  min(dec_max) - (abs(max(dec_max)) - abs(min(dec_min)))/2)
         #ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max * 2) + 0.5)
         #ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max * 2) + 0.5)
         ax[1][index].set_xlim(centre[0] - coord_range/2 - 1, centre[0] + coord_range/2 + 1)
