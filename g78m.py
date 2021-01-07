@@ -73,6 +73,10 @@ def main(group_numbers):
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
 
     data_dict = dict()
+    ra_max = []
+    ra_min = []
+    dec_max = []
+    dec_min = []
     for index in range(0, len(input_files)):
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
 
@@ -130,10 +134,15 @@ def main(group_numbers):
             else:
                 data_dict[j][6].append(np.mean(ra))
                 data_dict[j][7].append(np.mean(dec))
-                data_dict[j][8].append(abs(np.max(ra)))
-                data_dict[j][9].append(abs(np.min(ra)))
-                data_dict[j][10].append(abs(np.min(dec)))
-                data_dict[j][11].append(abs(np.max(dec)))
+                data_dict[j][8].append(np.max(ra))
+                data_dict[j][9].append(np.min(ra))
+                data_dict[j][10].append(np.max(dec))
+                data_dict[j][11].append(np.min(dec))
+
+                ra_max.append(np.max(ra))
+                ra_min.append(np.min(ra))
+                dec_max.append(np.max(dec))
+                dec_min.append(np.min(dec))
 
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
 
@@ -163,7 +172,7 @@ def main(group_numbers):
             ra = data_dict[j][4][index]
             dec = data_dict[j][5][index]
             coord_range = max(max(data_dict[j][8]) - min(data_dict[j][9]),
-                              max(data_dict[j][11]) - min(data_dict[j][10]))
+                              max(data_dict[j][10]) - min(data_dict[j][11]))
             coord_ranges.append(coord_range)
             if len(ra) == 0:
                 ra_maxs.append(0)
@@ -200,8 +209,13 @@ def main(group_numbers):
 
         ax[0][index].set_xlim(min(v_min) - 0.5, max(v_max) + 0.5)
         coord_range_max = max(coord_ranges) + 125
-        ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max * 2) + 0.5)
-        ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max * 2) + 0.5)
+        coord_range = max(abs(max(ra_max)) - abs(min(ra_min)), abs(max(dec_max)) - abs(min(dec_min)))
+        centre = (min(ra_min) + coord_range/2,
+                  min(dec_min) + coord_range/2)
+        #ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max * 2) + 0.5)
+        #ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max * 2) + 0.5)
+        ax[1][index].set_xlim(centre[0] - coord_range/2 - 1, centre[0] + coord_range/2 + 1)
+        ax[1][index].set_ylim(centre[1] - coord_range/2 - 1, centre[1] + coord_range/2 + 1)
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
