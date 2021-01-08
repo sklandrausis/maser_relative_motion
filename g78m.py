@@ -200,7 +200,8 @@ def main(group_numbers):
                 ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
 
                 ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
-                ax[1][index].scatter(ra[i], dec[i], s=max(coord_ranges) * np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
+                coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
+                ax[1][index].scatter(ra[i], dec[i], s=0.1 *coord_range * np.sqrt(intensity[i]), color=c, lw=2, marker=symbol)
                 ax[1][index].set_aspect("equal", adjustable='box')
                 ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
                 ax[1][index].xaxis.set_minor_locator(minorLocatorx)
@@ -208,15 +209,13 @@ def main(group_numbers):
                 ax[1][index].invert_xaxis()
 
         ax[0][index].set_xlim(min(v_min) - 0.5, max(v_max) + 0.5)
-        coord_range_max = max(coord_ranges) + 125
-        coord_range = max(abs(max(ra_max)) - abs(min(ra_min)), abs(max(dec_max)) - abs(min(dec_min)))
+        coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
 
-        centre = (min(ra_max) - (abs(max(ra_max)) - abs(min(ra_min)))/2,
-                  min(dec_max) - (abs(max(dec_max)) - abs(min(dec_min)))/2)
+        centre = (np.mean([max(ra_max), min(ra_min)]), np.mean([max(dec_max), min(dec_min)]))
         #ax[1][index].set_xlim(np.mean((max(ra_maxs), min(ra_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(ra_maxs), min(ra_mins))) + (coord_range_max * 2) + 0.5)
         #ax[1][index].set_ylim(np.mean((max(dec_maxs), min(dec_mins))) - (coord_range_max * 2) - 0.5, np.mean((max(dec_maxs), min(dec_mins))) + (coord_range_max * 2) + 0.5)
-        ax[1][index].set_xlim(centre[0] - coord_range/2 - 1, centre[0] + coord_range/2 + 1)
-        ax[1][index].set_ylim(centre[1] - coord_range/2 - 1, centre[1] + coord_range/2 + 1)
+        ax[1][index].set_xlim(centre[0] - coord_range/2 - 10, centre[0] + coord_range/2 + 10)
+        ax[1][index].set_ylim(centre[1] - coord_range/2 - 10, centre[1] + coord_range/2 + 10)
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.18, hspace=0, left=0.05, right=0.99)
