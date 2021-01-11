@@ -139,11 +139,11 @@ def main(group_numbers):
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
         ax[1][index].xaxis.set_minor_locator(minor_locatorx)
         ax[1][index].yaxis.set_minor_locator(minor_locatory)
-        ax[1][index].invert_xaxis()
         ax[0][index].set_xlim(min(v_min) - 0.5, max(v_max) + 0.5)
         centre = (np.mean([max(ra_max), min(ra_min)]), np.mean([max(dec_max), min(dec_min)]))
         ax[1][index].set_xlim(centre[0] - coord_range/2 - 10, centre[0] + coord_range/2 + 10)
         ax[1][index].set_ylim(centre[1] - coord_range/2 - 10, centre[1] + coord_range/2 + 10)
+        ax[1][index].invert_xaxis()
 
     ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
