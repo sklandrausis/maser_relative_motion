@@ -6,8 +6,14 @@ from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import curve_fit
 
 from parsers.configparser_ import ConfigParser
+
+
+def gauss(x, *p):
+    a, b, c = p
+    return a*np.exp(-(x-b)**2*np.log(2)/(c**2))
 
 
 def get_configs(section, key):
@@ -99,6 +105,11 @@ def main(group_number):
         ra = ras[index]
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
+        p0 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
+        coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p0, maxfev=100000)
+        q = np.linspace(min(velocity), max(velocity), 1000)
+        hist_fit = gauss(q, *coeff)
+        ax[0][index].plot(q, hist_fit, 'k')
 
         for i in range(len(velocity) - 1):
             if velocity[i] < vm or velocity[i] > vx:
