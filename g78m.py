@@ -1,7 +1,8 @@
 import sys
 import argparse
 
-from matplotlib import rc, cm
+from matplotlib import cm
+from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,6 +27,16 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
+def get_configs_items():
+    """
+
+    :return: None
+    """
+    config_file_path = "config/plot.cfg"
+    config = ConfigParser(config_file_path)
+    return config.get_items("main")
+
+
 def check_if_group_is_in_file(file, group):
     input_file = "groups/" + "/" + file
     group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
@@ -37,7 +48,10 @@ def check_if_group_is_in_file(file, group):
 
 
 def main(group_numbers):
-    rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
+    configuration_items = get_configs_items()
+    for key, value in configuration_items.items():
+        rcParams[key] = value
+
     minor_locatorx = MultipleLocator(20)
     minor_locatory = MultipleLocator(20)
     minor_locatorvel = MultipleLocator(1)
@@ -82,6 +96,8 @@ def main(group_numbers):
     ra_min = []
     dec_max = []
     dec_min = []
+    intensitys_max = []
+    intensitys_min = []
     for index in range(0, len(input_files)):
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
 
@@ -103,6 +119,8 @@ def main(group_numbers):
                 if group_tmp[i] == int(j):
                     velocity = np.append(velocity, velocity_tmp[i])
                     intensity = np.append(intensity, intensity_tmp[i])
+                    intensitys_max.append(max(intensity))
+                    intensitys_min.append(min(intensity))
                     ra = np.append(ra, ra_tmp[i])
                     dec = np.append(dec, dec_tmp[i])
 
@@ -145,20 +163,21 @@ def main(group_numbers):
 
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         ax[0][index].xaxis.set_minor_locator(minor_locatorvel)
-        ax[0][index].set_title(title, size=12)
-        ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
+        ax[0][index].set_title(title)
+        ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
+        ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minor_locatorx)
         ax[1][index].yaxis.set_minor_locator(minor_locatory)
         ax[0][index].set_xlim(min(v_min) - 0.5, max(v_max) + 0.5)
+        ax[0][index].set_ylim((min(intensitys_min)) - 0.1, (max(intensitys_max) + 0.1))
         centre = (np.mean([max(ra_max), min(ra_min)]), np.mean([max(dec_max), min(dec_min)]))
         ax[1][index].set_xlim(centre[0] - coord_range/2 - 10, centre[0] + coord_range/2 + 10)
         ax[1][index].set_ylim(centre[1] - coord_range/2 - 10, centre[1] + coord_range/2 + 10)
         ax[1][index].invert_xaxis()
 
-    ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
-    ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
+    ax[0][0].set_ylabel('Flux density (Jy)')
+    ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
     plt.tight_layout()
     plt.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
     plt.show()

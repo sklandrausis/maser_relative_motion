@@ -1,7 +1,8 @@
 import sys
 import argparse
 
-from matplotlib import rc, cm
+from matplotlib import cm
+from matplotlib import rcParams
 from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
@@ -28,8 +29,21 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
+def get_configs_items():
+    """
+
+    :return: None
+    """
+    config_file_path = "config/plot.cfg"
+    config = ConfigParser(config_file_path)
+    return config.get_items("main")
+
+
 def main(group_number):
-    rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
+    configuration_items = get_configs_items()
+    for key, value in configuration_items.items():
+        rcParams[key] = value
+
     minorLocatorx = MultipleLocator(20)
     minorLocatory = MultipleLocator(20)
     minorLocatorvel = MultipleLocator(1)
@@ -59,6 +73,8 @@ def main(group_number):
     min_ra = []
     min_dec = []
     max_dec = []
+    intensitys_max = []
+    intensitys_min = []
     for index in range(0, len(input_files)):
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
         velocity = np.empty(0)
@@ -85,6 +101,8 @@ def main(group_number):
         vxs.append(vx)
         dvs.append(dv)
         intensitys.append(intensity)
+        intensitys_max.append(max(intensity))
+        intensitys_min.append(min(intensity))
         ras.append(ra)
         decs.append(dec)
 
@@ -104,7 +122,7 @@ def main(group_number):
         dec = decs[index]
         ra = ras[index]
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
-        ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
+        ax[0][0].set_ylabel('Flux density (Jy)')
         p0 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
         coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p0, maxfev=100000)
         q = np.linspace(min(velocity), max(velocity), 1000)
@@ -120,11 +138,11 @@ def main(group_number):
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
             ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
             ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
-            ax[0][index].set_title(title, size=12)
-            ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
+            ax[0][index].set_title(title)
+            ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
 
             rel = []
-            ax[1][0].set_ylabel('$\\Delta$ Dec (mas)', fontsize=12)
+            ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
             for i in range(0, len(ra)):
                 el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
                 ax[1][index].add_artist(el)
@@ -133,10 +151,11 @@ def main(group_number):
                 rel.append([ra[i], dec[i], velocity[i]])
 
             coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
+            ax[0][index].set_ylim((min(intensitys_min)) - 0.1, (max(intensitys_max) + 0.1))
             ax[1][index].set_aspect("equal", adjustable='box')
             ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5, np.mean((max(max_ra), min(min_ra))) + (coord_range/2) + 0.5)
             ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range/2) - 0.5, np.mean((max(max_dec), min(min_dec))) + (coord_range/2) + 0.5)
-            ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
+            ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
             ax[1][index].xaxis.set_minor_locator(minorLocatorx)
             ax[1][index].yaxis.set_minor_locator(minorLocatory)
             ax[1][index].invert_xaxis()
