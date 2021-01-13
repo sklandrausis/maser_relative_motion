@@ -41,8 +41,20 @@ def main(ispec_files_dir, input_files_dir):
 
     fig, ax = plt.subplots(nrows=2, ncols=5, figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
 
+    max_ra = []
+    min_ra = []
+    min_dec = []
+    max_dec = []
+    v_s =[]
+    vms = []
+    vxs = []
+    dvs = []
+    ss = []
+    ras = []
+    decs = []
+    v1s = []
+    i1s = []
     for index in range(0, len(file_pairs)):
-        title = file_pairs[index][0].split("_")[0].upper() + "-" + dates[file_pairs[index][1].split(".")[0]]
         ispec_file = ispec_files_dir + "/" + file_pairs[index][0]
         input_file = input_files_dir + "/" + file_pairs[index][1]
 
@@ -55,7 +67,31 @@ def main(ispec_files_dir, input_files_dir):
         nu, v, s = np.loadtxt(ispec_file, unpack=True)
         v = v / 1000.0
         sm = s.max()
+        v_s.append(v)
+        vms.append(vm)
+        vxs.append(vx)
+        dvs.append(dv)
+        ss.append(s)
+        ras.append(ra)
+        decs.append(dec)
+        v1s.append(v1)
+        i1s.append(i1)
+        max_ra.append(np.max(ra))
+        min_ra.append(np.min(ra))
+        min_dec.append(np.min(dec))
+        max_dec.append(np.max(dec))
 
+    for index in range(0, len(file_pairs)):
+        v = v_s[index]
+        vm = vms[index]
+        vx = vxs[index]
+        dv = dvs[index]
+        s = ss[index]
+        ra = ras[index]
+        dec = decs[index]
+        v1 = v1s[index]
+        i1 = i1s[index]
+        title = file_pairs[index][0].split("_")[0].upper() + "-" + dates[file_pairs[index][1].split(".")[0]]
         ax[0][0].set_ylabel('Flux density (Jy)', fontsize=12)
         for i in range(len(v) - 1):
             if v[i] < vm or v[i] > vx:
@@ -81,8 +117,11 @@ def main(ispec_files_dir, input_files_dir):
             Circle((285, -200), radius=10, angle=0, edgecolor='black', facecolor='white', alpha=0.9))
         ax[1][index].annotate('1 Jy beam$^{-1}$', [275, -200], fontsize=12)
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(-240, 155)
-        ax[1][index].set_ylim(-50, 345)
+        coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
+        ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range / 2) - 10*np.sqrt(max(i1)),
+                              np.mean((max(max_ra), min(min_ra))) + (coord_range / 2) + 10*np.sqrt(max(i1)))
+        ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range / 2) - 10*np.sqrt(max(i1)),
+                              np.mean((max(max_dec), min(min_dec))) + (coord_range / 2) + 10*np.sqrt(max(i1)))
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
