@@ -45,6 +45,16 @@ def get_configs_items():
     return config.get_items("main")
 
 
+def check_if_group_is_in_file(file, group):
+    input_file = "groups/" + "/" + file
+    group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
+
+    if group not in group_nr:
+        return False
+    else:
+        return True
+
+
 def main(group_number):
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
@@ -66,6 +76,9 @@ def main(group_number):
     for file in file_order:
         input_files.append(file)
 
+    dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
+             get_configs("parameters", "dates").split(",")}
+
     v_max = []
     v_min = []
     for index in range(0, len(input_files)):
@@ -76,8 +89,12 @@ def main(group_number):
         v_max.append(max(velocity_tmp))
         v_min.append(min(velocity_tmp))
 
-    dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
-             get_configs("parameters", "dates").split(",")}
+    bad_files = []
+    for file in input_files:
+        if not check_if_group_is_in_file(file.split(".")[0] + ".groups", group_number):
+            bad_files.append(file)
+            del dates[file.split(".")[0]]
+    input_files = [file for file in input_files if file not in bad_files]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
 
