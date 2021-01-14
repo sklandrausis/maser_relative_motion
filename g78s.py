@@ -133,7 +133,8 @@ def main(group_number):
         ra = ras[index]
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
         p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
-        p2 = [1., -6., 0.2, 2., -6., 0.2]
+        p2 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2,
+              max(intensity)/4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
         q = np.linspace(min(velocity), max(velocity), 1000)
 
         if input_files[index].split(".")[0].upper() in gauss2_dict.keys():
