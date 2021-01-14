@@ -81,13 +81,10 @@ def main(group_number):
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
 
-    coord_ranges = []
     velocitys = []
     intensitys = []
     ras = []
     decs = []
-    avgs_ra = []
-    avgs_dec = []
     max_ra = []
     min_ra = []
     min_dec = []
@@ -109,21 +106,24 @@ def main(group_number):
                 ra = np.append(ra, ra_tmp[i])
                 dec = np.append(dec, dec_tmp[i])
 
-        coord_range = max(abs(abs(max(ra)) - abs(min(ra))), abs(abs(max(dec)) - abs(min(dec))))
-        coord_ranges.append(coord_range)
+        if len(intensity) == 0:
+            intensity = [0]
+
+        if len(velocity) == 0:
+            velocity = [0]
+
         velocitys.append(velocity)
         intensitys.append(intensity)
-        intensitys_max.append(max(intensity))
-        intensitys_min.append(min(intensity))
         ras.append(ra)
         decs.append(dec)
 
-        avgs_ra.append(np.mean(ra))
-        avgs_dec.append(np.mean(dec))
-        max_ra.append(np.max(ra))
-        min_ra.append(np.min(ra))
-        min_dec.append(np.min(dec))
-        max_dec.append(np.max(dec))
+        if len(ra) != 0:
+            intensitys_max.append(max(intensity))
+            intensitys_min.append(min(intensity))
+            max_ra.append(np.max(ra))
+            min_ra.append(np.min(ra))
+            min_dec.append(np.min(dec))
+            max_dec.append(np.max(dec))
 
     coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
     for index in range(0, len(input_files)):
@@ -132,20 +132,21 @@ def main(group_number):
         dec = decs[index]
         ra = ras[index]
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
-        p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
-        p2 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2,
-              max(intensity)/4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
-        q = np.linspace(min(velocity), max(velocity), 1000)
+        if len(velocity) >= 3:
+            p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
+            p2 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.3,
+                  max(intensity) / 4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.1]
+            q = np.linspace(min(velocity), max(velocity), 1000)
 
-        gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
-        if str(group_number) in gauss2_groups_for_epoch:
-            coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
-            hist_fit = gauss2(q, *coeff)
-        else:
-            coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
-            hist_fit = gauss(q, *coeff)
+            gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
+            if str(group_number) in gauss2_groups_for_epoch:
+                coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
+                hist_fit = gauss2(q, *coeff)
+            else:
+                coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+                hist_fit = gauss(q, *coeff)
 
-        ax[0][index].plot(q, hist_fit, 'k')
+            ax[0][index].plot(q, hist_fit, 'k')
 
         for i in range(len(velocity) - 1):
             if velocity[i] < min(v_min) or velocity[i] > max(v_max):
