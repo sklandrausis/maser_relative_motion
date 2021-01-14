@@ -156,26 +156,21 @@ def main(group_numbers):
             ra = data_dict[j][2][index]
             dec = data_dict[j][3][index]
 
-            p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
-            p2 = [1., -6., 0.2, 2., -6., 0.2]
-            q = np.linspace(min(velocity), max(velocity), 1000)
+            if len(velocity) >= 3:
+                p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
+                p2 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.3,
+                      max(intensity) / 4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.1]
+                q = np.linspace(min(velocity), max(velocity), 1000)
 
-            if input_files[index].split(".")[0].upper() in gauss2_dict.keys():
                 gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
-
                 if str(j) in gauss2_groups_for_epoch:
-
                     coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
                     hist_fit = gauss2(q, *coeff)
                 else:
                     coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
                     hist_fit = gauss(q, *coeff)
 
-            else:
-                coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
-                hist_fit = gauss(q, *coeff)
-
-            ax[0][index].plot(q, hist_fit, 'k')
+                ax[0][index].plot(q, hist_fit, 'k')
 
             for i in range(len(velocity) - 1):
                 if velocity[i] < min(v_min) or velocity[i] > max(v_max):
