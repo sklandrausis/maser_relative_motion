@@ -17,6 +17,12 @@ def gauss(x, *p):
     return a*np.exp(-(x-b)**2*np.log(2)/(c**2))
 
 
+def gauss2(x, *p):
+    a1, b1, c1, a2, b2, c2 = p
+    return a1*np.exp(-(x-b1)**2*np.log(2)/c1**2) + \
+           a2*np.exp(-(x-b2)**2*np.log(2)/c2**2)
+
+
 def get_configs(section, key):
     """
 
@@ -47,6 +53,12 @@ def main(group_number):
     minorLocatorx = MultipleLocator(20)
     minorLocatory = MultipleLocator(20)
     minorLocatorvel = MultipleLocator(1)
+
+    gauss2_list = get_configs("parameters", "gauss").split(";")
+    gauss2_dict = dict()
+
+    for epoch in gauss2_list:
+        gauss2_dict[epoch.split(":")[0]] = epoch.split(":")[1].split(",")
 
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
     input_files = []
@@ -120,10 +132,25 @@ def main(group_number):
         dec = decs[index]
         ra = ras[index]
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
-        p0 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
-        coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p0, maxfev=100000)
+        p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
+        p2 = [1., -6., 0.2, 2., -6., 0.2]
         q = np.linspace(min(velocity), max(velocity), 1000)
-        hist_fit = gauss(q, *coeff)
+
+        if input_files[index].split(".")[0].upper() in gauss2_dict.keys():
+            gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
+
+            if str(group_number) in gauss2_groups_for_epoch:
+
+                coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
+                hist_fit = gauss2(q, *coeff)
+            else:
+                coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+                hist_fit = gauss(q, *coeff)
+
+        else:
+            coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+            hist_fit = gauss(q, *coeff)
+
         ax[0][index].plot(q, hist_fit, 'k')
 
         for i in range(len(velocity) - 1):
