@@ -138,15 +138,9 @@ def main(group_number):
 
         if input_files[index].split(".")[0].upper() in gauss2_dict.keys():
             gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
-
             if str(group_number) in gauss2_groups_for_epoch:
-
                 coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
                 hist_fit = gauss2(q, *coeff)
-            else:
-                coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
-                hist_fit = gauss(q, *coeff)
-
         else:
             coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
             hist_fit = gauss(q, *coeff)
