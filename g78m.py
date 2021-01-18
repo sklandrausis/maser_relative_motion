@@ -165,17 +165,17 @@ def main(group_numbers):
                 if str(j) in gauss2_groups_for_epoch:
                     try:
                         coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
+                        hist_fit = gauss2(q, *coeff)
+                        ax[0][index].plot(q, hist_fit, 'k')
                     except:
                         pass
-                    hist_fit = gauss2(q, *coeff)
                 else:
                     try:
                         coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+                        hist_fit = gauss(q, *coeff)
+                        ax[0][index].plot(q, hist_fit, 'k')
                     except:
                         pass
-                    hist_fit = gauss(q, *coeff)
-
-                ax[0][index].plot(q, hist_fit, 'k')
 
             for i in range(len(velocity) - 1):
                 if velocity[i] < min(v_min) or velocity[i] > max(v_max):
