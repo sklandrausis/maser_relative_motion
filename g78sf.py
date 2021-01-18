@@ -174,7 +174,7 @@ def main(group_number):
             if velocity[i] < min(v_min) or velocity[i] > max(v_max):
                 c = (0, 0, 0)
             else:
-                c = cm.jet((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
+                c = cm.turbo((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
             ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
