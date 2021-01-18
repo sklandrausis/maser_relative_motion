@@ -77,16 +77,6 @@ def main(group_number):
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
 
-    v_max = []
-    v_min = []
-    for index in range(0, len(input_files)):
-        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
-        group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
-            input_file, unpack=True)
-
-        v_max.append(max(velocity_tmp))
-        v_min.append(min(velocity_tmp))
-
     bad_files = []
     for file in input_files:
         if not check_if_group_is_in_file(file.split(".")[0] + ".groups", group_number):
@@ -106,6 +96,8 @@ def main(group_number):
     max_dec = []
     intensitys_max = []
     intensitys_min = []
+    v_maxs = []
+    v_mins = []
     for index in range(0, len(input_files)):
         input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
         velocity = np.empty(0)
@@ -120,6 +112,9 @@ def main(group_number):
                 intensity = np.append(intensity, intensity_tmp[i])
                 ra = np.append(ra, ra_tmp[i])
                 dec = np.append(dec, dec_tmp[i])
+
+        v_maxs.append(max(velocity))
+        v_mins.append(min(velocity))
 
         if len(intensity) == 0:
             intensity = [0]
@@ -142,6 +137,8 @@ def main(group_number):
 
     coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
     for index in range(0, len(input_files)):
+        v_max = v_maxs[index]
+        v_min = v_mins[index]
         velocity = velocitys[index]
         intensity = intensitys[index]
         dec = decs[index]
@@ -171,10 +168,10 @@ def main(group_number):
 
         rel = []
         for i in range(len(velocity) - 1):
-            if velocity[i] < min(v_min) or velocity[i] > max(v_max):
+            if velocity[i] < v_min or velocity[i] > v_max:
                 c = (0, 0, 0)
             else:
-                c = cm.turbo((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
+                c = cm.turbo((velocity[i] - v_min) / (v_max - v_min), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
             ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
@@ -184,7 +181,6 @@ def main(group_number):
 
             el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
             ax[1][index].add_artist(el)
-            c = cm.jet((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
             el.set_facecolor(c)
             rel.append([ra[i], dec[i], velocity[i]])
 
