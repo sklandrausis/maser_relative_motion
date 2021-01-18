@@ -35,7 +35,6 @@ def get_configs(section, key):
 
 def get_configs_items():
     """
-
     :return: None
     """
     config_file_path = "config/plot.cfg"
@@ -164,10 +163,16 @@ def main(group_numbers):
 
                 gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
                 if str(j) in gauss2_groups_for_epoch:
-                    coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
+                    try:
+                        coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
+                    except:
+                        pass
                     hist_fit = gauss2(q, *coeff)
                 else:
-                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+                    try:
+                        coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+                    except:
+                        pass
                     hist_fit = gauss(q, *coeff)
 
                 ax[0][index].plot(q, hist_fit, 'k')
