@@ -187,8 +187,10 @@ def main(group_number):
 
         ax[0][index].set_ylim((min(intensitys_min)) - 0.1, (max(intensitys_max) + 0.1))
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5, (np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5) + 12)
-        ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range/2) - 0.5, np.mean((max(max_dec), min(min_dec))) + (coord_range/2) + 0.5)
+        ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range / 2) - 0.5,
+                              (np.mean((max(max_ra), min(min_ra))) - (coord_range / 2) - 0.5) + 12)
+        ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range / 2) - 0.5,
+                              np.mean((max(max_dec), min(min_dec))) + (coord_range / 2) + 0.5 + 12)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
