@@ -3,7 +3,7 @@ import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
+from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
 
@@ -31,7 +31,20 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
+def get_configs_items():
+    """
+    :return: None
+    """
+    config_file_path = "config/plot.cfg"
+    config = ConfigParser(config_file_path)
+    return config.get_items("main")
+
+
 def main(group_number):
+    configuration_items = get_configs_items()
+    for key, value in configuration_items.items():
+        rcParams[key] = value
+
     minorLocatorx = MultipleLocator(20)
     minorLocatory = MultipleLocator(20)
     minorLocatorvel = MultipleLocator(1)
@@ -54,7 +67,6 @@ def main(group_number):
 
     data = dict()
     max_intensity = []
-    ch_for_max_intensity = None
     for index in range(0, len(input_files)):
         epoch = input_files[index].split(".")[0]
         data[epoch] = dict()
@@ -94,14 +106,38 @@ def main(group_number):
 
     print("references ra", references_ra, "references dec", references_dec, "references velocity", references_velocity)
 
-    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
+    velocity_max = []
+    velocity_min = []
+    intensity_max = []
+    intensity_min = []
+    ra_max = []
+    ra_min = []
+    dec_max = []
+    dec_min = []
     for epoch in data:
-        data[epoch]["ra"] -= references_ra
-        data[epoch]["dec"] -= references_dec
 
         if epoch != epoch_with_max_intensity:
-            data[epoch]["velocity"] -= references_velocity
+            closet_velocity_index_to_references_velocity = \
+                (np.abs(data[epoch]["velocity"] - references_velocity)).argmin()
+            data[epoch]["ra"] -= data[epoch]["ra"][closet_velocity_index_to_references_velocity]
+            data[epoch]["dec"] -= data[epoch]["dec"][closet_velocity_index_to_references_velocity]
 
+        else:
+            data[epoch]["ra"] -= references_ra
+            data[epoch]["dec"] -= references_dec
+
+        velocity_max.append(max(data[epoch]["velocity"]))
+        velocity_min.append(min(data[epoch]["velocity"]))
+        intensity_max.append(max(data[epoch]["intensity"]))
+        intensity_min.append(min(data[epoch]["intensity"]))
+        ra_max.append(max(data[epoch]["ra"]))
+        ra_min.append(min(data[epoch]["ra"]))
+        dec_max.append(max(data[epoch]["dec"]))
+        dec_min.append(min(data[epoch]["dec"]))
+
+    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
+    coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
+    for epoch in data:
         velocity = data[epoch]["velocity"]
         v_min = min(velocity)
         v_max = max(velocity)
@@ -118,20 +154,20 @@ def main(group_number):
                 c = cm.turbo((velocity[i] - v_min) / (v_max - v_min), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
-            ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
-            ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
-            ax[0][index].set_title(title)
-            ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-
             el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
             el.set_facecolor(c)
             ax[1][index].add_artist(el)
 
-        coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
-        ax[0][index].set_ylim((min(intensity)) - 0.1, (max(intensity) + 0.1))
+        ax[0][index].set_xlim(min(velocity_min) - 0.5, max(velocity_max) + 0.5)
+        ax[0][index].set_ylim((min(intensity_min)) - 0.7, (max(intensity_max) + 0.7))
+        ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
+        ax[0][index].set_title(title)
+        ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(-10, 10)
-        ax[1][index].set_ylim(-10, 10)
+        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
+                              (np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5) + 12)
+        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5 + 12)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
@@ -140,6 +176,7 @@ def main(group_number):
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
     plt.tight_layout()
+    plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
     plt.show()
 
 
