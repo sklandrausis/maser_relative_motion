@@ -137,21 +137,23 @@ def main(group_number):
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
+    output = []
     for epoch in data:
         velocity = data[epoch]["velocity"]
-        v_min = min(velocity)
-        v_max = max(velocity)
         intensity = data[epoch]["intensity"]
-
         index = list(data.keys()).index(epoch)
         ra = data[epoch]["ra"]
         dec = data[epoch]["dec"]
         title = epoch.upper() + "-" + dates[epoch]
+
+        for o in range(0, len(velocity)):
+            output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
+
         for i in range(len(velocity) - 1):
-            if velocity[i] < v_min or velocity[i] > v_max:
+            if velocity[i] < min(velocity_min) or velocity[i] > max(velocity_max):
                 c = (0, 0, 0)
             else:
-                c = cm.turbo((velocity[i] - v_min) / (v_max - v_min), 1)
+                c = cm.turbo((velocity[i] - min(velocity_min)) / (max(velocity_max) - min(velocity_min)), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
             el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
@@ -164,10 +166,10 @@ def main(group_number):
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
-                              (np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5) + 12)
-        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
-                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5 + 12)
+        ax[1][index].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
+                              np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
+        ax[1][index].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
+                              np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
@@ -178,6 +180,8 @@ def main(group_number):
     plt.tight_layout()
     plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
     plt.show()
+
+    np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
 
 
 if __name__ == "__main__":
