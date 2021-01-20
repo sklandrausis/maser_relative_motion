@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
+from scipy.optimize import curve_fit
 
 from parsers.configparser_ import ConfigParser
 
@@ -40,6 +41,17 @@ def get_configs_items():
     return config.get_items("main")
 
 
+def gauss(x, *p):
+    a, b, c = p
+    return a*np.exp(-(x-b)**2*np.log(2)/(c**2))
+
+
+def gauss2(x, *p):
+    a1, b1, c1, a2, b2, c2 = p
+    return a1*np.exp(-(x-b1)**2*np.log(2)/c1**2) + \
+           a2*np.exp(-(x-b2)**2*np.log(2)/c2**2)
+
+
 def main(group_number):
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
@@ -48,6 +60,12 @@ def main(group_number):
     minorLocatorx = MultipleLocator(20)
     minorLocatory = MultipleLocator(20)
     minorLocatorvel = MultipleLocator(1)
+
+    gauss2_list = get_configs("parameters", "gauss").split(";")
+    gauss2_dict = dict()
+
+    for epoch in gauss2_list:
+        gauss2_dict[epoch.split(":")[0]] = epoch.split(":")[1].split(",")
 
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
     input_files = []
@@ -145,6 +163,29 @@ def main(group_number):
         ra = data[epoch]["ra"]
         dec = data[epoch]["dec"]
         title = epoch.upper() + "-" + dates[epoch]
+
+        if len(velocity) >= 3:
+            p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
+            p2 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.3,
+                  max(intensity) / 4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.1]
+            q = np.linspace(min(velocity), max(velocity), 1000)
+
+            gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
+            if str(group_number) in gauss2_groups_for_epoch:
+                try:
+                    coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
+                    hist_fit = gauss2(q, *coeff)
+                    ax[0][index].plot(q, hist_fit, 'k')
+                except:
+                    pass
+
+            else:
+                try:
+                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
+                    hist_fit = gauss(q, *coeff)
+                    ax[0][index].plot(q, hist_fit, 'k')
+                except:
+                    pass
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
