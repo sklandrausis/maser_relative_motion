@@ -166,10 +166,10 @@ def main(group_number):
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
-                              np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
-        ax[1][index].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
-                              np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
+        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
