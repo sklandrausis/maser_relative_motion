@@ -52,6 +52,15 @@ def gauss2(x, *p):
            a2*np.exp(-(x-b2)**2*np.log(2)/c2**2)
 
 
+def firs_exceeds(array, value):
+    index = -1
+    for i in range(0, len(array)):
+        if array[i] > value:
+            index = i
+            break
+    return index
+
+
 def main(group_number):
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
@@ -165,27 +174,48 @@ def main(group_number):
         title = epoch.upper() + "-" + dates[epoch]
 
         if len(velocity) >= 3:
-            p1 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.2]
-            p2 = [max(intensity), min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.3,
-                  max(intensity) / 4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.1]
-            q = np.linspace(min(velocity), max(velocity), 1000)
-
             gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
-            if str(group_number) in gauss2_groups_for_epoch:
-                try:
-                    coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
-                    hist_fit = gauss2(q, *coeff)
-                    ax[0][index].plot(q, hist_fit, 'k')
-                except:
-                    pass
+
+            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
+            split_index = firs_exceeds_tmp + 1
+            if firs_exceeds_tmp != -1:
+                a = intensity[0:split_index]
+                b = intensity[split_index:len(intensity)]
+                c = velocity[split_index:len(velocity)]
+                d = velocity[split_index:len(velocity)]
+
+                velocity_tmp = [c, d]
+                intensity_tmp = [a, b]
 
             else:
-                try:
-                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
-                    hist_fit = gauss(q, *coeff)
-                    ax[0][index].plot(q, hist_fit, 'k')
-                except:
-                    pass
+                velocity_tmp = [velocity]
+                intensity_tmp = [intensity]
+
+            for gauss_nr in range(0, len(velocity_tmp)):
+                p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
+                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
+                p2 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
+                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.3,
+                      max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
+                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1]
+                q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 1000)
+                if str(group_number) in gauss2_groups_for_epoch:
+                    try:
+                        coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                      p0=p2, maxfev=100000)
+                        hist_fit = gauss2(q, *coeff)
+                        ax[0][index].plot(q, hist_fit, 'k')
+                    except:
+                        pass
+
+                else:
+                    try:
+                        coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                      p0=p1, maxfev=100000)
+                        hist_fit = gauss(q, *coeff)
+                        ax[0][index].plot(q, hist_fit, 'k')
+                    except:
+                        pass
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
