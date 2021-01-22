@@ -1,0 +1,9 @@
+Build: docker build -f Docker/Dockerfile -t <Image name> .
+Build example:  docker build -f Docker/Dockerfile -t mrm .
+
+Before executing docker run command: execute xhost +
+
+Run: docker run --env DISPLAY=$DISPLAY --privileged --volume $XAUTH:/root/.Xauthority --volume /tmp/.X11-unix:/tmp/.X11-unix  -it -e USER -v $HOME/:$HOME/ -e HOME -w $HOME --rm  <Image name>
+Run example: docker run --env DISPLAY=$DISPLAY --privileged --volume $XAUTH:/root/.Xauthority --volume /tmp/.X11-unix:/tmp/.X11-unix  -it -e USER -v $HOME/:$HOME/ -e HOME -w $HOME --rm  mrm
+
+
