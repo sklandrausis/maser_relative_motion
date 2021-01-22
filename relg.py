@@ -181,7 +181,7 @@ def main(group_number):
             if firs_exceeds_tmp != -1:
                 a = intensity[0:split_index]
                 b = intensity[split_index:len(intensity)]
-                c = velocity[split_index:len(velocity)]
+                c = velocity[0:split_index]
                 d = velocity[split_index:len(velocity)]
 
                 velocity_tmp = [c, d]
