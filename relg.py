@@ -197,7 +197,7 @@ def main(group_number):
                 c = cm.turbo((velocity[i] - min(velocity_min)) / (max(velocity_max) - min(velocity_min)), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
-            el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
+            el = Circle((ra[i], dec[i]), radius=0.1 * np.log2(intensity[i]), angle=0, lw=2)
             el.set_facecolor(c)
             ax[1][index].add_artist(el)
 
