@@ -190,6 +190,21 @@ def main(group_number):
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
 
+        size = []
+        for my in intensity:
+            if 0.0 < my <= 0.1:
+                size.append(10)
+            elif 0.1 < my <= 0.2:
+                size.append(20)
+            elif 0.2 < my <= 0.3:
+                size.append(30)
+            elif 0.3 < my <= 0.4:
+                size.append(40)
+            elif 0.4 < my <= 0.5:
+                size.append(50)
+            else:
+                size.append(60)
+
         for i in range(len(velocity) - 1):
             if velocity[i] < min(velocity_min) or velocity[i] > max(velocity_max):
                 c = (0, 0, 0)
@@ -197,7 +212,8 @@ def main(group_number):
                 c = cm.turbo((velocity[i] - min(velocity_min)) / (max(velocity_max) - min(velocity_min)), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
-            el = Circle((ra[i], dec[i]), radius=0.1 * np.log(intensity[i]), angle=0, lw=2)
+
+            el = Circle((ra[i], dec[i]), radius=0.01*size[i], angle=0, lw=2)
             el.set_facecolor(c)
             ax[1][index].add_artist(el)
 
@@ -215,6 +231,8 @@ def main(group_number):
         ax[1][index].xaxis.set_minor_locator(minorLocatorx)
         ax[1][index].yaxis.set_minor_locator(minorLocatory)
         ax[1][index].invert_xaxis()
+        ax[1][index].set_yscale('linear')
+        ax[1][index].set_yscale('linear')
 
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
