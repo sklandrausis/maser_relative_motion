@@ -2,6 +2,8 @@ import sys
 import argparse
 
 import numpy as np
+import matplotlib
+matplotlib.use('TKAgg')
 import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
