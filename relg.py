@@ -176,7 +176,7 @@ def main(group_number):
         if len(velocity) >= 3:
             gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
 
-            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
+            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.3)
             split_index = firs_exceeds_tmp + 1
             if firs_exceeds_tmp != -1:
                 a = intensity[0:split_index]
@@ -219,21 +219,6 @@ def main(group_number):
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
-
-        size = []
-        for my in intensity:
-            if 0.0 < my <= 0.1:
-                size.append(10)
-            elif 0.1 < my <= 0.2:
-                size.append(20)
-            elif 0.2 < my <= 0.3:
-                size.append(30)
-            elif 0.3 < my <= 0.4:
-                size.append(40)
-            elif 0.4 < my <= 0.5:
-                size.append(50)
-            else:
-                size.append(60)
 
         for i in range(len(velocity) - 1):
             if velocity[i] < min(velocity_min) or velocity[i] > max(velocity_max):
