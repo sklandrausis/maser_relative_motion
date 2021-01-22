@@ -243,7 +243,7 @@ def main(group_number):
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
 
-            el = Circle((ra[i], dec[i]), radius=0.01*size[i], angle=0, lw=2)
+            el = Circle((ra[i], dec[i]), radius=0.05*np.log(intensity[i] * 1000), angle=0, lw=2)
             el.set_facecolor(c)
             ax[1][index].add_artist(el)
 
