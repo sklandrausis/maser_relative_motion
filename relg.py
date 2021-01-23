@@ -3,7 +3,7 @@ import argparse
 
 import numpy as np
 import matplotlib
-matplotlib.use('TKAgg')
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
