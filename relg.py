@@ -57,7 +57,7 @@ def gauss2(x, *p):
 def firs_exceeds(array, value):
     index = -1
     for i in range(0, len(array)):
-        if array[i] > value:
+        if abs(array[i]) > value:
             index = i
             break
     return index
@@ -178,7 +178,8 @@ def main(group_number):
         if len(velocity) >= 3:
             gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
 
-            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.3)
+            #print(epoch, np.diff(velocity))
+            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.4)
             split_index = firs_exceeds_tmp + 1
             if firs_exceeds_tmp != -1:
                 a = intensity[0:split_index]
@@ -193,6 +194,7 @@ def main(group_number):
                 velocity_tmp = [velocity]
                 intensity_tmp = [intensity]
 
+            print(epoch, len(velocity_tmp))
             for gauss_nr in range(0, len(velocity_tmp)):
                 p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
                       0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
@@ -202,6 +204,7 @@ def main(group_number):
                       0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1]
                 q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 1000)
                 if str(group_number) in gauss2_groups_for_epoch:
+                    print(epoch)
                     try:
                         coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
                                                       p0=p2, maxfev=100000)
