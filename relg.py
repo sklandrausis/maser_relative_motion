@@ -176,8 +176,6 @@ def main(group_number):
         title = epoch.upper() + "-" + dates[epoch]
 
         if len(velocity) >= 3:
-            gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
-
             firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
             split_index = firs_exceeds_tmp + 1
             if firs_exceeds_tmp != -1:
@@ -194,20 +192,34 @@ def main(group_number):
                 intensity_tmp = [intensity]
 
             for gauss_nr in range(0, len(velocity_tmp)):
+                '''
                 p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
                       0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
                 p2 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
                       0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.3,
                       max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
-                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1]
-                q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 1000)
+                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1] 
+                '''
+
+                amplitude = max(intensity_tmp[gauss_nr])
+                tmp = abs(velocity_tmp[gauss_nr])
+                second_largest_amplitude = intensity_tmp[gauss_nr][(-intensity_tmp[gauss_nr]).argsort()[1]]
+                idx1 = (np.abs(intensity_tmp[gauss_nr] - amplitude)).argmin()
+                idx2 = (np.abs(intensity_tmp[gauss_nr] - second_largest_amplitude)).argmin()
+                centre_of_peak = min(velocity_tmp[gauss_nr]) + (max(tmp) - min(tmp))/2
+                standard_deviation = np.std(intensity_tmp[gauss_nr])
+                p1 = [amplitude, centre_of_peak, standard_deviation]
+                p2 = [amplitude, velocity_tmp[gauss_nr][idx1], standard_deviation,
+                      amplitude, velocity_tmp[gauss_nr][idx2], standard_deviation]
+
+                q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
 
                 perrs = []
                 coeffs = []
 
                 try:
                     coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                  p0=p2, maxfev=100000)
+                                                  p0=p2, maxfev=100000, method="lm")
                     perr = np.sqrt(np.diag(var_matrix))
                     perr = perr[~np.isnan(perr)]
                     perrs.append(sum(perr) / len(perr))
@@ -217,7 +229,7 @@ def main(group_number):
 
                 try:
                     coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                  p0=p1, maxfev=100000)
+                                                  p0=p1, maxfev=100000, method="lm")
                     perr = np.sqrt(np.diag(var_matrix))
                     perr = perr[~np.isnan(perr)]
                     perrs.append(sum(perr) / len(perr))
@@ -225,7 +237,6 @@ def main(group_number):
                 except:
                     pass
 
-                print(perrs)
                 if len(perrs) > 0:
                     coeff_index = perrs.index(min(perrs))
                     coeff = coeffs[coeff_index]
