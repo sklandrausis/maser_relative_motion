@@ -192,61 +192,62 @@ def main(group_number):
                 intensity_tmp = [intensity]
 
             for gauss_nr in range(0, len(velocity_tmp)):
-                '''
-                p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
-                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
-                p2 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
-                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.3,
-                      max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
-                      0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1] 
-                '''
+                if len(velocity_tmp[gauss_nr]) >= 3:
+                    '''
+                    p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
+                          0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
+                    p2 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
+                          0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.3,
+                          max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
+                          0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1] 
+                    '''
 
-                amplitude = max(intensity_tmp[gauss_nr])
-                tmp = abs(velocity_tmp[gauss_nr])
-                second_largest_amplitude = intensity_tmp[gauss_nr][(-intensity_tmp[gauss_nr]).argsort()[1]]
-                idx1 = (np.abs(intensity_tmp[gauss_nr] - amplitude)).argmin()
-                idx2 = (np.abs(intensity_tmp[gauss_nr] - second_largest_amplitude)).argmin()
-                centre_of_peak = min(velocity_tmp[gauss_nr]) + (max(tmp) - min(tmp))/2
-                standard_deviation = np.std(intensity_tmp[gauss_nr])
-                p1 = [amplitude, centre_of_peak, standard_deviation]
-                p2 = [amplitude, velocity_tmp[gauss_nr][idx1], standard_deviation,
-                      amplitude, velocity_tmp[gauss_nr][idx2], standard_deviation]
+                    amplitude = max(intensity_tmp[gauss_nr])
+                    tmp = abs(velocity_tmp[gauss_nr])
+                    second_largest_amplitude = intensity_tmp[gauss_nr][(-intensity_tmp[gauss_nr]).argsort()[1]]
+                    idx1 = (np.abs(intensity_tmp[gauss_nr] - amplitude)).argmin()
+                    idx2 = (np.abs(intensity_tmp[gauss_nr] - second_largest_amplitude)).argmin()
+                    centre_of_peak = min(velocity_tmp[gauss_nr]) + (max(tmp) - min(tmp))/2
+                    standard_deviation = np.std(intensity_tmp[gauss_nr])
+                    p1 = [amplitude, centre_of_peak, standard_deviation]
+                    p2 = [amplitude, velocity_tmp[gauss_nr][idx1], standard_deviation,
+                          amplitude, velocity_tmp[gauss_nr][idx2], standard_deviation]
 
-                q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
+                    q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
 
-                perrs = []
-                coeffs = []
+                    perrs = []
+                    coeffs = []
 
-                try:
-                    coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                  p0=p2, maxfev=100000, method="lm")
-                    perr = np.sqrt(np.diag(var_matrix))
-                    perr = perr[~np.isnan(perr)]
-                    perrs.append(sum(perr) / len(perr))
-                    coeffs.append(coeff)
-                except:
-                    pass
+                    try:
+                        coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                      p0=p2, maxfev=100000, method="lm")
+                        perr = np.sqrt(np.diag(var_matrix))
+                        perr = perr[~np.isnan(perr)]
+                        perrs.append(sum(perr) / len(perr))
+                        coeffs.append(coeff)
+                    except:
+                        pass
 
-                try:
-                    coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                  p0=p1, maxfev=100000, method="lm")
-                    perr = np.sqrt(np.diag(var_matrix))
-                    perr = perr[~np.isnan(perr)]
-                    perrs.append(sum(perr) / len(perr))
-                    coeffs.append(coeff)
-                except:
-                    pass
+                    try:
+                        coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                      p0=p1, maxfev=100000, method="lm")
+                        perr = np.sqrt(np.diag(var_matrix))
+                        perr = perr[~np.isnan(perr)]
+                        perrs.append(sum(perr) / len(perr))
+                        coeffs.append(coeff)
+                    except:
+                        pass
 
-                if len(perrs) > 0:
-                    coeff_index = perrs.index(min(perrs))
-                    coeff = coeffs[coeff_index]
+                    if len(perrs) > 0:
+                        coeff_index = perrs.index(min(perrs))
+                        coeff = coeffs[coeff_index]
 
-                    if len(coeff) == 6:
-                        hist_fit = gauss2(q, *coeff)
-                        ax[0][index].plot(q, hist_fit, 'k')
-                    elif len(coeff) == 3:
-                        hist_fit = gauss(q, *coeff)
-                        ax[0][index].plot(q, hist_fit, 'k')
+                        if len(coeff) == 6:
+                            hist_fit = gauss2(q, *coeff)
+                            ax[0][index].plot(q, hist_fit, 'k')
+                        elif len(coeff) == 3:
+                            hist_fit = gauss(q, *coeff)
+                            ax[0][index].plot(q, hist_fit, 'k')
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
