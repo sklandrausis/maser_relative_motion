@@ -191,6 +191,13 @@ def main(group_number):
                 velocity_tmp = [velocity]
                 intensity_tmp = [intensity]
 
+            size = []
+            max_intensity_index = np.array(intensity).argmax()
+            for j in range(0, len(velocity)):
+                for k in range(j + 1, len(velocity)):
+                    dist = np.sqrt((ra[j] - ra[k]) ** 2 + (dec[j] - dec[k]) ** 2)
+                    size.append(dist)
+
             for gauss_nr in range(0, len(velocity_tmp)):
                 if len(velocity_tmp[gauss_nr]) >= 3:
                     '''
@@ -241,6 +248,11 @@ def main(group_number):
                     if len(perrs) > 0:
                         coeff_index = perrs.index(min(perrs))
                         coeff = coeffs[coeff_index]
+                        print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
+                              (group_number, ra[max_intensity_index], dec[max_intensity_index], velocity[max_intensity_index],
+                               coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0], max(size), max(size) * 1.64,
+                             (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                             (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
@@ -248,6 +260,18 @@ def main(group_number):
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
                             ax[0][index].plot(q, hist_fit, 'k')
+                else:
+                    if len(size) > 0:
+                        print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
+                              (group_number, ra[max_intensity_index], dec[max_intensity_index], velocity[max_intensity_index], "-",
+                               "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
+                               (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                               (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
+
+                    else:
+                        print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" % \
+                              (group_number, ra[max_intensity_index], dec[max_intensity_index],
+                               velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
@@ -288,7 +312,6 @@ def main(group_number):
     plt.show()
 
     np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot group')
