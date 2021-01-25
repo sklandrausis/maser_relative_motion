@@ -178,8 +178,7 @@ def main(group_number):
         if len(velocity) >= 3:
             gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
 
-            #print(epoch, np.diff(velocity))
-            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.4)
+            firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
             split_index = firs_exceeds_tmp + 1
             if firs_exceeds_tmp != -1:
                 a = intensity[0:split_index]
@@ -194,7 +193,6 @@ def main(group_number):
                 velocity_tmp = [velocity]
                 intensity_tmp = [intensity]
 
-            print(epoch, len(velocity_tmp))
             for gauss_nr in range(0, len(velocity_tmp)):
                 p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
                       0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
@@ -203,24 +201,41 @@ def main(group_number):
                       max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
                       0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1]
                 q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 1000)
-                if str(group_number) in gauss2_groups_for_epoch:
-                    print(epoch)
-                    try:
-                        coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                      p0=p2, maxfev=100000)
+
+                perrs = []
+                coeffs = []
+
+                try:
+                    coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                  p0=p2, maxfev=100000)
+                    perr = np.sqrt(np.diag(var_matrix))
+                    perr = perr[~np.isnan(perr)]
+                    perrs.append(sum(perr) / len(perr))
+                    coeffs.append(coeff)
+                except:
+                    pass
+
+                try:
+                    coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                  p0=p1, maxfev=100000)
+                    perr = np.sqrt(np.diag(var_matrix))
+                    perr = perr[~np.isnan(perr)]
+                    perrs.append(sum(perr) / len(perr))
+                    coeffs.append(coeff)
+                except:
+                    pass
+
+                print(perrs)
+                if len(perrs) > 0:
+                    coeff_index = perrs.index(min(perrs))
+                    coeff = coeffs[coeff_index]
+
+                    if len(coeff) == 6:
                         hist_fit = gauss2(q, *coeff)
                         ax[0][index].plot(q, hist_fit, 'k')
-                    except:
-                        pass
-
-                else:
-                    try:
-                        coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                      p0=p1, maxfev=100000)
+                    elif len(coeff) == 3:
                         hist_fit = gauss(q, *coeff)
                         ax[0][index].plot(q, hist_fit, 'k')
-                    except:
-                        pass
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
