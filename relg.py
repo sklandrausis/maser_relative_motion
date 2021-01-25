@@ -313,6 +313,7 @@ def main(group_number):
 
     np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot group')
     parser.add_argument('group_number', type=int, help='group number')
