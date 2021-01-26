@@ -3,7 +3,6 @@ import argparse
 
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
@@ -45,13 +44,12 @@ def get_configs_items():
 
 def gauss(x, *p):
     a, b, c = p
-    return a*np.exp(-(x-b)**2*np.log(2)/(c**2))
+    return a * np.exp(-(x - b) ** 2 * np.log(2) / (c ** 2))
 
 
 def gauss2(x, *p):
     a1, b1, c1, a2, b2, c2 = p
-    return a1*np.exp(-(x-b1)**2*np.log(2)/c1**2) + \
-           a2*np.exp(-(x-b2)**2*np.log(2)/c2**2)
+    return a1 * np.exp(-(x - b1) ** 2 * np.log(2) / c1 ** 2) + a2 * np.exp(-(x - b2) ** 2 * np.log(2) / c2 ** 2)
 
 
 def firs_exceeds(array, value):
@@ -64,13 +62,14 @@ def firs_exceeds(array, value):
 
 
 def main(group_number):
+    matplotlib.use('TkAgg')
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
         rcParams[key] = value
 
-    minorLocatorx = MultipleLocator(20)
-    minorLocatory = MultipleLocator(20)
-    minorLocatorvel = MultipleLocator(1)
+    minor_locatorx = MultipleLocator(20)
+    minor_locatory = MultipleLocator(20)
+    minor_locator_level = MultipleLocator(1)
 
     gauss2_list = get_configs("parameters", "gauss").split(";")
     gauss2_dict = dict()
@@ -132,7 +131,6 @@ def main(group_number):
     references_ra = data[epoch_with_max_intensity]["ra"][reference_index]
     references_dec = data[epoch_with_max_intensity]["dec"][reference_index]
     references_velocity = data[epoch_with_max_intensity]["velocity"][reference_index]
-
     print("references ra", references_ra, "references dec", references_dec, "references velocity", references_velocity)
 
     velocity_max = []
@@ -168,6 +166,7 @@ def main(group_number):
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     output = []
     for epoch in data:
+        print("epoch", epoch)
         velocity = data[epoch]["velocity"]
         intensity = data[epoch]["intensity"]
         index = list(data.keys()).index(epoch)
@@ -210,21 +209,19 @@ def main(group_number):
                     '''
 
                     amplitude = max(intensity_tmp[gauss_nr])
-                    tmp = abs(velocity_tmp[gauss_nr])
-                    second_largest_amplitude = intensity_tmp[gauss_nr][(-intensity_tmp[gauss_nr]).argsort()[1]]
-                    idx1 = (np.abs(intensity_tmp[gauss_nr] - amplitude)).argmin()
-                    idx2 = (np.abs(intensity_tmp[gauss_nr] - second_largest_amplitude)).argmin()
-                    centre_of_peak = min(velocity_tmp[gauss_nr]) + (max(tmp) - min(tmp))/2
+                    centre_of_peak_index = list(intensity_tmp[gauss_nr]).index(amplitude)
+                    centre_of_peak = velocity_tmp[gauss_nr][centre_of_peak_index]
+                    second_largest_amplitude_index = (-intensity_tmp[gauss_nr]).argsort()[1]
+                    second_largest_amplitude = intensity_tmp[gauss_nr][second_largest_amplitude_index]
+                    second_largest_centre_of_peak = velocity_tmp[gauss_nr][second_largest_amplitude_index]
                     standard_deviation = np.std(intensity_tmp[gauss_nr])
                     p1 = [amplitude, centre_of_peak, standard_deviation]
-                    p2 = [amplitude, velocity_tmp[gauss_nr][idx1], standard_deviation,
-                          amplitude, velocity_tmp[gauss_nr][idx2], standard_deviation]
-
+                    p2 = [amplitude, centre_of_peak, standard_deviation,
+                          second_largest_amplitude, second_largest_centre_of_peak, standard_deviation]
                     q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
 
                     perrs = []
                     coeffs = []
-
                     try:
                         coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
                                                       p0=p2, maxfev=100000, method="lm")
@@ -248,33 +245,49 @@ def main(group_number):
                     if len(perrs) > 0:
                         coeff_index = perrs.index(min(perrs))
                         coeff = coeffs[coeff_index]
-                        print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
-                              (group_number, ra[max_intensity_index], dec[max_intensity_index], velocity[max_intensity_index],
-                               coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0], max(size), max(size) * 1.64,
-                             (velocity[0] - velocity[len(velocity) - 1]) / max(size),
-                             (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
                             ax[0][index].plot(q, hist_fit, 'k')
+
+                            print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
+                                  "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
+                                  (group_number, ra[max_intensity_index], dec[max_intensity_index],
+                                   velocity[max_intensity_index],
+                                   coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
+                                   coeff[4], coeff[5] * 2, coeff[3],
+                                   max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
+                                   max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
+
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
                             ax[0][index].plot(q, hist_fit, 'k')
+
+                            print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
+                                  "%.3f)\\\\" %
+                                  (group_number, ra[max_intensity_index], dec[max_intensity_index],
+                                   velocity[max_intensity_index],
+                                   coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
+                                   max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
+                                   max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
                 else:
                     if len(size) > 0:
-                        print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" % \
-                              (group_number, ra[max_intensity_index], dec[max_intensity_index], velocity[max_intensity_index], "-",
+                        print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
+                              (group_number, ra[max_intensity_index], dec[max_intensity_index],
+                               velocity[max_intensity_index], "-",
                                "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
                                (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
                     else:
-                        print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" % \
+                        print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
                               (group_number, ra[max_intensity_index], dec[max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
+
+        np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
 
         for i in range(len(velocity) - 1):
             if velocity[i] < min(velocity_min) or velocity[i] > max(velocity_max):
@@ -284,13 +297,13 @@ def main(group_number):
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
 
-            el = Circle((ra[i], dec[i]), radius=0.05*np.log(intensity[i] * 1000), angle=0, lw=2)
+            el = Circle((ra[i], dec[i]), radius=0.05 * np.log(intensity[i] * 1000), angle=0, lw=2)
             el.set_facecolor(c)
             ax[1][index].add_artist(el)
 
         ax[0][index].set_xlim(min(velocity_min) - 0.5, max(velocity_max) + 0.5)
         ax[0][index].set_ylim((min(intensity_min)) - 0.7, (max(intensity_max) + 0.7))
-        ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
+        ax[0][index].xaxis.set_minor_locator(minor_locator_level)
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1][index].set_aspect("equal", adjustable='box')
@@ -299,8 +312,8 @@ def main(group_number):
         ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
                               np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
-        ax[1][index].xaxis.set_minor_locator(minorLocatorx)
-        ax[1][index].yaxis.set_minor_locator(minorLocatory)
+        ax[1][index].xaxis.set_minor_locator(minor_locatorx)
+        ax[1][index].yaxis.set_minor_locator(minor_locatory)
         ax[1][index].invert_xaxis()
         ax[1][index].set_yscale('linear')
         ax[1][index].set_yscale('linear')
@@ -310,8 +323,6 @@ def main(group_number):
     plt.tight_layout()
     plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
     plt.show()
-
-    np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
 
 
 if __name__ == "__main__":
