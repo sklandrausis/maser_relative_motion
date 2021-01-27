@@ -237,7 +237,10 @@ def main(group_number):
                                                       p0=p1, maxfev=100000, method="lm")
                         perr = np.sqrt(np.diag(var_matrix))
                         perr = perr[~np.isnan(perr)]
-                        perrs.append(sum(perr) / len(perr))
+                        if epoch == "em064c":
+                            perrs.append(9999999999999999999999999999999999999999)
+                        else:
+                            perrs.append(sum(perr) / len(perr))
                         coeffs.append(coeff)
                     except:
                         pass
