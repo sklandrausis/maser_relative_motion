@@ -215,9 +215,14 @@ def main(group_number):
                     second_largest_amplitude = intensity_tmp[gauss_nr][second_largest_amplitude_index]
                     second_largest_centre_of_peak = velocity_tmp[gauss_nr][second_largest_amplitude_index]
                     standard_deviation = np.std(intensity_tmp[gauss_nr])
-                    p1 = [amplitude, centre_of_peak, standard_deviation]
-                    p2 = [amplitude, centre_of_peak, standard_deviation,
-                          second_largest_amplitude, second_largest_centre_of_peak, standard_deviation]
+                    if epoch == "es066e":
+                        p1 = [0.359, -6.978, 0.0989113239219858]
+                        p2 = [0.359, -6.978, 0.0989113239219858, 0.338, -7.0219, 0.0989113239219858]
+                    else:
+                        p1 = [amplitude, centre_of_peak, standard_deviation]
+                        p2 = [amplitude, centre_of_peak, standard_deviation,
+                              second_largest_amplitude, second_largest_centre_of_peak, standard_deviation]
+
                     q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
 
                     perrs = []
