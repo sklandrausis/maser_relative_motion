@@ -165,6 +165,7 @@ def main(group_number):
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     output = []
+    output2 = []
     for epoch in data:
         print("epoch", epoch)
         velocity = data[epoch]["velocity"]
@@ -182,22 +183,30 @@ def main(group_number):
                 b = intensity[split_index:len(intensity)]
                 c = velocity[0:split_index]
                 d = velocity[split_index:len(velocity)]
+                e = ra[0:split_index]
+                f = ra[split_index:len(velocity)]
+                g = dec[0:split_index]
+                h = dec[split_index:len(velocity)]
 
                 velocity_tmp = [c, d]
                 intensity_tmp = [a, b]
+                ra_tmp = [e, f]
+                dec_tmp = [g, h]
 
             else:
                 velocity_tmp = [velocity]
                 intensity_tmp = [intensity]
-
-            size = []
-            max_intensity_index = np.array(intensity).argmax()
-            for j in range(0, len(velocity)):
-                for k in range(j + 1, len(velocity)):
-                    dist = np.sqrt((ra[j] - ra[k]) ** 2 + (dec[j] - dec[k]) ** 2)
-                    size.append(dist)
+                ra_tmp = [ra]
+                dec_tmp = [dec]
 
             for gauss_nr in range(0, len(velocity_tmp)):
+                size = []
+                max_intensity_index = np.array(intensity_tmp[gauss_nr]).argmax()
+                for j in range(0, len(velocity_tmp[gauss_nr])):
+                    for k in range(j + 1, len(velocity_tmp[gauss_nr])):
+                        dist = np.sqrt((ra[j] - ra[k]) ** 2 + (dec[j] - dec[k]) ** 2)
+                        size.append(dist)
+
                 if len(velocity_tmp[gauss_nr]) >= 3:
                     '''
                     p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
@@ -216,8 +225,8 @@ def main(group_number):
                     second_largest_centre_of_peak = velocity_tmp[gauss_nr][second_largest_amplitude_index]
                     standard_deviation = np.std(intensity_tmp[gauss_nr])
                     if epoch == "es066e":
-                        p1 = [0.359, -6.978, 0.0989113239219858]
-                        p2 = [0.359, -6.978, 0.0989113239219858, 0.338, -7.0219, 0.0989113239219858]
+                        p1 = [0.9, -6.45, 0.2]
+                        p2 = [0.9, -6.45, 0.2, 0.32, -5.43, 0.1]
                     else:
                         p1 = [amplitude, centre_of_peak, standard_deviation]
                         p2 = [amplitude, centre_of_peak, standard_deviation,
@@ -260,12 +269,19 @@ def main(group_number):
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
-                                  (group_number, ra[max_intensity_index], dec[max_intensity_index],
-                                   velocity[max_intensity_index],
+                                  (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                   dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    coeff[4], coeff[5] * 2, coeff[3],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
+
+                            output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                            dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                            coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
+                                            coeff[4], coeff[5] * 2, coeff[3],
+                                            max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
+                                            max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
@@ -273,29 +289,45 @@ def main(group_number):
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
-                                  (group_number, ra[max_intensity_index], dec[max_intensity_index],
-                                   velocity[max_intensity_index],
+                                  (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                   dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
+
+                            output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                   dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                   coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
+                                   max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
+                                   max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
                 else:
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
-                              (group_number, ra[max_intensity_index], dec[max_intensity_index],
-                               velocity[max_intensity_index], "-",
+                              (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                               dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
                                "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
                                (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
+                        output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                        dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
+                                        "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
+                                        (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                                        (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
+
                     else:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
-                              (group_number, ra[max_intensity_index], dec[max_intensity_index],
+                              (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                               dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
+
+                        output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                        dec_tmp[gauss_nr][max_intensity_index],
+                                        velocity[max_intensity_index], "-", "-",
+                                        intensity[max_intensity_index], "-", "-", "-"])
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
-
-        np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
 
         for i in range(len(velocity) - 1):
             if velocity[i] < min(velocity_min) or velocity[i] > max(velocity_max):
@@ -326,6 +358,8 @@ def main(group_number):
         ax[1][index].set_yscale('linear')
         ax[1][index].set_yscale('linear')
 
+    np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
+    np.savetxt(str(group_number) + ".2txt", output2, delimiter=" ", fmt='%s')
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
     plt.tight_layout()
