@@ -213,7 +213,7 @@ def main(group_number):
                           0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
                     p2 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
                           0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.3,
-                          max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
+                         epoch, velocity[o], intensity[o], ra[o], dec[o] max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
                           0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1] 
                     '''
 
@@ -269,14 +269,14 @@ def main(group_number):
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
-                                  (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                  (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                    dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    coeff[4], coeff[5] * 2, coeff[3],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
-                            output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                            output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                             dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                             coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                             coeff[4], coeff[5] * 2, coeff[3],
@@ -289,13 +289,13 @@ def main(group_number):
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
-                                  (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                                  (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                    dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
-                            output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                            output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                    dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
@@ -303,13 +303,13 @@ def main(group_number):
                 else:
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
-                              (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                              (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
                                "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
                                (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
-                        output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                        output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                         dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
                                         "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
                                         (velocity[0] - velocity[len(velocity) - 1]) / max(size),
@@ -317,11 +317,11 @@ def main(group_number):
 
                     else:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
-                              (group_number, ra_tmp[gauss_nr][max_intensity_index],
+                              (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
-                        output2.append([group_number, ra_tmp[gauss_nr][max_intensity_index],
+                        output2.append([epoch, group_number, ra_tmp[gauss_nr][max_intensity_index],
                                         dec_tmp[gauss_nr][max_intensity_index],
                                         velocity[max_intensity_index], "-", "-",
                                         intensity[max_intensity_index], "-", "-", "-"])
@@ -362,8 +362,15 @@ def main(group_number):
         ax[1][index].set_yscale('linear')
         ax[1][index].set_yscale('linear')
 
-    np.savetxt(str(group_number) + ".txt", output, delimiter=" ", fmt='%s')
-    np.savetxt(str(group_number) + ".2txt", output2, delimiter=" ", fmt='%s')
+    header1 = ["epoch", "velocity", "intensity", "ra", "dec"]
+    header2 = ["epoch", "gauss_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*2", "max_intensity", "coeff0", "coeff4",
+               "coeff5_*_2", "coeff3", "max(size)", "max(size)_*_1.64",
+               "(velocity[0]_-_velocity[len(velocity) - 1])_/_max(size)",
+               "(velocity[0]_-_velocity[len(velocity)_-_1])_/_(max(size)_*_1.64)"]
+    np.savetxt("cloudlet_" + str(group_number) + "._coords.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
+               header=",".join(header1))
+    np.savetxt("cloudlet_" + str(group_number) + "._sats.csv", np.array(output2, dtype=object), delimiter=", ", fmt='%s',
+               header=",".join(header2))
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
     plt.tight_layout()
