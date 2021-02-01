@@ -346,10 +346,9 @@ def main(group_number):
         ax[0][index].xaxis.set_minor_locator(minor_locator_level)
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-        ax[1][index].axline((max(ra) + 0.5, min(dec)), (max(ra) + 0.5, max(dec)))
         m, b = np.polyfit(ra, dec, 1)
         ax[1][index].plot(ra, m * ra + b)
-        print("position angle is ", 90 + np.arctan(m))
+        print("position angle is ", 90 - np.degrees(np.arctan(m)))
         ax[1][index].set_aspect("equal", adjustable='box')
         ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
                               np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
