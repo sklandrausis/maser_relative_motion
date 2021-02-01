@@ -12,6 +12,17 @@ from scipy.optimize import curve_fit
 from parsers.configparser_ import ConfigParser
 
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def check_if_group_is_in_file(file, group):
     input_file = "groups/" + "/" + file
     group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
@@ -61,7 +72,7 @@ def firs_exceeds(array, value):
     return index
 
 
-def main(group_number):
+def main(group_number, ddddd):
     matplotlib.use('TkAgg')
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
@@ -296,10 +307,11 @@ def main(group_number):
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
                             output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
-                                   dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
-                                   coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
-                                   max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
-                                   max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
+                                            dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                            coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
+                                            "-", "-", "-", max(size), max(size) * 1.64,
+                                            (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                                            (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
                 else:
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
@@ -310,9 +322,9 @@ def main(group_number):
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
                         output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
-                                        dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
-                                        "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
-                                        (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                                        dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                        "-", "-", intensity[max_intensity_index], "-", "-", "-", "-", max(size),
+                                        max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                         (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
 
                     else:
@@ -321,10 +333,9 @@ def main(group_number):
                                dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
-                        output2.append([epoch, group_number, ra_tmp[gauss_nr][max_intensity_index],
-                                        dec_tmp[gauss_nr][max_intensity_index],
-                                        velocity[max_intensity_index], "-", "-",
-                                        intensity[max_intensity_index], "-", "-", "-"])
+                        output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
+                                        dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
+                                        "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-"])
 
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
@@ -347,7 +358,8 @@ def main(group_number):
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         m, b = np.polyfit(ra, dec, 1)
-        ax[1][index].plot(ra, m * ra + b)
+        if ddddd:
+            ax[1][index].plot(ra, m * ra + b, "k--")
         print("position angle is ", 90 - np.degrees(np.arctan(m)))
         ax[1][index].set_aspect("equal", adjustable='box')
         ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
@@ -366,6 +378,7 @@ def main(group_number):
                "coeff5_*_2", "coeff3", "max(size)", "max(size)_*_1.64",
                "(velocity[0]_-_velocity[len(velocity) - 1])_/_max(size)",
                "(velocity[0]_-_velocity[len(velocity)_-_1])_/_(max(size)_*_1.64)"]
+
     np.savetxt("cloudlet_" + str(group_number) + "._coords.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
                header=",".join(header1))
     np.savetxt("cloudlet_" + str(group_number) + "._sats.csv", np.array(output2, dtype=object), delimiter=", ", fmt='%s',
@@ -380,6 +393,7 @@ def main(group_number):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot group')
     parser.add_argument('group_number', type=int, help='group number')
+    parser.add_argument('--d', type=str2bool, help='plot line', default=True)
     args = parser.parse_args()
-    main(args.group_number)
+    main(args.group_number, args.d)
     sys.exit(0)
