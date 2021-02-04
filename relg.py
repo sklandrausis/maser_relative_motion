@@ -324,13 +324,13 @@ def main(group_number, ddddd):
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o]])
 
-        for i in range(len(velocity) - 1):
+        for i in range(len(velocity)):
             if velocity[i] < min(velocity_min) or velocity[i] > max(velocity_max):
                 c = (0, 0, 0)
             else:
                 c = cm.turbo((velocity[i] - min(velocity_min)) / (max(velocity_max) - min(velocity_min)), 1)
 
-            ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
+            ax[0][index].scatter((velocity[i]), (intensity[i],), color=c, lw=2)
 
             el = Circle((ra[i], dec[i]), radius=0.05 * np.log(intensity[i] * 1000), angle=0, lw=2)
             el.set_facecolor(c)
@@ -360,6 +360,7 @@ def main(group_number, ddddd):
                               [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
         print("position angle is ", 90 - np.degrees(np.arctan(m)))
+
         ax[1][index].set_aspect("equal", adjustable='box')
         ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
                               np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
