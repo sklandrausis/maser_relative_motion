@@ -8,6 +8,8 @@ from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
 from scipy.optimize import curve_fit
+from astropy import units as u
+from astropy.coordinates import SkyCoord
 
 from parsers.configparser_ import ConfigParser
 
@@ -357,9 +359,23 @@ def main(group_number, ddddd):
         ax[0][index].xaxis.set_minor_locator(minor_locator_level)
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-        m, b = np.polyfit(ra, dec, 1)
+
+        max_separation = {"r": 0, "d": -1, "separation": 0}
+        sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
+        for r in range(0, len(ra)):
+            for d in range(0, len(dec)):
+                if r != d:
+                    separation = sky_coords[r].separation(sky_coords[d])
+                    if separation > max_separation["separation"]:
+                        max_separation["r"] = r
+                        max_separation["d"] = d
+                        max_separation["separation"] = separation
+
+        m, b = np.polyfit([ra[max_separation["r"]], ra[max_separation["d"]]],
+                          [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
         if ddddd:
             ax[1][index].plot(ra, m * ra + b, "k--")
+
         print("position angle is ", 90 - np.degrees(np.arctan(m)))
         ax[1][index].set_aspect("equal", adjustable='box')
         ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
