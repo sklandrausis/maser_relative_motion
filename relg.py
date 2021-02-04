@@ -186,7 +186,27 @@ def main(group_number, ddddd):
         index = list(data.keys()).index(epoch)
         ra = data[epoch]["ra"]
         dec = data[epoch]["dec"]
-        title = epoch.upper() + "-" + dates[epoch]
+        title = dates[epoch]
+
+        max_separation = {"r": 0, "d": -1, "separation": 0}
+        sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
+        for r in range(0, len(ra)):
+            for d in range(0, len(dec)):
+                if r != d:
+                    separation = sky_coords[r].separation(sky_coords[d])
+                    if separation > max_separation["separation"]:
+                        max_separation["r"] = r
+                        max_separation["d"] = d
+                        max_separation["separation"] = separation
+
+        m, b = np.polyfit([ra[max_separation["r"]], ra[max_separation["d"]]],
+                          [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
+        if ddddd:
+            ax[1][index].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
+                              [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
+
+        position_angle = 90 - np.degrees(np.arctan(m))
+        print("position angle is ", position_angle)
 
         if len(velocity) >= 3:
             firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
@@ -276,7 +296,8 @@ def main(group_number, ddddd):
                                             coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                             coeff[4], coeff[5] * 2, coeff[3],
                                             max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
-                                            max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
+                                            max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64),
+                                            position_angle])
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
@@ -295,7 +316,8 @@ def main(group_number, ddddd):
                                             coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                             "-", "-", "-", max(size), max(size) * 1.64,
                                             (velocity[0] - velocity[len(velocity) - 1]) / max(size),
-                                            (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
+                                            (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64),
+                                            position_angle])
                 else:
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
@@ -309,7 +331,8 @@ def main(group_number, ddddd):
                                         dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                         "-", "-", intensity[max_intensity_index], "-", "-", "-", "-", max(size),
                                         max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) / max(size),
-                                        (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)])
+                                        (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64),
+                                        position_angle])
 
                     else:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
@@ -319,27 +342,9 @@ def main(group_number, ddddd):
 
                         output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                         dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
-                                        "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-"])
+                                        "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-",
+                                        position_angle])
 
-        max_separation = {"r": 0, "d": -1, "separation": 0}
-        sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
-        for r in range(0, len(ra)):
-            for d in range(0, len(dec)):
-                if r != d:
-                    separation = sky_coords[r].separation(sky_coords[d])
-                    if separation > max_separation["separation"]:
-                        max_separation["r"] = r
-                        max_separation["d"] = d
-                        max_separation["separation"] = separation
-
-        m, b = np.polyfit([ra[max_separation["r"]], ra[max_separation["d"]]],
-                          [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
-        if ddddd:
-            ax[1][index].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
-                              [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
-
-        position_angle = 90 - np.degrees(np.arctan(m))
-        print("position angle is ", position_angle)
         for o in range(0, len(velocity)):
             output.append([epoch, velocity[o], intensity[o], ra[o], dec[o], position_angle])
 
@@ -355,8 +360,8 @@ def main(group_number, ddddd):
             el.set_facecolor(c)
             ax[1][index].add_artist(el)
 
-        ax[0][index].set_xlim(min(velocity_min) - 0.5, max(velocity_max) + 0.5)
-        ax[0][index].set_ylim((min(intensity_min)) - 0.7, (max(intensity_max) + 0.7))
+        ax[0][index].set_xlim(min(velocity_min) - 0.2, max(velocity_max) + 0.5)
+        ax[0][index].set_ylim((min(intensity_min)) - 0.5, (max(intensity_max) + 0.5))
         ax[0][index].xaxis.set_minor_locator(minor_locator_level)
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
