@@ -264,10 +264,7 @@ def main(group_number, ddddd):
                                                       p0=p1, maxfev=100000, method="lm")
                         perr = np.sqrt(np.diag(var_matrix))
                         perr = perr[~np.isnan(perr)]
-                        if epoch == "em064c":
-                            perrs.append(9999999999999999999999999999999999999999)
-                        else:
-                            perrs.append(sum(perr) / len(perr))
+                        perrs.append(sum(perr) / len(perr))
                         coeffs.append(coeff)
                     except:
                         pass
@@ -378,10 +375,10 @@ def main(group_number, ddddd):
 
         print("position angle is ", 90 - np.degrees(np.arctan(m)))
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
-                              np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
-        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
-                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
+        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 12,
+                              np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 12)
+        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 12,
+                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 12)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minor_locatorx)
         ax[1][index].yaxis.set_minor_locator(minor_locatory)
