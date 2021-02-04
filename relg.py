@@ -371,14 +371,15 @@ def main(group_number, ddddd):
         m, b = np.polyfit([ra[max_separation["r"]], ra[max_separation["d"]]],
                           [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
         if ddddd:
-            ax[1][index].plot(ra, m * ra + b, "k--")
+            ax[1][index].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
+                              [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
         print("position angle is ", 90 - np.degrees(np.arctan(m)))
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 12,
-                              np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 12)
-        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 12,
-                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 12)
+        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
+        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
         ax[1][index].xaxis.set_minor_locator(minor_locatorx)
         ax[1][index].yaxis.set_minor_locator(minor_locatory)
