@@ -221,14 +221,6 @@ def main(group_number, ddddd):
                         size.append(dist)
 
                 if len(velocity_tmp[gauss_nr]) >= 3:
-                    '''
-                    p1 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
-                          0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.2]
-                    p2 = [max(intensity_tmp[gauss_nr]), min(velocity_tmp[gauss_nr]) +
-                          0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.3,
-                         epoch, velocity[o], intensity[o], ra[o], dec[o] max(intensity_tmp[gauss_nr]) / 4, min(velocity_tmp[gauss_nr]) +
-                          0.5 * (max(velocity_tmp[gauss_nr]) - min(velocity_tmp[gauss_nr])), 0.1] 
-                    '''
 
                     amplitude = max(intensity_tmp[gauss_nr])
                     centre_of_peak_index = list(intensity_tmp[gauss_nr]).index(amplitude)
@@ -237,37 +229,30 @@ def main(group_number, ddddd):
                     second_largest_amplitude = intensity_tmp[gauss_nr][second_largest_amplitude_index]
                     second_largest_centre_of_peak = velocity_tmp[gauss_nr][second_largest_amplitude_index]
                     standard_deviation = np.std(intensity_tmp[gauss_nr])
-                    if epoch == "es066e":
-                        p1 = [0.9, -6.45, 0.2]
-                        p2 = [0.9, -6.45, 0.2, 0.32, -5.43, 0.1]
-                    else:
-                        p1 = [amplitude, centre_of_peak, standard_deviation]
-                        p2 = [amplitude, centre_of_peak, standard_deviation,
-                              second_largest_amplitude, second_largest_centre_of_peak, standard_deviation]
+                    ps = [[amplitude, centre_of_peak, standard_deviation],
+                          [amplitude, centre_of_peak, standard_deviation, second_largest_amplitude,
+                           second_largest_centre_of_peak, standard_deviation], [0.9, -6.45, 0.2],
+                          [0.9, -6.45, 0.2, 0.32, -5.43, 0.1], [0.361, -6.98, 0.2, 0.149, -6.489, 0.2],
+                          [2.2, -6.9, 0.2, 23.6, -6.22, 0.2]]
 
                     q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
-
                     perrs = []
                     coeffs = []
-                    try:
-                        coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                      p0=p2, maxfev=100000, method="lm")
-                        perr = np.sqrt(np.diag(var_matrix))
-                        perr = perr[~np.isnan(perr)]
-                        perrs.append(sum(perr) / len(perr))
-                        coeffs.append(coeff)
-                    except:
-                        pass
+                    for p in ps:
+                        try:
+                            if len(p) == 3:
+                                coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                              p0=p, method="lm")
+                            else:
+                                coeff, var_matrix = curve_fit(gauss2, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
+                                                              p0=p, method="lm")
 
-                    try:
-                        coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
-                                                      p0=p1, maxfev=100000, method="lm")
-                        perr = np.sqrt(np.diag(var_matrix))
-                        perr = perr[~np.isnan(perr)]
-                        perrs.append(sum(perr) / len(perr))
-                        coeffs.append(coeff)
-                    except:
-                        pass
+                            perr = np.sqrt(np.diag(var_matrix))
+                            perr = perr[~np.isnan(perr)]
+                            perrs.append(np.mean(perr) / len(perr))
+                            coeffs.append(coeff)
+                        except:
+                            pass
 
                     if len(perrs) > 0:
                         coeff_index = perrs.index(min(perrs))
