@@ -378,10 +378,8 @@ def main(group_number, ddddd):
         ax[1][index].set_yscale('linear')
 
     header1 = ["epoch", "velocity", "intensity", "ra", "dec", "position_angle"]
-    header2 = ["epoch", "gauss_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*2", "max_intensity", "coeff0", "coeff4",
-               "coeff5_*_2", "coeff3", "max(size)", "max(size)_*_1.64",
-               "(velocity[0]_-_velocity[len(velocity)_-_1])_/_max(size)",
-               "(velocity[0]_-_velocity[len(velocity)_-_1])_/_(max(size)_*_1.64)", "position_angle"]
+    header2 = ["epoch", "gauss_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*_2", "max_intensity", "coeff0", "coeff4",
+               "coeff5_*_2", "coeff3", "max_distance", "max_distance_au", "gradient", "gradient_au", "position_angle"]
 
     np.savetxt("cloudlet_" + str(group_number) + "._coords.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
                header=",".join(header1))
