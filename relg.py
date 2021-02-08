@@ -205,7 +205,7 @@ def main(group_number, ddddd):
             ax[1][index].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
                               [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
-        position_angle = 90 - np.degrees(np.arctan(m))
+        position_angle = 90 + np.degrees(np.arctan(m))
         print("position angle is ", position_angle)
 
         if len(velocity) >= 3:
@@ -253,12 +253,15 @@ def main(group_number, ddddd):
                           [amplitude, centre_of_peak, standard_deviation, second_largest_amplitude,
                            second_largest_centre_of_peak, standard_deviation], [0.9, -6.45, 0.2],
                           [0.9, -6.45, 0.2, 0.32, -5.43, 0.1], [0.361, -6.98, 0.2, 0.149, -6.489, 0.2],
-                          [2.2, -6.9, 0.2, 23.6, -6.22, 0.2]]
+                          [2.2, -6.9, 0.2, 23.6, -6.22, 0.2], [1.99, -6.977, 0.05, 0.6, -7.3, 0.05],
+                          [0.035, -7.75, 0.001]]
 
                     q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
                     perrs = []
                     coeffs = []
                     for p in ps:
+                        if epoch == "ea063":
+                            p = [0.035, -7.75, 0.001]
                         try:
                             if len(p) == 3:
                                 coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
