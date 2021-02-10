@@ -75,6 +75,9 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
+    splits_index = []
+    groups = []
+
     matplotlib.use('TkAgg')
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
@@ -118,17 +121,20 @@ def main(group_number, epoch, ddddd):
         fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16), dpi=90)
         coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
 
+        color = []
         for v in range(len(velocity)):
             if velocity[v] < min(velocity) or velocity[v] > max(velocity):
                 c = (0, 0, 0)
             else:
                 c = cm.turbo((velocity[v] - min(velocity)) / (max(velocity) - min(velocity)), 1)
 
-            ax[0].scatter((velocity[v]), (intensity[v],), color=c, lw=2)
+            color.append(c)
 
             el = Circle((ra[v], dec[v]), radius=0.05 * np.log(intensity[v] * 1000), angle=0, lw=2)
             el.set_facecolor(c)
             ax[1].add_artist(el)
+
+        ax[0].scatter(velocity, intensity, color=color, lw=2, picker=True)
 
         max_separation = {"r": 0, "d": -1, "separation": 0}
         sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
@@ -263,6 +269,7 @@ def main(group_number, epoch, ddddd):
                                dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
+        ax[1].invert_xaxis()
         ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
         ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
         ax[0].xaxis.set_minor_locator(minor_locator_level)
@@ -278,6 +285,45 @@ def main(group_number, epoch, ddddd):
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
         plt.tight_layout()
         plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
+
+        def onpick1(event):
+            ind = event.ind[0]
+            if ind not in splits_index:
+                splits_index.append(ind)
+            max_index = len(velocity) - 1
+            if len(groups) == 0:
+                groups.append([0, ind + 1])
+                groups.append([ind + 1, max_index + 1])
+
+            else:
+                for g in groups:
+                    if ind in g:
+                        new_group_max = max(g)
+                        new_group_min = min(g)
+                        groups.append([new_group_min, ind + 1])
+                        groups.append([ind + 1, new_group_max])
+                        groups.remove(g)
+                        break
+
+            for g in groups:
+                x = intensity[g[0]:g[1]]
+                y = velocity[g[0]:g[1]]
+
+                amplitude = max(y)
+                centre_of_peak_index = list(y).index(amplitude)
+                centre_of_peak = x[centre_of_peak_index]
+                standard_deviation = np.std(y)
+                p = [amplitude, centre_of_peak, standard_deviation],
+                coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm")
+                q = np.linspace(min(x), max(x), 10000)
+                hist_fit = gauss(q, *coeff)
+                ax[0].plot(q, hist_fit, 'r')
+                print(coeff)
+            event.canvas.draw()
+            event.canvas.flush_events()
+
+
+        fig.canvas.mpl_connect('pick_event', onpick1)
         plt.show()
     else:
         print("group is not in epoch")

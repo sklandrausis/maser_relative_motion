@@ -58,15 +58,19 @@ def main():
     group_index = []
     max_vel = []
     min_vel = []
+    max_intet = []
+    min_intet= []
     print("\hline")
     epoch_data = dict()
     for file in files_in_order:
         index = files_in_order.index(file)
-        title = file.split(".")[0].upper() + "-" + dates[file.split(".")[0]]
+        title = dates[file.split(".")[0]]
         group, channel, velocity, intensity, integral_intensity, ra, dec = np.loadtxt("groups/" + file, unpack=True)
         groups = list(set(group))
         max_vel.append(max(velocity))
         min_vel.append(min(velocity))
+        max_intet.append(max(intensity))
+        min_intet.append(min(intensity))
         epoch_data[file.split(".")[0].upper()] = dict()
 
         data = dict()
@@ -152,13 +156,15 @@ def main():
 
             ax[index].scatter(vel, inten, c=np.array([color]))
 
-        ax[index].set_ylabel('Flux density [Jy]', fontsize=12)
         ax[index].text(-5.5, 5, title, size=12)
+        ax[index].set_yscale("log")
         ax[index].xaxis.set_minor_locator(minorLocatorvel)
 
+    ax[0].set_ylabel('Flux density [Jy]', fontsize=12)
     for file in files_in_order:
         index = files_in_order.index(file)
         ax[index].set_xlim(min(min_vel) - 0.1, max(max_vel) + 0.1)
+        ax[index].set_ylim(min(min_intet) - 0.1, max(max_intet) + 0.1)
     ax[-1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
 
     plt.tight_layout()
