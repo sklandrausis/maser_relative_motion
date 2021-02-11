@@ -10,6 +10,7 @@ from matplotlib.ticker import MultipleLocator
 from scipy.optimize import curve_fit
 from astropy import units as u
 from astropy.coordinates import SkyCoord
+from scipy.stats import stats, pearsonr
 
 from parsers.configparser_ import ConfigParser
 
@@ -135,6 +136,18 @@ def main(group_number, epoch, ddddd):
             ax[1].add_artist(el)
 
         ax[0].scatter(velocity, intensity, color=color, lw=2, picker=True)
+
+        slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
+        line = slope * ra + intercept
+        ax[1].plot(ra, line, 'r', label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
+                   format(slope, intercept, p_value, std_err))
+
+        position_angle2 = 90 + np.degrees(np.arctan(slope))
+        print("position angle from linear fit is ", position_angle2)
+
+        print("Distance between fit and points", np.sqrt((line-dec) **2))
+
+        print("Pearsonr correlation", pearsonr(ra, line))
 
         max_separation = {"r": 0, "d": -1, "separation": 0}
         sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
@@ -270,6 +283,7 @@ def main(group_number, epoch, ddddd):
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
         ax[1].invert_xaxis()
+        ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
         ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
         ax[0].xaxis.set_minor_locator(minor_locator_level)
