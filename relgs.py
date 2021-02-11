@@ -205,6 +205,7 @@ def main(group_number, epoch, ddddd):
                           [0.035, -7.75, 0.001]]
 
                     q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
+                    print(q)
                     perrs = []
                     coeffs = []
                     for p in ps:
@@ -283,8 +284,6 @@ def main(group_number, epoch, ddddd):
         ax[1].set_ylabel('$\\Delta$ Dec (mas)')
         ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
 
         def onpick1(event):
             ind = event.ind[0]
@@ -306,9 +305,8 @@ def main(group_number, epoch, ddddd):
                         break
 
             for g in groups:
-                x = intensity[g[0]:g[1]]
-                y = velocity[g[0]:g[1]]
-
+                x = velocity[g[0]:g[1]]
+                y = intensity[g[0]:g[1]]
                 amplitude = max(y)
                 centre_of_peak_index = list(y).index(amplitude)
                 centre_of_peak = x[centre_of_peak_index]
@@ -318,12 +316,12 @@ def main(group_number, epoch, ddddd):
                 q = np.linspace(min(x), max(x), 10000)
                 hist_fit = gauss(q, *coeff)
                 ax[0].plot(q, hist_fit, 'r')
-                print(coeff)
-            event.canvas.draw()
+                event.canvas.draw()
             event.canvas.flush_events()
 
-
         fig.canvas.mpl_connect('pick_event', onpick1)
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
         plt.show()
     else:
         print("group is not in epoch")
