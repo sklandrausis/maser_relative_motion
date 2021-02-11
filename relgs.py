@@ -205,7 +205,6 @@ def main(group_number, epoch, ddddd):
                           [0.035, -7.75, 0.001]]
 
                     q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
-                    print(q)
                     perrs = []
                     coeffs = []
                     for p in ps:
@@ -305,19 +304,29 @@ def main(group_number, epoch, ddddd):
                         break
 
             for g in groups:
-                x = velocity[g[0]:g[1]]
-                y = intensity[g[0]:g[1]]
-                amplitude = max(y)
-                centre_of_peak_index = list(y).index(amplitude)
-                centre_of_peak = x[centre_of_peak_index]
-                standard_deviation = np.std(y)
-                p = [amplitude, centre_of_peak, standard_deviation],
-                coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm")
-                q = np.linspace(min(x), max(x), 10000)
-                hist_fit = gauss(q, *coeff)
-                ax[0].plot(q, hist_fit, 'r')
-                event.canvas.draw()
-            event.canvas.flush_events()
+                if g[0] < g[1]:
+                    index1 = g[0]
+                    index2 = g[1]
+                elif g[1] < g[0]:
+                    index1 = g[1]
+                    index2 = g[0]
+                else:
+                    index1 = g[0]
+                    index2 = g[1]
+
+                x = velocity[index1:index2]
+                y = intensity[index1:index2]
+                if len(x) >= 3:
+                    amplitude = max(y)
+                    centre_of_peak_index = list(y).index(amplitude)
+                    centre_of_peak = x[centre_of_peak_index]
+                    standard_deviation = np.std(y)
+                    p = [amplitude, centre_of_peak, standard_deviation],
+                    coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
+                    q = np.linspace(min(x), max(x), 10000)
+                    hist_fit = gauss(q, *coeff)
+                    ax[0].plot(q, hist_fit, 'r')
+                    event.canvas.draw()
 
         fig.canvas.mpl_connect('pick_event', onpick1)
         plt.tight_layout()
