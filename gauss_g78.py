@@ -39,7 +39,7 @@ def get_configs(section, key):
 
 
 def main():
-    dpi = 300
+    dpi = 150
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
@@ -99,7 +99,7 @@ def main():
         for g in groups:
 
             vel = data[g]["vel"]
-            inten = data[g]["inten"]
+            inten = np.array(data[g]["inten"]).clip(2)
             ra_ = data[g]["ra"]
             dec_ = data[g]["dec"]
 
@@ -129,7 +129,7 @@ def main():
 
                 q = np.linspace(min(vel), max(vel), 1000)
                 hist_fit = gauss(q, *coeff)
-                ax[index].plot(q, hist_fit, 'k')
+                ax[index].plot(q, hist_fit.clip(2), 'k')
                 epoch_data[file.split(".")[0].upper()][g].append(ra_[line])
                 epoch_data[file.split(".")[0].upper()][g].append(dec_[line])
                 epoch_data[file.split(".")[0].upper()][g].append(vel[line])
@@ -154,7 +154,7 @@ def main():
                           (g, ra_[line], dec_[line], vel[line], "-",
                            "-", inten[line], "-", "-", "-"))
 
-            ax[index].scatter(vel, inten, c=np.array([color]))
+            ax[index].scatter(vel, np.array(inten), c=np.array([color]))
 
         ax[index].text(-5.5, 5, title, size=12)
         ax[index].set_yscale("log")
@@ -163,8 +163,9 @@ def main():
     ax[0].set_ylabel('Flux density [Jy]', fontsize=12)
     for file in files_in_order:
         index = files_in_order.index(file)
-        ax[index].set_xlim(min(min_vel) - 0.1, max(max_vel) + 0.1)
-        ax[index].set_ylim(min(min_intet) - 0.1, max(max_intet) + 0.1)
+        ax[index].set_xlim(min(min_vel) - 0.5, max(max_vel) + 0.5)
+        ax[index].set_ylim(1, 100)
+        #ax[index].set_yticks([10, 100])
     ax[-1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
 
     plt.tight_layout()
