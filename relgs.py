@@ -145,7 +145,7 @@ def main(group_number, epoch, ddddd):
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
 
-        print("Distance between fit and points", np.sqrt((line-dec) **2))
+        print("Distance between fit and points", line-dec)
 
         print("Pearsonr correlation", pearsonr(ra, line))
 
@@ -290,9 +290,9 @@ def main(group_number, epoch, ddddd):
         ax[0].set_title(date)
         ax[1].set_aspect("equal", adjustable='box')
         ax[1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
-                              np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
+                       np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
         ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
-                              np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+                       np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
         ax[0].set_ylabel('Flux density (Jy)')
         ax[1].set_ylabel('$\\Delta$ Dec (mas)')
         ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
