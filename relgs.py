@@ -350,7 +350,23 @@ def main(group_number, epoch, ddddd):
                     ax[1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
                                format(slope, intercept, p_value, std_err))
 
+                    max_separation = {"r": 0, "d": -1, "separation": 0}
+                    sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec) for coord in range(0, len(ra_tmp))]
+                    for r in range(0, len(ra_tmp)):
+                        for d in range(0, len(dec_tmp)):
+                            if r != d:
+                                separation = sky_coords[r].separation(sky_coords[d])
+                                if separation > max_separation["separation"]:
+                                    max_separation["r"] = r
+                                    max_separation["d"] = d
+                                    max_separation["separation"] = separation
+
+                    m, b = np.polyfit([ra_tmp[max_separation["r"]], ra_tmp[max_separation["d"]]],
+                                      [dec_tmp[max_separation["r"]], dec_tmp[max_separation["d"]]], 1)
+                    
+                    position_angle = 90 + np.degrees(np.arctan(m))
                     position_angle2 = 90 + np.degrees(np.arctan(slope))
+                    print("position angle is ", position_angle)
                     print("position angle from linear fit is ", position_angle2)
                     print("Distance between fit and points", line - dec_tmp)
                     print("Pearsonr correlation", pearsonr(ra_tmp, line))
