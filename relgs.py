@@ -222,8 +222,8 @@ def main(group_number, epoch, ddddd):
                     perrs = []
                     coeffs = []
                     for p in ps:
-                        if epoch == "ea063":
-                            p = [0.035, -7.75, 0.001]
+                        #if epoch == "ea063":
+                            #p = [0.035, -7.75, 0.001]
                         try:
                             if len(p) == 3:
                                 coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
@@ -363,7 +363,7 @@ def main(group_number, epoch, ddddd):
 
                     m, b = np.polyfit([ra_tmp[max_separation["r"]], ra_tmp[max_separation["d"]]],
                                       [dec_tmp[max_separation["r"]], dec_tmp[max_separation["d"]]], 1)
-                    
+
                     position_angle = 90 + np.degrees(np.arctan(m))
                     position_angle2 = 90 + np.degrees(np.arctan(slope))
                     print("position angle is ", position_angle)
