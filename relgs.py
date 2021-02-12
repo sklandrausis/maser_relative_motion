@@ -1,5 +1,6 @@
 import sys
 import argparse
+from random import random
 
 import numpy as np
 import matplotlib
@@ -331,6 +332,7 @@ def main(group_number, epoch, ddddd):
                 x = velocity[index1:index2]
                 y = intensity[index1:index2]
                 if len(x) >= 3:
+                    color = (random(), random(), random())
                     amplitude = max(y)
                     centre_of_peak_index = list(y).index(amplitude)
                     centre_of_peak = x[centre_of_peak_index]
@@ -339,7 +341,23 @@ def main(group_number, epoch, ddddd):
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     q = np.linspace(min(x), max(x), 10000)
                     hist_fit = gauss(q, *coeff)
-                    ax[0].plot(q, hist_fit, 'r')
+                    ax[0].plot(q, hist_fit, c=color)
+
+                    ra_tmp = ra[index1:index2]
+                    dec_tmp = dec[index1:index2]
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
+                    line = slope * ra_tmp + intercept
+                    ax[1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
+                               format(slope, intercept, p_value, std_err))
+
+                    position_angle2 = 90 + np.degrees(np.arctan(slope))
+                    print("position angle from linear fit is ", position_angle2)
+                    print("Distance between fit and points", line - dec_tmp)
+                    print("Pearsonr correlation", pearsonr(ra_tmp, line))
+
+                    ax[1].get_legend().remove()
+                    ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
+
                     event.canvas.draw()
 
         fig.canvas.mpl_connect('pick_event', onpick1)
