@@ -79,6 +79,7 @@ def firs_exceeds(array, value):
 def main(group_number, epoch, ddddd):
     splits_index = []
     groups = []
+    output = []
 
     matplotlib.use('TkAgg')
     configuration_items = get_configs_items()
@@ -352,7 +353,15 @@ def main(group_number, epoch, ddddd):
                                format(slope, intercept, p_value, std_err))
 
                     max_separation = {"r": 0, "d": -1, "separation": 0}
-                    sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec) for coord in range(0, len(ra_tmp))]
+                    sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
+                                  for coord in range(0, len(ra_tmp))]
+                    size = []
+                    max_intensity_index = max_intensity_index = np.array(y).argmax()
+                    for j in range(0, len(x)):
+                        for k in range(j + 1, len(x)):
+                            dist = np.sqrt((ra_tmp[j] - ra_tmp[k]) ** 2 + (dec_tmp[j] - dec_tmp[k]) ** 2)
+                            size.append(dist)
+
                     for r in range(0, len(ra_tmp)):
                         for d in range(0, len(dec_tmp)):
                             if r != d:
@@ -367,6 +376,12 @@ def main(group_number, epoch, ddddd):
 
                     position_angle = 90 + np.degrees(np.arctan(m))
                     position_angle2 = 90 + np.degrees(np.arctan(slope))
+                    sub_group_nr = groups.index(g)
+                    output.append([sub_group_nr, ra_tmp[max_intensity_index], dec_tmp[max_intensity_index],
+                                   x[max_intensity_index], coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
+                                   max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
+                                   (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2])
+
                     print("position angle is ", position_angle)
                     print("position angle from linear fit is ", position_angle2)
                     print("Distance between fit and points", line - dec_tmp)
@@ -381,6 +396,10 @@ def main(group_number, epoch, ddddd):
         plt.tight_layout()
         plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
         plt.show()
+        header2 = ["sub_group_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*_2", "max_intensity", "coeff0",
+                   "max_distance", "max_distance_au", "gradient", "gradient_au", "position_angle", "position_angle2"]
+        np.savetxt("cloudlet_sub_" + str(group_number) + "._sats.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
+               header=",".join(header2))
     else:
         print("group is not in epoch")
         sys.exit()
