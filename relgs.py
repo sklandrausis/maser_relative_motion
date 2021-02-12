@@ -124,7 +124,7 @@ def main(group_number, epoch, ddddd):
         coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
 
         color = []
-        for v in range(len(velocity)):
+        for v in range(0, len(velocity)):
             if velocity[v] < min(velocity) or velocity[v] > max(velocity):
                 c = (0, 0, 0)
             else:
@@ -283,7 +283,6 @@ def main(group_number, epoch, ddddd):
                                dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
-        ax[1].invert_xaxis()
         ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
         ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
@@ -294,6 +293,8 @@ def main(group_number, epoch, ddddd):
                        np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
         ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
                        np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+
+        ax[1].invert_xaxis()
         ax[0].set_ylabel('Flux density (Jy)')
         ax[1].set_ylabel('$\\Delta$ Dec (mas)')
         ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
