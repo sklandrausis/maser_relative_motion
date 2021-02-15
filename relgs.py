@@ -77,7 +77,6 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    splits_index = []
     groups = []
     output = []
 
@@ -330,21 +329,21 @@ def main(group_number, epoch, ddddd):
 
         def onpick1(event):
             ind = event.ind[0]
-            if ind not in splits_index:
-                splits_index.append(ind)
+            print(ind)
             max_index = len(velocity) - 1
             if len(groups) == 0:
                 groups.append([0, ind + 1])
                 groups.append([ind + 1, max_index + 1])
-
+                print(groups)
             else:
                 for g in groups:
-                    if ind in g:
+                    if ind in range(min(g), max(g) - 1):
                         new_group_max = max(g)
                         new_group_min = min(g)
                         groups.append([new_group_min, ind + 1])
                         groups.append([ind + 1, new_group_max])
                         groups.remove(g)
+                        print(groups)
                         break
 
             for g in groups:
@@ -419,6 +418,8 @@ def main(group_number, epoch, ddddd):
                     ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
 
                     event.canvas.draw()
+
+            print(groups)
 
         fig.canvas.mpl_connect('pick_event', onpick1)
         plt.tight_layout()
