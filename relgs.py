@@ -257,6 +257,13 @@ def main(group_number, epoch, ddddd):
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
+                            output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
+                                           dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                           coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0], max(size),
+                                           max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                                           (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64),
+                                           position_angle, position_angle2])
+
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
                             ax[0].plot(q, hist_fit, 'k')
@@ -269,6 +276,13 @@ def main(group_number, epoch, ddddd):
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
+                            output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
+                                           dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                           coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0], max(size),
+                                           max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                                           (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64),
+                                           position_angle, position_angle2])
+
                 else:
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
@@ -278,11 +292,23 @@ def main(group_number, epoch, ddddd):
                                (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
+                        output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
+                                       dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-", "-",
+                                       intensity[max_intensity_index], "-", max(size),
+                                       max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) / max(size),
+                                       (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64), position_angle,
+                                       position_angle2])
+
                     else:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
                               (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
+
+                        output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
+                                       dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-", "-",
+                                       intensity[max_intensity_index], "-", "-", "-", "-", "-", position_angle,
+                                       position_angle2])
 
         ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
@@ -396,7 +422,7 @@ def main(group_number, epoch, ddddd):
         plt.tight_layout()
         plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
         plt.show()
-        header2 = ["sub_group_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*_2", "max_intensity", "coeff0",
+        header2 = ["sub_group_nr", "ra", "dec", "velocity", "vel_fit", "sigma", "max_intensity", "fit_amp",
                    "max_distance", "max_distance_au", "gradient", "gradient_au", "position_angle", "position_angle2"]
         np.savetxt("cloudlet_sub_" + str(group_number) + "._sats.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
                header=",".join(header2))

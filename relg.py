@@ -200,7 +200,7 @@ def main(group_number, ddddd):
                               [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
         position_angle = 90 + np.degrees(np.arctan(m))
-        #print("position angle is ", position_angle)
+        print("position angle is ", position_angle)
 
         if len(velocity) >= 3:
             firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.9)
@@ -281,9 +281,6 @@ def main(group_number, ddddd):
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
                             ax[0][index].plot(q, hist_fit, 'k')
-                            print("6")
-
-                            '''
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
                                   (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
@@ -292,7 +289,6 @@ def main(group_number, ddddd):
                                    coeff[4], coeff[5] * 2, coeff[3],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
-                            '''
 
                             output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                             dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
@@ -303,10 +299,8 @@ def main(group_number, ddddd):
                                             position_angle])
 
                         elif len(coeff) == 3:
-                            print("3")
                             hist_fit = gauss(q, *coeff)
                             ax[0][index].plot(q, hist_fit, 'k')
-                            '''
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
                                   (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
@@ -314,7 +308,6 @@ def main(group_number, ddddd):
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
-                            '''
 
                             output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                             dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
@@ -325,14 +318,12 @@ def main(group_number, ddddd):
                                             position_angle])
                 else:
                     if len(size) > 0:
-                        '''
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
                               (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
                                "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
                                (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
-                        '''
 
                         output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                         dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
@@ -342,12 +333,10 @@ def main(group_number, ddddd):
                                         position_angle])
 
                     else:
-                        '''
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
                               (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                dec_tmp[gauss_nr][max_intensity_index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
-                        '''
 
                         output2.append([epoch, gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                         dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
