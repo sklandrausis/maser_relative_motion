@@ -361,15 +361,15 @@ def main(group_number, epoch, ddddd):
                 y = intensity[index1:index2]
                 if len(x) >= 3:
                     color = (random(), random(), random())
+                    if groups.index(g) == 0:
+                        y[-1] = (y[-1] + y[-2])/2
+                    elif groups.index(g) == 1:
+                        y[0] = (y[0] + y[1])/2
                     amplitude = max(y)
                     centre_of_peak_index = list(y).index(amplitude)
                     centre_of_peak = x[centre_of_peak_index]
                     standard_deviation = np.std(y)
                     p = [amplitude, centre_of_peak, standard_deviation]
-                    if groups.index(g) == 0:
-                        y[-1] = (y[-1] + y[-2])/2
-                    elif groups.index(g) == 1:
-                        y[0] = (y[0] + y[1])/2
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     q = np.linspace(min(x), max(x), 10000)
                     hist_fit = gauss(q, *coeff)
