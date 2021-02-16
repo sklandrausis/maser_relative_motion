@@ -333,7 +333,7 @@ def main(group_number, epoch, ddddd):
             max_index = len(velocity) - 1
             if len(groups) == 0:
                 groups.append([0, ind + 1])
-                groups.append([ind + 1, max_index + 1])
+                groups.append([ind - 1, max_index + 1])
                 print(groups)
             else:
                 for g in groups:
@@ -341,7 +341,7 @@ def main(group_number, epoch, ddddd):
                         new_group_max = max(g)
                         new_group_min = min(g)
                         groups.append([new_group_min, ind + 1])
-                        groups.append([ind + 1, new_group_max])
+                        groups.append([ind - 1, new_group_max])
                         groups.remove(g)
                         print(groups)
                         break
@@ -365,7 +365,11 @@ def main(group_number, epoch, ddddd):
                     centre_of_peak_index = list(y).index(amplitude)
                     centre_of_peak = x[centre_of_peak_index]
                     standard_deviation = np.std(y)
-                    p = [amplitude, centre_of_peak, standard_deviation],
+                    p = [amplitude, centre_of_peak, standard_deviation]
+                    if groups.index(g) == 0:
+                        y[-1] /= 2
+                    elif groups.index(g) == 1:
+                        y[0] /= 2
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     q = np.linspace(min(x), max(x), 10000)
                     hist_fit = gauss(q, *coeff)
@@ -399,7 +403,6 @@ def main(group_number, epoch, ddddd):
 
                     m, b = np.polyfit([ra_tmp[max_separation["r"]], ra_tmp[max_separation["d"]]],
                                       [dec_tmp[max_separation["r"]], dec_tmp[max_separation["d"]]], 1)
-
                     position_angle = 90 + np.degrees(np.arctan(m))
                     position_angle2 = 90 + np.degrees(np.arctan(slope))
                     sub_group_nr = groups.index(g)
