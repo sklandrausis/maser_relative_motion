@@ -77,7 +77,7 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    groups = []
+    groups = [[0, 5], [5, 8], [8, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -100,7 +100,7 @@ def main(group_number, epoch, ddddd):
         dec = np.empty(0)
         velocity = np.empty(0)
         group_tmp, channel_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
-            np.loadtxt(input_file, unpack=True, usecols=(0, 1, 2, 3, 5, 6))
+            np.loadtxt(input_file, unpack=True, usecols=(0, 1, 2, 3, 5, 6), dtype=np.float)
 
         for i in range(0, len(channel_tmp)):
             if group_tmp[i] == int(group_number):
@@ -331,21 +331,23 @@ def main(group_number, epoch, ddddd):
             ind = event.ind[0]
             print(ind)
             max_index = len(velocity) - 1
+            '''
             if len(groups) == 0:
                 groups.append([0, ind + 1])
-                groups.append([ind - 1, max_index + 1])
+                groups.append([ind + 1, max_index + 1])
                 print(groups)
             else:
                 for g in groups:
-                    if ind in range(min(g), max(g) - 1):
+                    if ind in range(min(g), max(g) + 1):
                         new_group_max = max(g)
                         new_group_min = min(g)
                         groups.append([new_group_min, ind + 1])
-                        groups.append([ind - 1, new_group_max])
+                        groups.append([ind + 1, new_group_max])
                         groups.remove(g)
                         print(groups)
                         break
-
+            '''
+            ps = [[0.75, -6.7, 0.2], [1.59, -6.44, 0.2], [8.36, -6.08, 0.2]]
             for g in groups:
                 if g[0] < g[1]:
                     index1 = g[0]
@@ -361,17 +363,17 @@ def main(group_number, epoch, ddddd):
                 y = intensity[index1:index2]
                 if len(x) >= 3:
                     color = (random(), random(), random())
+                    '''
                     if groups.index(g) == 0:
                         y[-1] = (y[-1] + y[-2])/2
                     elif groups.index(g) == 1:
                         y[0] = (y[0] + y[1])/2
-                    amplitude = max(y)
-                    centre_of_peak_index = list(y).index(amplitude)
-                    centre_of_peak = x[centre_of_peak_index]
-                    standard_deviation = np.std(y)
-                    p = [amplitude, centre_of_peak, standard_deviation]
-                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=100000)
-                    q = np.linspace(min(velocity), max(velocity), 10000)
+                    '''
+                    p = ps[groups.index(g)]
+                    #p.append(np.std(y))
+                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=1000)
+
+                    q = np.linspace(min(velocity), max(velocity), 1000)
                     hist_fit = gauss(q, *coeff)
                     ax[0].plot(q, hist_fit, c=color)
 
