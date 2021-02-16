@@ -370,8 +370,8 @@ def main(group_number, epoch, ddddd):
                     centre_of_peak = x[centre_of_peak_index]
                     standard_deviation = np.std(y)
                     p = [amplitude, centre_of_peak, standard_deviation]
-                    coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
-                    q = np.linspace(min(x), max(x), 10000)
+                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=100000)
+                    q = np.linspace(min(velocity), max(velocity), 10000)
                     hist_fit = gauss(q, *coeff)
                     ax[0].plot(q, hist_fit, c=color)
 
