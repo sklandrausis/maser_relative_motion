@@ -367,9 +367,9 @@ def main(group_number, epoch, ddddd):
                     standard_deviation = np.std(y)
                     p = [amplitude, centre_of_peak, standard_deviation]
                     if groups.index(g) == 0:
-                        y[-1] /= 2
+                        y[-1] = (y[-1] + y[-2])/2
                     elif groups.index(g) == 1:
-                        y[0] /= 2
+                        y[0] = (y[0] + y[1])/2
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     q = np.linspace(min(x), max(x), 10000)
                     hist_fit = gauss(q, *coeff)
