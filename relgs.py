@@ -67,6 +67,12 @@ def gauss2(x, *p):
     return a1 * np.exp(-(x - b1) ** 2 * np.log(2) / c1 ** 2) + a2 * np.exp(-(x - b2) ** 2 * np.log(2) / c2 ** 2)
 
 
+def gauss3(x, *p):
+    a1, b1, c1, a2, b2, c2, a3, b3, c3 = p
+    return a1 * np.exp(-(x - b1) ** 2 * np.log(2) / c1 ** 2) + a2 * np.exp(-(x - b2) ** 2 * np.log(2) / c2 ** 2) + a3 * \
+           np.exp(-(x - b3) ** 2 * np.log(2) / c3 ** 2)
+
+
 def firs_exceeds(array, value):
     index = -1
     for i in range(0, len(array)):
@@ -77,7 +83,8 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    groups = [[0, 5], [5, 8], [8, 19]]
+    #groups = [[0, 5], [5, 8], [8, 19]]
+    groups = [[0, 5], [1, 12], [8, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -244,6 +251,7 @@ def main(group_number, epoch, ddddd):
                         coeff = coeffs[coeff_index]
 
                         if len(coeff) == 6:
+                            print("yes")
                             hist_fit = gauss2(q, *coeff)
                             ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
 
@@ -329,6 +337,22 @@ def main(group_number, epoch, ddddd):
         ps = [[0.79, -6.7006000000000006, 0.29286133237421424],
               [0.93, -6.525, 0.36800573667026204],
               [8.292, -6.086, 2.8962589178124705]]
+
+        '''
+        p = [0.79, -6.7006000000000006, 0.29286133237421424,
+             0.93, -6.525, 0.36800573667026204,
+             8.292, -6.086, 2.8962589178124705]
+        
+
+        color = (random(), random(), random())
+
+        coeff, var_matrix = curve_fit(gauss3, velocity, intensity, p0=p, method="lm", maxfev=100000)
+        q = np.linspace(min(velocity), max(velocity), 10000)
+        hist_fit = gauss3(q, *coeff)
+        ax[0].plot(q, hist_fit, c=color, label="gauss3")
+        
+        '''
+
         for g in groups:
             index1 = g[0]
             index2 = g[1]
@@ -337,21 +361,15 @@ def main(group_number, epoch, ddddd):
             y = intensity[index1:index2]
             if len(x) >= 3:
                 color = (random(), random(), random())
-                '''
-                if groups.index(g) == 0:
-                    y[-1] = (y[-1] + y[-2])/2
-                elif groups.index(g) == 1:
-                    y[0] = (y[0] + y[1])/2
-                '''
                 amplitude = max(y)
                 centre_of_peak_index = list(y).index(amplitude)
                 centre_of_peak = x[centre_of_peak_index]
                 standard_deviation = np.std(y)
                 p = ps[groups.index(g)]
-                coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=100000)
+                coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                 q = np.linspace(min(velocity), max(velocity), 10000)
                 hist_fit = gauss(q, *coeff)
-                ax[0].plot(q, hist_fit, c=color, label="groug is " + str(groups.index(g)))
+                ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
