@@ -83,8 +83,7 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    #groups = [[0, 5], [5, 8], [8, 19]]
-    groups = [[0, 5], [4, 19]]
+    groups = [[0, 5], [5, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -251,7 +250,6 @@ def main(group_number, epoch, ddddd):
                         coeff = coeffs[coeff_index]
 
                         if len(coeff) == 6:
-                            print("yes")
                             hist_fit = gauss2(q, *coeff)
                             ax[0].plot(q, hist_fit, 'k--', label="Fit for all data")
 
@@ -335,23 +333,7 @@ def main(group_number, epoch, ddddd):
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
 
         ps = [[0.79, -6.7006000000000006, 0.29286133237421424],
-              [0.93, -6.525, 0.36800573667026204],
               [8.292, -6.086, 2.8962589178124705]]
-
-        '''
-        p = [0.79, -6.7006000000000006, 0.29286133237421424,
-             0.93, -6.525, 0.36800573667026204,
-             8.292, -6.086, 2.8962589178124705]
-        
-
-        color = (random(), random(), random())
-
-        coeff, var_matrix = curve_fit(gauss3, velocity, intensity, p0=p, method="lm", maxfev=100000)
-        q = np.linspace(min(velocity), max(velocity), 10000)
-        hist_fit = gauss3(q, *coeff)
-        ax[0].plot(q, hist_fit, c=color, label="gauss3")
-        
-        '''
 
         q = np.linspace(min(velocity), max(velocity), 10000)
         hist_fits = list()
@@ -416,7 +398,8 @@ def main(group_number, epoch, ddddd):
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
         ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
-
+        ax[1].xaxis.set_minor_locator(minor_locatorx)
+        ax[1].yaxis.set_minor_locator(minor_locatory)
         ax[0].legend(loc='upper left',)
         ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         plt.tight_layout()
