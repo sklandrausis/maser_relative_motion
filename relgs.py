@@ -84,7 +84,7 @@ def firs_exceeds(array, value):
 
 def main(group_number, epoch, ddddd):
     #groups = [[0, 5], [5, 8], [8, 19]]
-    groups = [[0, 5], [1, 12], [8, 19]]
+    groups = [[0, 5], [4, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -253,7 +253,7 @@ def main(group_number, epoch, ddddd):
                         if len(coeff) == 6:
                             print("yes")
                             hist_fit = gauss2(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
+                            ax[0].plot(q, hist_fit, 'k--', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -353,6 +353,8 @@ def main(group_number, epoch, ddddd):
         
         '''
 
+        q = np.linspace(min(velocity), max(velocity), 10000)
+        hist_fits = list()
         for g in groups:
             index1 = g[0]
             index2 = g[1]
@@ -367,8 +369,8 @@ def main(group_number, epoch, ddddd):
                 standard_deviation = np.std(y)
                 p = ps[groups.index(g)]
                 coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
-                q = np.linspace(min(velocity), max(velocity), 10000)
                 hist_fit = gauss(q, *coeff)
+                hist_fits.append(hist_fit)
                 ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
@@ -412,6 +414,8 @@ def main(group_number, epoch, ddddd):
                 print("position angle from linear fit is ", position_angle2)
                 print("Distance between fit and points", line - dec_tmp)
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
+
+        ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
 
         ax[0].legend(loc='upper left',)
         ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
