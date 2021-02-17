@@ -100,7 +100,7 @@ def main(group_number, epoch, ddddd):
         dec = np.empty(0)
         velocity = np.empty(0)
         group_tmp, channel_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
-            np.loadtxt(input_file, unpack=True, usecols=(0, 1, 2, 3, 5, 6), dtype=np.float)
+            np.loadtxt(input_file, unpack=True, usecols=(0, 1, 2, 3, 5, 6))
 
         for i in range(0, len(channel_tmp)):
             if group_tmp[i] == int(group_number):
@@ -136,7 +136,7 @@ def main(group_number, epoch, ddddd):
             el.set_facecolor(c)
             ax[1].add_artist(el)
 
-        ax[0].scatter(velocity, intensity, color=color, lw=2, picker=True)
+        ax[0].scatter(velocity, intensity, color=color, lw=2)
 
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
@@ -245,7 +245,7 @@ def main(group_number, epoch, ddddd):
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k')
+                            ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -266,7 +266,7 @@ def main(group_number, epoch, ddddd):
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k')
+                            ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
@@ -310,7 +310,6 @@ def main(group_number, epoch, ddddd):
                                        "-", "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-",
                                        position_angle, position_angle2])
 
-        ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
         ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
         ax[0].xaxis.set_minor_locator(minor_locator_level)
@@ -327,106 +326,77 @@ def main(group_number, epoch, ddddd):
         ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
 
-        def onpick1(event):
-            ind = event.ind[0]
-            print(ind)
-            max_index = len(velocity) - 1
-            '''
-            if len(groups) == 0:
-                groups.append([0, ind + 1])
-                groups.append([ind + 1, max_index + 1])
-                print(groups)
-            else:
-                for g in groups:
-                    if ind in range(min(g), max(g) + 1):
-                        new_group_max = max(g)
-                        new_group_min = min(g)
-                        groups.append([new_group_min, ind + 1])
-                        groups.append([ind + 1, new_group_max])
-                        groups.remove(g)
-                        print(groups)
-                        break
-            '''
-            ps = [[0.75, -6.7, 0.2], [1.59, -6.44, 0.2], [8.36, -6.08, 0.2]]
-            for g in groups:
-                if g[0] < g[1]:
-                    index1 = g[0]
-                    index2 = g[1]
-                elif g[1] < g[0]:
-                    index1 = g[1]
-                    index2 = g[0]
-                else:
-                    index1 = g[0]
-                    index2 = g[1]
+        ps = [[0.79, -6.7006000000000006, 0.29286133237421424],
+              [0.93, -6.525, 0.36800573667026204],
+              [8.292, -6.086, 2.8962589178124705]]
+        for g in groups:
+            index1 = g[0]
+            index2 = g[1]
 
-                x = velocity[index1:index2]
-                y = intensity[index1:index2]
-                if len(x) >= 3:
-                    color = (random(), random(), random())
-                    '''
-                    if groups.index(g) == 0:
-                        y[-1] = (y[-1] + y[-2])/2
-                    elif groups.index(g) == 1:
-                        y[0] = (y[0] + y[1])/2
-                    '''
-                    p = ps[groups.index(g)]
-                    #p.append(np.std(y))
-                    coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=1000)
+            x = velocity[index1:index2]
+            y = intensity[index1:index2]
+            if len(x) >= 3:
+                color = (random(), random(), random())
+                '''
+                if groups.index(g) == 0:
+                    y[-1] = (y[-1] + y[-2])/2
+                elif groups.index(g) == 1:
+                    y[0] = (y[0] + y[1])/2
+                '''
+                amplitude = max(y)
+                centre_of_peak_index = list(y).index(amplitude)
+                centre_of_peak = x[centre_of_peak_index]
+                standard_deviation = np.std(y)
+                p = ps[groups.index(g)]
+                coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=100000)
+                q = np.linspace(min(velocity), max(velocity), 10000)
+                hist_fit = gauss(q, *coeff)
+                ax[0].plot(q, hist_fit, c=color, label="groug is " + str(groups.index(g)))
 
-                    q = np.linspace(min(velocity), max(velocity), 1000)
-                    hist_fit = gauss(q, *coeff)
-                    ax[0].plot(q, hist_fit, c=color)
+                ra_tmp = ra[index1:index2]
+                dec_tmp = dec[index1:index2]
+                slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
+                line = slope * ra_tmp + intercept
+                ax[1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
+                           format(slope, intercept, p_value, std_err))
 
-                    ra_tmp = ra[index1:index2]
-                    dec_tmp = dec[index1:index2]
-                    slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
-                    line = slope * ra_tmp + intercept
-                    ax[1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
-                               format(slope, intercept, p_value, std_err))
+                max_separation = {"r": 0, "d": -1, "separation": 0}
+                sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
+                              for coord in range(0, len(ra_tmp))]
+                size = []
+                max_intensity_index = np.array(y).argmax()
+                for j in range(0, len(x)):
+                    for k in range(j + 1, len(x)):
+                        dist = np.sqrt((ra_tmp[j] - ra_tmp[k]) ** 2 + (dec_tmp[j] - dec_tmp[k]) ** 2)
+                        size.append(dist)
 
-                    max_separation = {"r": 0, "d": -1, "separation": 0}
-                    sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
-                                  for coord in range(0, len(ra_tmp))]
-                    size = []
-                    max_intensity_index = np.array(y).argmax()
-                    for j in range(0, len(x)):
-                        for k in range(j + 1, len(x)):
-                            dist = np.sqrt((ra_tmp[j] - ra_tmp[k]) ** 2 + (dec_tmp[j] - dec_tmp[k]) ** 2)
-                            size.append(dist)
+                for r in range(0, len(ra_tmp)):
+                    for d in range(0, len(dec_tmp)):
+                        if r != d:
+                            separation = sky_coords[r].separation(sky_coords[d])
+                            if separation > max_separation["separation"]:
+                                max_separation["r"] = r
+                                max_separation["d"] = d
+                                max_separation["separation"] = separation
 
-                    for r in range(0, len(ra_tmp)):
-                        for d in range(0, len(dec_tmp)):
-                            if r != d:
-                                separation = sky_coords[r].separation(sky_coords[d])
-                                if separation > max_separation["separation"]:
-                                    max_separation["r"] = r
-                                    max_separation["d"] = d
-                                    max_separation["separation"] = separation
+                m, b = np.polyfit([ra_tmp[max_separation["r"]], ra_tmp[max_separation["d"]]],
+                                  [dec_tmp[max_separation["r"]], dec_tmp[max_separation["d"]]], 1)
+                position_angle = 90 + np.degrees(np.arctan(m))
+                position_angle2 = 90 + np.degrees(np.arctan(slope))
+                sub_group_nr = groups.index(g)
 
-                    m, b = np.polyfit([ra_tmp[max_separation["r"]], ra_tmp[max_separation["d"]]],
-                                      [dec_tmp[max_separation["r"]], dec_tmp[max_separation["d"]]], 1)
-                    position_angle = 90 + np.degrees(np.arctan(m))
-                    position_angle2 = 90 + np.degrees(np.arctan(slope))
-                    sub_group_nr = groups.index(g)
+                output.append([sub_group_nr, ra_tmp[max_intensity_index], dec_tmp[max_intensity_index],
+                               x[max_intensity_index], coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
+                               "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
+                               (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2])
 
-                    output.append([sub_group_nr, ra_tmp[max_intensity_index], dec_tmp[max_intensity_index],
-                                   x[max_intensity_index], coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
-                                   "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
-                                   (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2])
+                print("position angle is ", position_angle)
+                print("position angle from linear fit is ", position_angle2)
+                print("Distance between fit and points", line - dec_tmp)
+                print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
-                    print("position angle is ", position_angle)
-                    print("position angle from linear fit is ", position_angle2)
-                    print("Distance between fit and points", line - dec_tmp)
-                    print("Pearsonr correlation", pearsonr(ra_tmp, line))
-
-                    ax[1].get_legend().remove()
-                    ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
-
-                    event.canvas.draw()
-
-            print(groups)
-
-        fig.canvas.mpl_connect('pick_event', onpick1)
+        ax[0].legend(loc='upper left',)
+        ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         plt.tight_layout()
         plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
         plt.show()
