@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, leastsq
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from scipy.stats import stats, pearsonr
@@ -57,8 +57,10 @@ def get_configs_items():
     return config.get_items("main")
 
 
-def gauss(x, *p):
-    a, b, c = p
+def gauss(x, p):
+    a = p[0]
+    b = p[1]
+    c = p[2]
     return a * np.exp(-(x - b) ** 2 * np.log(2) / (c ** 2))
 
 
@@ -224,7 +226,7 @@ def main(group_number, epoch, ddddd):
                           [2.2, -6.9, 0.2, 23.6, -6.22, 0.2], [1.99, -6.977, 0.05, 0.6, -7.3, 0.05],
                           [0.035, -7.75, 0.001]]
 
-                    q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 10000)
+                    q = np.linspace(min(velocity_tmp[gauss_nr]), max(velocity_tmp[gauss_nr]), 1000000)
                     perrs = []
                     coeffs = []
                     for p in ps:
@@ -271,7 +273,7 @@ def main(group_number, epoch, ddddd):
                                            position_angle, position_angle2])
 
                         elif len(coeff) == 3:
-                            hist_fit = gauss(q, *coevelocityff)
+                            hist_fit = gauss(q, *coeff)
                             ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
@@ -315,28 +317,43 @@ def main(group_number, epoch, ddddd):
                                        dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                        "-", "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-",
                                        position_angle, position_angle2])
+        x = velocity
+        y_real = intensity
 
-        ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
-        ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
-        ax[0].xaxis.set_minor_locator(minor_locator_level)
-        ax[0].set_title(date)
-        ax[1].set_aspect("equal", adjustable='box')
-        ax[1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
-                       np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
-        ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
-                       np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+        def norm(x, mean, sd):
+            norm = []
+            for i in range(x.size):
+                norm += [1.0 / (sd * np.sqrt(2 * np.pi)) * np.exp(-(x[i] - mean) ** 2 / (2 * sd ** 2))]
+            return np.array(norm)
 
-        ax[1].invert_xaxis()
-        ax[0].set_ylabel('Flux density (Jy)')
-        ax[1].set_ylabel('$\\Delta$ Dec (mas)')
-        ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-        ax[1].set_xlabel('$\\Delta$ RA (mas)')
+        p1 = [8.292, -6.086, 2.8962589178124705]
+        ps = [[0.79, -6.7006000000000006, 0.2],
+              [0.93, -6.525, 0.2],
+              [8.292, -6.086, 0.2]]
+
+        def res(p1, y, x):
+            y_fit = gauss(x, p1) + gauss(x, p1)
+            err = y - y_fit
+            return err
+
+        plsq = leastsq(res, x0=ps, args=(y_real, x))[0]
+        print("plsq", plsq, len(plsq))
+        y_est = gauss(q, [plsq[0], plsq[1], plsq[2]])
+        ax[0].plot(q, y_est, 'g', label='Fitted1')
+
+        y_est = gauss(q, [plsq[3], plsq[4], plsq[5]])
+        ax[0].plot(q, y_est, 'b', label='Fitted2')
+
+        y_est = gauss(q, [plsq[6], plsq[7], plsq[8]])
+        ax[0].plot(q, y_est, 'r', label='Fitted3')
+
+        '''
 
         ps = [[0.79, -6.7006000000000006, 0.29286133237421424],
               [0.93, -6.525, 0.36800573667026204],
               [8.292, -6.086, 2.8962589178124705]]
 
-        q = np.linspace(min(velocity), max(velocity), 10000)
+        q = np.linspace(min(velocity), max(velocity), len(velocity))
         hist_fits = list()
         for g in groups:
             index1 = g[0]
@@ -357,7 +374,7 @@ def main(group_number, epoch, ddddd):
                     if index1 <= point < index2:
                         sigma[point] = 1
                     else:
-                        sigma[point] = 0.000000001
+                        sigma[point] = 3000
 
                 coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p, method="lm", maxfev=100000,
                                               sigma=sigma, absolute_sigma=True)
@@ -407,9 +424,40 @@ def main(group_number, epoch, ddddd):
                 print("Distance between fit and points", line - dec_tmp)
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
-        ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
+        summ_hist = np.zeros(len(q))
+
+        for group in groups:
+            group_index = groups.index(group)
+            hist_fit = hist_fits[group_index]
+            index1 = group[0]
+            index2 = group[1]
+
+            for point2 in range(0, len(velocity)):
+                if index1 <= point2 < index2:
+                    summ_hist[point2] += 0.9 * hist_fit[point2]
+                else:
+                    summ_hist[point2] += 0.1 * hist_fit[point2]
+
+        ax[0].plot(q, summ_hist, c="k", label="Sum of all groups")
+        '''
+
+        ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
+        ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
+        ax[0].xaxis.set_minor_locator(minor_locator_level)
+        ax[0].set_title(date)
+        ax[1].set_aspect("equal", adjustable='box')
+        ax[1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
+                       np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
+        ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
+                       np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+
+        ax[0].set_ylabel('Flux density (Jy)')
+        ax[1].set_ylabel('$\\Delta$ Dec (mas)')
+        ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
+        ax[1].set_xlabel('$\\Delta$ RA (mas)')
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
+        ax[1].invert_xaxis()
         ax[0].legend(loc='upper left',)
         ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         plt.tight_layout()
