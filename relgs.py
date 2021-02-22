@@ -120,6 +120,7 @@ def main(group_number, epoch, ddddd):
         dec -= references_dec
 
         fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16), dpi=90)
+        fig2, ax2 = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=90)
         coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
 
         color = []
@@ -351,9 +352,11 @@ def main(group_number, epoch, ddddd):
 
                 coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                 hist_fit = gauss(q, *coeff)
+                hist_fit2 = gauss(x, *coeff)
 
                 hist_fits.append(hist_fit)
                 ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
+                ax2.scatter(x, y - hist_fit2, c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
@@ -402,8 +405,10 @@ def main(group_number, epoch, ddddd):
         ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
-        ax[0].legend(loc='upper left',)
+        ax[0].legend(loc='upper left')
         ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
+        ax2.legend(loc='upper left')
+        ax2.set_title("Residuals for spectre")
         plt.tight_layout()
         plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
         plt.show()
