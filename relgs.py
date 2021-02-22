@@ -77,7 +77,7 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    groups = [[0, 8], [7, 19]]
+    groups = [[0, 5], [5, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -325,7 +325,7 @@ def main(group_number, epoch, ddddd):
         ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
 
-        ps = [[0.79, -6.7006000000000006,  0.43855130828672717, 1.59, -6.4, 0.09816338421224098],
+        ps = [[0.79, -6.7006000000000006,  0.43855130828672717],
               [8.292, -6.086, 2.8962589178124705]]
 
         q = np.linspace(min(velocity), max(velocity), 10000)
@@ -339,12 +339,18 @@ def main(group_number, epoch, ddddd):
             if len(x) >= 3:
                 color = (random(), random(), random())
                 p = ps[groups.index(g)]
+
+                '''
                 if groups.index(g) == 0:
                     coeff, var_matrix = curve_fit(gauss2, x, y, p0=p, method="lm", maxfev=100000)
                     hist_fit = gauss2(q, *coeff)
                 else:
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     hist_fit = gauss(q, *coeff)
+                '''
+
+                coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
+                hist_fit = gauss(q, *coeff)
 
                 hist_fits.append(hist_fit)
                 ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
