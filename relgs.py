@@ -97,8 +97,7 @@ def main(group_number, epoch, ddddd):
         group_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
             np.loadtxt(input_file, unpack=True, usecols=(0, 2, 3, 5, 6))
 
-        dtype = [('group_nr', int), ('channel_nr', int), ('velocity', float), ('intensity', float),
-                 ("ra", float), ("dec", float)]
+        dtype = [('group_nr', int), ('velocity', float), ('intensity', float), ("ra", float), ("dec", float)]
         values = [(group_tmp[ch], velocity_tmp[ch], intensity_tmp[ch], ra_tmp[ch], dec_tmp[ch])
                   for ch in range(0, len(group_tmp))]
         data = np.array(values, dtype=dtype)
