@@ -67,12 +67,6 @@ def gauss2(x, *p):
     return a1 * np.exp(-(x - b1) ** 2 * np.log(2) / c1 ** 2) + a2 * np.exp(-(x - b2) ** 2 * np.log(2) / c2 ** 2)
 
 
-def gauss3(x, *p):
-    a1, b1, c1, a2, b2, c2, a3, b3, c3 = p
-    return a1 * np.exp(-(x - b1) ** 2 * np.log(2) / c1 ** 2) + a2 * np.exp(-(x - b2) ** 2 * np.log(2) / c2 ** 2) + a3 * \
-           np.exp(-(x - b3) ** 2 * np.log(2) / c3 ** 2)
-
-
 def firs_exceeds(array, value):
     index = -1
     for i in range(0, len(array)):
@@ -83,7 +77,7 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    groups = [[0, 5], [5, 19]]
+    groups = [[0, 8], [7, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -100,29 +94,29 @@ def main(group_number, epoch, ddddd):
             date.split("-")[1].strip() for date in get_configs("parameters", "dates").split(",")}[epoch]
 
     if check_if_group_is_in_file(input_file, group_number):
-        intensity = np.empty(0)
-        channels = np.empty(0)
-        ra = np.empty(0)
-        dec = np.empty(0)
-        velocity = np.empty(0)
-        group_tmp, channel_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
-            np.loadtxt(input_file, unpack=True, usecols=(0, 1, 2, 3, 5, 6))
+        group_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
+            np.loadtxt(input_file, unpack=True, usecols=(0, 2, 3, 5, 6))
 
-        for i in range(0, len(channel_tmp)):
-            if group_tmp[i] == int(group_number):
-                intensity = np.append(intensity, intensity_tmp[i])
-                channels = np.append(channels, channel_tmp[i])
-                ra = np.append(ra, ra_tmp[i])
-                dec = np.append(dec, dec_tmp[i])
-                velocity = np.append(velocity, velocity_tmp[i])
+        dtype = [('group_nr', int), ('channel_nr', int), ('velocity', float), ('intensity', float),
+                 ("ra", float), ("dec", float)]
+        values = [(group_tmp[ch], velocity_tmp[ch], intensity_tmp[ch], ra_tmp[ch], dec_tmp[ch])
+                  for ch in range(0, len(group_tmp))]
+        data = np.array(values, dtype=dtype)
+        data = np.sort(data, order=['group_nr', 'velocity'])
+        data = data[data["group_nr"] == group_number]
 
-        max_max_intensity = max(intensity)
-        reference_index = np.where(intensity == max_max_intensity)[0][0]
-        references_ra = ra[reference_index]
-        references_dec = dec[reference_index]
-        references_velocity = velocity[reference_index]
+        max_intensity = max(data["intensity"])
+        reference_index = np.where(data["intensity"] == max_intensity)[0][0]
+        references_ra = data["ra"][reference_index]
+        references_dec = data["dec"][reference_index]
+        references_velocity = data["velocity"][reference_index]
         print("references ra", references_ra, "references dec", references_dec,
               "references velocity", references_velocity)
+
+        velocity = data["velocity"]
+        intensity = data["intensity"]
+        ra = data["ra"]
+        dec = data["dec"]
         ra -= references_ra
         dec -= references_dec
 
@@ -332,7 +326,7 @@ def main(group_number, epoch, ddddd):
         ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
 
-        ps = [[0.79, -6.7006000000000006, 0.29286133237421424],
+        ps = [[0.79, -6.7006000000000006,  0.43855130828672717, 1.59, -6.4, 0.09816338421224098],
               [8.292, -6.086, 2.8962589178124705]]
 
         q = np.linspace(min(velocity), max(velocity), 10000)
@@ -345,13 +339,14 @@ def main(group_number, epoch, ddddd):
             y = intensity[index1:index2]
             if len(x) >= 3:
                 color = (random(), random(), random())
-                amplitude = max(y)
-                centre_of_peak_index = list(y).index(amplitude)
-                centre_of_peak = x[centre_of_peak_index]
-                standard_deviation = np.std(y)
                 p = ps[groups.index(g)]
-                coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
-                hist_fit = gauss(q, *coeff)
+                if groups.index(g) == 0:
+                    coeff, var_matrix = curve_fit(gauss2, x, y, p0=p, method="lm", maxfev=100000)
+                    hist_fit = gauss2(q, *coeff)
+                else:
+                    coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
+                    hist_fit = gauss(q, *coeff)
+
                 hist_fits.append(hist_fit)
                 ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
 
@@ -397,6 +392,8 @@ def main(group_number, epoch, ddddd):
                 print("Distance between fit and points", line - dec_tmp)
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
+        hist_fits[0][-1] *= 0.5
+        hist_fits[1][0] *= 0.5
         ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
