@@ -331,6 +331,7 @@ def main(group_number, epoch, ddddd):
 
         q = np.linspace(min(velocity), max(velocity), 10000)
         hist_fits = list()
+        hist_fits2 = list()
         for g in groups:
             index1 = g[0]
             index2 = g[1]
@@ -352,11 +353,10 @@ def main(group_number, epoch, ddddd):
 
                 coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                 hist_fit = gauss(q, *coeff)
-                hist_fit2 = gauss(x, *coeff)
-
+                hist_fit2 = gauss(velocity, *coeff)
                 hist_fits.append(hist_fit)
+                hist_fits2.append(hist_fit2)
                 ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
-                ax2.scatter(x, y - hist_fit2, c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
@@ -402,7 +402,9 @@ def main(group_number, epoch, ddddd):
 
         hist_fits[0][-1] *= 0.5
         hist_fits[1][0] *= 0.5
+
         ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
+        ax2.scatter(velocity, intensity - sum(hist_fits2), c=color)
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
         ax[0].legend(loc='upper left')
