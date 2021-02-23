@@ -404,7 +404,8 @@ def main(group_number, epoch, ddddd):
         hist_fits[1][0] *= 0.5
 
         ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
-        ax2.scatter(velocity, intensity - sum(hist_fits2), c=color)
+        ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
+        ax2.plot(velocity, intensity - sum(hist_fits2), "k.")
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
         ax[0].legend(loc='upper left')
