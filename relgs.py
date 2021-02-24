@@ -77,7 +77,7 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    groups = [[0, 5], [5, 19]]
+    groups = [[0, 5], [7, 19]]
     output = []
 
     matplotlib.use('TkAgg')
@@ -101,6 +101,8 @@ def main(group_number, epoch, ddddd):
         values = [(group_tmp[ch], velocity_tmp[ch], intensity_tmp[ch], ra_tmp[ch], dec_tmp[ch])
                   for ch in range(0, len(group_tmp))]
         data = np.array(values, dtype=dtype)
+        vel_max = max(data["velocity"])
+        vel_min = min(data["velocity"])
         data = np.sort(data, order=['group_nr', 'velocity'])
         data = data[data["group_nr"] == group_number]
 
@@ -310,34 +312,20 @@ def main(group_number, epoch, ddddd):
                                        "-", "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-",
                                        position_angle, position_angle2])
 
-        ax[0].set_xlim(min(velocity) - 0.2, max(velocity) + 0.5)
-        ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
-        ax[0].xaxis.set_minor_locator(minor_locator_level)
-        ax[0].set_title(date)
-        ax[1].set_aspect("equal", adjustable='box')
-        ax[1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
-                       np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
-        ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
-                       np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
-
-        ax[1].invert_xaxis()
-        ax[0].set_ylabel('Flux density (Jy)')
-        ax[1].set_ylabel('$\\Delta$ Dec (mas)')
-        ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-        ax[1].set_xlabel('$\\Delta$ RA (mas)')
-
         ps = [[0.79, -6.7006000000000006,  0.43855130828672717],
               [8.292, -6.086, 2.8962589178124705]]
 
-        q = np.linspace(min(velocity), max(velocity), 10000)
         hist_fits = list()
         hist_fits2 = list()
+        hist_fits3 = list()
+        q2 = np.linspace(min(velocity), max(velocity), 10000)
         for g in groups:
             index1 = g[0]
             index2 = g[1]
 
             x = velocity[index1:index2]
             y = intensity[index1:index2]
+            q = np.linspace(min(x), max(x), 10000)
             if len(x) >= 3:
                 color = (random(), random(), random())
                 p = ps[groups.index(g)]
@@ -356,7 +344,9 @@ def main(group_number, epoch, ddddd):
                 hist_fit2 = gauss(velocity, *coeff)
                 hist_fits.append(hist_fit)
                 hist_fits2.append(hist_fit2)
-                ax[0].plot(q, hist_fit, c=color, label="group is " + str(groups.index(g)))
+                hist_fit3 = gauss(q2, *coeff)
+                hist_fits3.append(hist_fit3)
+                ax[0].plot(q, hist_fit, '--', c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
@@ -400,12 +390,27 @@ def main(group_number, epoch, ddddd):
                 print("Distance between fit and points", line - dec_tmp)
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
-        hist_fits[0][-1] *= 0.5
-        hist_fits[1][0] *= 0.5
+        #hist_fits[0][-1] *= 0.5
+        #hist_fits[1][0] *= 0.5
 
-        ax[0].plot(q, sum(hist_fits), c="k", label="Sum of all groups")
+        q2 = np.linspace(min(velocity), max(velocity), 10000)
+        ax[0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
+        ax[0].set_xlim(vel_min - 0.2, vel_max + 0.5)
+        ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
+        ax[0].xaxis.set_minor_locator(minor_locator_level)
+        ax[0].set_title(date)
+        ax[1].set_aspect("equal", adjustable='box')
+        ax[1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
+                       np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
+        ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
+                       np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+        ax[1].invert_xaxis()
+        ax[0].set_ylabel('Flux density (Jy)')
+        ax[1].set_ylabel('$\\Delta$ Dec (mas)')
+        ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
+        ax[1].set_xlabel('$\\Delta$ RA (mas)')
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
         ax[0].legend(loc='upper left')
