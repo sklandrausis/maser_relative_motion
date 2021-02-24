@@ -419,8 +419,8 @@ def main(group_number, epoch, ddddd):
         header2 = ["sub_group_nr", "ra", "dec", "velocity", "vel_fit", "sigma", "max_intensity", "fit_amp", "vel_fit2",
                    "sigma2", "fit_amp2", "max_distance", "max_distance_au", "gradient", "gradient_au",
                    "position_angle", "position_angle2"]
-        np.savetxt("cloudlet_sub_" + str(group_number) + "._sats.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
-               header=",".join(header2))
+        np.savetxt("cloudlet_sub_" + "_" + epoch + "_" + str(group_number) + "._sats.csv",
+                   np.array(output, dtype=object), delimiter=", ", fmt='%s', header=",".join(header2))
     else:
         print("group is not in epoch")
         sys.exit()
