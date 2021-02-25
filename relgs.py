@@ -431,12 +431,12 @@ def main(group_number, ddddd):
         ax[index][1].xaxis.set_minor_locator(minor_locatorx)
         ax[index][1].yaxis.set_minor_locator(minor_locatory)
         ax[index][0].legend(loc='upper left')
-        ax[index][1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
+        ax[index][1].legend(loc='upper left', bbox_to_anchor=(1, 1), prop={'size': 8})
         ax2[index].legend(loc='upper left')
         ax2[index].set_title("Residuals for spectre")
 
     plt.tight_layout()
-    plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
+    fig.subplots_adjust(top=0.947, bottom=0.07, left=0.03, right=1, hspace=0, wspace=0)
     plt.show()
 
 
