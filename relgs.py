@@ -76,8 +76,7 @@ def firs_exceeds(array, value):
     return index
 
 
-def main(group_number, epoch, ddddd):
-    groups = [[0, 5], [7, 19]]
+def main(group_number, ddddd):
     output = []
 
     matplotlib.use('TkAgg')
@@ -89,15 +88,33 @@ def main(group_number, epoch, ddddd):
     minor_locatory = MultipleLocator(20)
     minor_locator_level = MultipleLocator(1)
 
-    input_file = "groups/" + epoch + ".groups"
-    date = {date.split("-")[0].strip():
-            date.split("-")[1].strip() for date in get_configs("parameters", "dates").split(",")}[epoch]
+    dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
+             get_configs("parameters", "dates").split(",")}
 
-    if check_if_group_is_in_file(input_file, group_number):
+    file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
+    input_files = []
+
+    for file in file_order:
+        input_files.append(file)
+
+    bad_files = []
+    for file in input_files:
+        if not check_if_group_is_in_file("groups/" + file.split(".")[0] + ".groups", group_number):
+            bad_files.append(file)
+            del dates[file.split(".")[0]]
+
+    input_files = [file for file in input_files if file not in bad_files]
+    dtype = [('group_nr', int), ('velocity', float), ('intensity', float), ("ra", float), ("dec", float)]
+
+    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=90)
+    fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
+    for index in range(0, len(input_files)):
+        epoch = input_files[index].split(".")[0]
+        date = dates[epoch]
+        groups = [[int(g.split(",")[0]), int(g.split(",")[1])] for g in get_configs("grouops", epoch).split(";")]
+        input_file = "groups/" + epoch + ".groups"
         group_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
             np.loadtxt(input_file, unpack=True, usecols=(0, 2, 3, 5, 6))
-
-        dtype = [('group_nr', int), ('velocity', float), ('intensity', float), ("ra", float), ("dec", float)]
         values = [(group_tmp[ch], velocity_tmp[ch], intensity_tmp[ch], ra_tmp[ch], dec_tmp[ch])
                   for ch in range(0, len(group_tmp))]
         data = np.array(values, dtype=dtype)
@@ -121,10 +138,7 @@ def main(group_number, epoch, ddddd):
         ra -= references_ra
         dec -= references_dec
 
-        fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16), dpi=90)
-        fig2, ax2 = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=90)
         coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
-
         color = []
         for v in range(0, len(velocity)):
             if velocity[v] < min(velocity) or velocity[v] > max(velocity):
@@ -136,20 +150,17 @@ def main(group_number, epoch, ddddd):
 
             el = Circle((ra[v], dec[v]), radius=0.05 * np.log(intensity[v] * 1000), angle=0, lw=2)
             el.set_facecolor(c)
-            ax[1].add_artist(el)
+            ax[index][1].add_artist(el)
 
-        ax[0].scatter(velocity, intensity, color=color, lw=2)
-
+        ax[index][0].scatter(velocity, intensity, color=color, lw=2)
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
-        ax[1].plot(ra, line, 'r', label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
-                   format(slope, intercept, p_value, std_err))
+        ax[index][1].plot(ra, line, 'r', label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
+                          format(slope, intercept, p_value, std_err))
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
-
-        print("Distance between fit and points", line-dec)
-
+        print("Distance between fit and points", line - dec)
         print("Pearsonr correlation", pearsonr(ra, line))
 
         max_separation = {"r": 0, "d": -1, "separation": 0}
@@ -166,8 +177,8 @@ def main(group_number, epoch, ddddd):
         m, b = np.polyfit([ra[max_separation["r"]], ra[max_separation["d"]]],
                           [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
         if ddddd:
-            ax[1].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
-                       [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
+            ax[index][1].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
+                              [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
         position_angle = 90 + np.degrees(np.arctan(m))
         print("position angle is ", position_angle)
@@ -189,7 +200,6 @@ def main(group_number, epoch, ddddd):
                 intensity_tmp = [a, b]
                 ra_tmp = [e, f]
                 dec_tmp = [g, h]
-
             else:
                 velocity_tmp = [velocity]
                 intensity_tmp = [intensity]
@@ -224,8 +234,8 @@ def main(group_number, epoch, ddddd):
                     perrs = []
                     coeffs = []
                     for p in ps:
-                        #if epoch == "ea063":
-                            #p = [0.035, -7.75, 0.001]
+                        # if epoch == "ea063":
+                        # p = [0.035, -7.75, 0.001]
                         try:
                             if len(p) == 3:
                                 coeff, var_matrix = curve_fit(gauss, velocity_tmp[gauss_nr], intensity_tmp[gauss_nr],
@@ -247,7 +257,7 @@ def main(group_number, epoch, ddddd):
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k--', label="Fit for all data")
+                            ax[index][0].plot(q, hist_fit, 'k--', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -268,7 +278,7 @@ def main(group_number, epoch, ddddd):
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
+                            ax[index][0].plot(q, hist_fit, 'k', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
@@ -312,13 +322,14 @@ def main(group_number, epoch, ddddd):
                                        "-", "-", intensity[max_intensity_index], "-", "-", "-", "-", "-", "-", "-",
                                        position_angle, position_angle2])
 
-        ps = [[0.79, -6.7006000000000006,  0.43855130828672717],
+        ps = [[0.79, -6.7006000000000006, 0.43855130828672717],
               [8.292, -6.086, 2.8962589178124705]]
 
         hist_fits = list()
         hist_fits2 = list()
         hist_fits3 = list()
         q2 = np.linspace(min(velocity), max(velocity), 10000)
+
         for g in groups:
             index1 = g[0]
             index2 = g[1]
@@ -326,6 +337,7 @@ def main(group_number, epoch, ddddd):
             x = velocity[index1:index2]
             y = intensity[index1:index2]
             q = np.linspace(min(x), max(x), 10000)
+
             if len(x) >= 3:
                 color = (random(), random(), random())
                 p = ps[groups.index(g)]
@@ -337,6 +349,7 @@ def main(group_number, epoch, ddddd):
                 else:
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     hist_fit = gauss(q, *coeff)
+                    
                 '''
 
                 coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
@@ -346,13 +359,13 @@ def main(group_number, epoch, ddddd):
                 hist_fits2.append(hist_fit2)
                 hist_fit3 = gauss(q2, *coeff)
                 hist_fits3.append(hist_fit3)
-                ax[0].plot(q, hist_fit, '--', c=color, label="group is " + str(groups.index(g)))
+                ax[index][0].plot(q, hist_fit, '--', c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
                 slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
                 line = slope * ra_tmp + intercept
-                ax[1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
+                ax[index][1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
                            format(slope, intercept, p_value, std_err))
 
                 max_separation = {"r": 0, "d": -1, "separation": 0}
@@ -390,52 +403,47 @@ def main(group_number, epoch, ddddd):
                 print("Distance between fit and points", line - dec_tmp)
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
-        #hist_fits[0][-1] *= 0.5
-        #hist_fits[1][0] *= 0.5
+            header2 = ["sub_group_nr", "ra", "dec", "velocity", "vel_fit", "sigma", "max_intensity", "fit_amp",
+                       "vel_fit2",
+                       "sigma2", "fit_amp2", "max_distance", "max_distance_au", "gradient", "gradient_au",
+                       "position_angle", "position_angle2"]
+            np.savetxt("cloudlet_sub_" + "_" + epoch + "_" + str(group_number) + "._sats.csv",
+                       np.array(output, dtype=object), delimiter=", ", fmt='%s', header=",".join(header2))
 
         q2 = np.linspace(min(velocity), max(velocity), 10000)
-        ax[0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
-        ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
-        ax2.plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
-        ax[0].set_xlim(vel_min - 0.2, vel_max + 0.5)
-        ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
-        ax[0].xaxis.set_minor_locator(minor_locator_level)
-        ax[0].set_title(date)
-        ax[1].set_aspect("equal", adjustable='box')
-        ax[1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
+        ax[index][0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
+        ax2[index].plot(velocity, intensity - sum(hist_fits2), "k-")
+        ax2[index].plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
+        ax[index][0].set_xlim(vel_min - 0.2, vel_max + 0.5)
+        ax[index][0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
+        ax[index][0].xaxis.set_minor_locator(minor_locator_level)
+        ax[index][0].set_title(date)
+        ax[index][1].set_aspect("equal", adjustable='box')
+        ax[index][1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
                        np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
-        ax[1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
+        ax[index][1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
                        np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
-        ax[1].invert_xaxis()
-        ax[0].set_ylabel('Flux density (Jy)')
-        ax[1].set_ylabel('$\\Delta$ Dec (mas)')
-        ax[0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-        ax[1].set_xlabel('$\\Delta$ RA (mas)')
-        ax[1].xaxis.set_minor_locator(minor_locatorx)
-        ax[1].yaxis.set_minor_locator(minor_locatory)
-        ax[0].legend(loc='upper left')
-        ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
-        ax2.legend(loc='upper left')
-        ax2.set_title("Residuals for spectre")
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
-        plt.show()
+        ax[index][1].invert_xaxis()
+        ax[index][0].set_ylabel('Flux density (Jy)')
+        ax[index][1].set_ylabel('$\\Delta$ Dec (mas)')
+        ax[index][0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
+        ax[index][1].set_xlabel('$\\Delta$ RA (mas)')
+        ax[index][1].xaxis.set_minor_locator(minor_locatorx)
+        ax[index][1].yaxis.set_minor_locator(minor_locatory)
+        ax[index][0].legend(loc='upper left')
+        ax[index][1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
+        ax2[index].legend(loc='upper left')
+        ax2[index].set_title("Residuals for spectre")
 
-        header2 = ["sub_group_nr", "ra", "dec", "velocity", "vel_fit", "sigma", "max_intensity", "fit_amp", "vel_fit2",
-                   "sigma2", "fit_amp2", "max_distance", "max_distance_au", "gradient", "gradient_au",
-                   "position_angle", "position_angle2"]
-        np.savetxt("cloudlet_sub_" + "_" + epoch + "_" + str(group_number) + "._sats.csv",
-                   np.array(output, dtype=object), delimiter=", ", fmt='%s', header=",".join(header2))
-    else:
-        print("group is not in epoch")
-        sys.exit()
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
+    plt.show()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot group')
     parser.add_argument('group_number', type=int, help='group number')
-    parser.add_argument('epoch', type=str, help='epoch name', choices=["el032", "em064c", "em064d", "es066e", "ea063"])
     parser.add_argument('--d', type=str2bool, help='plot line', default=True)
     args = parser.parse_args()
-    main(args.group_number, args.epoch, args.d)
+    main(args.group_number, args.d)
     sys.exit(0)
