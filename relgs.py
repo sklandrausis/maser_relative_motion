@@ -435,7 +435,7 @@ def main(group_number, ddddd):
         ax2[index].legend(loc='upper left')
         ax2[index].set_title("Residuals for spectre")
 
-    plt.tight_layout()
+    fig.tight_layout()
     fig.subplots_adjust(top=0.947, bottom=0.07, left=0.03, right=1, hspace=0, wspace=0)
     plt.show()
 
