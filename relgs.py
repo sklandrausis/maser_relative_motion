@@ -106,20 +106,20 @@ def main(group_number, ddddd):
     input_files = [file for file in input_files if file not in bad_files]
     dtype = [('group_nr', int), ('velocity', float), ('intensity', float), ("ra", float), ("dec", float)]
 
-    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=90)
-    fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
+    ra_max = []
+    ra_min = []
+    dec_max = []
+    dec_min = []
+    datas = dict()
+
     for index in range(0, len(input_files)):
         epoch = input_files[index].split(".")[0]
-        date = dates[epoch]
-        groups = [[int(g.split(",")[0]), int(g.split(",")[1])] for g in get_configs("grouops", epoch).split(";")]
         input_file = "groups/" + epoch + ".groups"
         group_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
             np.loadtxt(input_file, unpack=True, usecols=(0, 2, 3, 5, 6))
         values = [(group_tmp[ch], velocity_tmp[ch], intensity_tmp[ch], ra_tmp[ch], dec_tmp[ch])
                   for ch in range(0, len(group_tmp))]
         data = np.array(values, dtype=dtype)
-        vel_max = max(data["velocity"])
-        vel_min = min(data["velocity"])
         data = np.sort(data, order=['group_nr', 'velocity'])
         data = data[data["group_nr"] == group_number]
 
@@ -128,17 +128,32 @@ def main(group_number, ddddd):
         references_ra = data["ra"][reference_index]
         references_dec = data["dec"][reference_index]
         references_velocity = data["velocity"][reference_index]
+        data["ra"] -= references_ra
+        data["dec"] -= references_dec
+        datas[epoch] = data
+
         print("references ra", references_ra, "references dec", references_dec,
               "references velocity", references_velocity)
 
+        ra_max.append(max(data["ra"]))
+        ra_min.append(min(data["ra"]))
+        dec_max.append(max(data["dec"]))
+        dec_min.append(min(data["dec"]))
+
+    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=90)
+    fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
+    coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
+    for index in range(0, len(input_files)):
+        epoch = input_files[index].split(".")[0]
+        date = dates[epoch]
+        groups = [[int(g.split(",")[0]), int(g.split(",")[1])] for g in get_configs("grouops", epoch).split(";")]
+
+        data = datas[epoch]
         velocity = data["velocity"]
         intensity = data["intensity"]
         ra = data["ra"]
         dec = data["dec"]
-        ra -= references_ra
-        dec -= references_dec
 
-        coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
         color = []
         for v in range(0, len(velocity)):
             if velocity[v] < min(velocity) or velocity[v] > max(velocity):
@@ -419,10 +434,10 @@ def main(group_number, ddddd):
         ax[index][0].xaxis.set_minor_locator(minor_locator_level)
         ax[index][0].text(-5.75, 5, date)
         ax[index][1].set_aspect("equal", adjustable='box')
-        ax[index][1].set_xlim(np.mean((max(ra), min(ra))) - (coord_range / 2) - 0.5,
-                       np.mean((max(ra), min(ra))) + (coord_range / 2) + 0.5)
-        ax[index][1].set_ylim(np.mean((max(dec), min(dec))) - (coord_range / 2) - 0.5,
-                       np.mean((max(dec), min(dec))) + (coord_range / 2) + 0.5)
+        ax[index][1].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
+        ax[index][1].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
+                              np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
         ax[index][1].invert_xaxis()
         ax[index][1].set_ylabel('$\\Delta$ Dec (mas)')
         ax[index][1].xaxis.set_minor_locator(minor_locatorx)
