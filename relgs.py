@@ -448,6 +448,7 @@ def main(group_number, ddddd):
 
     for ax_index in range(0, len(input_files) - 1):
         ax[ax_index][1].axes.get_xaxis().set_visible(False)
+        ax[ax_index][0].axes.get_xaxis().set_visible(False)
 
     ax[-1][1].set_xlabel('$\\Delta$ RA (mas)')
     ax[-1][0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
