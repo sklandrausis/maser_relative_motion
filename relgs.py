@@ -140,7 +140,8 @@ def main(group_number, ddddd):
         dec_max.append(max(data["dec"]))
         dec_min.append(min(data["dec"]))
 
-    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=90)
+    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=120,
+                           gridspec_kw={'width_ratios': [2, 3]})
     fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     for index in range(0, len(input_files)):
