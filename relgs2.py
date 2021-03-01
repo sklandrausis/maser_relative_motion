@@ -142,8 +142,7 @@ def main(group_number, epoch, ddddd):
 
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
-        ax[1].plot(ra, line, 'r', label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
-                   format(slope, intercept, p_value, std_err))
+        ax[1].plot(ra, line, 'r')
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
@@ -352,8 +351,7 @@ def main(group_number, epoch, ddddd):
                 dec_tmp = dec[index1:index2]
                 slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
                 line = slope * ra_tmp + intercept
-                ax[1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
-                           format(slope, intercept, p_value, std_err))
+                ax[1].plot(ra_tmp, line, c=color)
 
                 max_separation = {"r": 0, "d": -1, "separation": 0}
                 sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
@@ -397,7 +395,7 @@ def main(group_number, epoch, ddddd):
         ax[0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
-        ax[0].set_xlim(vel_min - 0.2, vel_max + 0.5)
+        ax[0].set_xlim(vel_min, vel_max)
         ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
         ax[0].xaxis.set_minor_locator(minor_locator_level)
         ax[0].set_title(date)
@@ -414,7 +412,6 @@ def main(group_number, epoch, ddddd):
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
         ax[0].legend(loc='upper left')
-        ax[1].legend(loc='upper left', bbox_to_anchor=(1.05, 1))
         ax2.legend(loc='upper left')
         ax2.set_title("Residuals for spectre")
         plt.tight_layout()

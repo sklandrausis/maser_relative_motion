@@ -140,8 +140,7 @@ def main(group_number, ddddd):
         dec_max.append(max(data["dec"]))
         dec_min.append(min(data["dec"]))
 
-    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=120,
-                           gridspec_kw={'width_ratios': [2, 3]})
+    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=120)
     fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     for index in range(0, len(input_files)):
@@ -171,8 +170,7 @@ def main(group_number, ddddd):
         ax[index][0].scatter(velocity, intensity, color=color, lw=2)
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
-        ax[index][1].plot(ra, line, 'r', label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
-                          format(slope, intercept, p_value, std_err))
+        ax[index][1].plot(ra, line, 'r')
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
@@ -381,8 +379,7 @@ def main(group_number, ddddd):
                 dec_tmp = dec[index1:index2]
                 slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
                 line = slope * ra_tmp + intercept
-                ax[index][1].plot(ra_tmp, line, c=color, label='y={:.2f}x+{:.2f} p value {:.2f} std err {:.2f}'.
-                           format(slope, intercept, p_value, std_err))
+                ax[index][1].plot(ra_tmp, line, c=color)
 
                 max_separation = {"r": 0, "d": -1, "separation": 0}
                 sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
@@ -430,8 +427,8 @@ def main(group_number, ddddd):
         ax[index][0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
-        ax[index][0].set_xlim(-7.3, -5.2)
-        ax[index][0].set_ylim(- 0.5, 65)
+        ax[index][0].set_xlim(-7.2, -5.3)
+        ax[index][0].set_ylim(-0.5, 65)
         ax[index][0].xaxis.set_minor_locator(minor_locator_level)
         ax[index][0].text(-5.75, 5, date)
         ax[index][1].set_aspect("equal", adjustable='box')
@@ -443,7 +440,6 @@ def main(group_number, ddddd):
         ax[index][1].set_ylabel('$\\Delta$ Dec (mas)')
         ax[index][1].xaxis.set_minor_locator(minor_locatorx)
         ax[index][1].yaxis.set_minor_locator(minor_locatory)
-        ax[index][1].legend(loc='upper left', bbox_to_anchor=(1, 1), prop={'size': 8})
         ax2[index].legend(loc='upper left')
         ax2[index].set_title("Residuals for spectre")
 
