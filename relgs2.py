@@ -246,7 +246,7 @@ def main(group_number, epoch, ddddd):
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k--', label="Fit for all data")
+                            ax[0].plot(q, hist_fit, 'k--')
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -267,7 +267,7 @@ def main(group_number, epoch, ddddd):
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k', label="Fit for all data")
+                            ax[0].plot(q, hist_fit, 'k')
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
@@ -345,7 +345,7 @@ def main(group_number, epoch, ddddd):
                 hist_fits2.append(hist_fit2)
                 hist_fit3 = gauss(q2, *coeff)
                 hist_fits3.append(hist_fit3)
-                ax[0].plot(q, hist_fit, '--', c=color, label="group is " + str(groups.index(g)))
+                ax[0].plot(q, hist_fit, '--', c=color)
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
@@ -392,7 +392,7 @@ def main(group_number, epoch, ddddd):
         #hist_fits[1][0] *= 0.5
 
         q2 = np.linspace(min(velocity), max(velocity), 10000)
-        ax[0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
+        ax[0].plot(q2, sum(hist_fits3), c="k")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
         ax[0].set_xlim(vel_min, vel_max)
@@ -411,7 +411,6 @@ def main(group_number, epoch, ddddd):
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
-        ax[0].legend(loc='upper left')
         ax2.legend(loc='upper left')
         ax2.set_title("Residuals for spectre")
         plt.tight_layout()
