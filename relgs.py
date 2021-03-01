@@ -140,7 +140,7 @@ def main(group_number, ddddd):
         dec_max.append(max(data["dec"]))
         dec_min.append(min(data["dec"]))
 
-    fig, ax = plt.subplots(nrows=len(input_files), ncols=2, figsize=(16, 16), dpi=120)
+    fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=120)
     fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     for index in range(0, len(input_files)):
@@ -165,12 +165,12 @@ def main(group_number, ddddd):
 
             el = Circle((ra[v], dec[v]), radius=0.05 * np.log(intensity[v] * 1000), angle=0, lw=2)
             el.set_facecolor(c)
-            ax[index][1].add_artist(el)
+            ax[1][index].add_artist(el)
 
-        ax[index][0].scatter(velocity, intensity, color=color, lw=2)
+        ax[0][index].scatter(velocity, intensity, color=color, lw=2)
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
-        ax[index][1].plot(ra, line, 'r')
+        ax[1][index].plot(ra, line, 'r')
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
@@ -191,7 +191,7 @@ def main(group_number, ddddd):
         m, b = np.polyfit([ra[max_separation["r"]], ra[max_separation["d"]]],
                           [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
         if ddddd:
-            ax[index][1].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
+            ax[1][index].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
                               [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
         position_angle = 90 + np.degrees(np.arctan(m))
@@ -271,7 +271,7 @@ def main(group_number, ddddd):
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
-                            ax[index][0].plot(q, hist_fit, 'k--', label="Fit for all data")
+                            ax[0][index].plot(q, hist_fit, 'k--', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -292,7 +292,7 @@ def main(group_number, ddddd):
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
-                            ax[index][0].plot(q, hist_fit, 'k', label="Fit for all data")
+                            ax[0][index].plot(q, hist_fit, 'k', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
@@ -373,13 +373,13 @@ def main(group_number, ddddd):
                 hist_fits2.append(hist_fit2)
                 hist_fit3 = gauss(q2, *coeff)
                 hist_fits3.append(hist_fit3)
-                ax[index][0].plot(q, hist_fit, '--', c=color, label="group is " + str(groups.index(g)))
+                ax[0][index].plot(q, hist_fit, '--', c=color, label="group is " + str(groups.index(g)))
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
                 slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
                 line = slope * ra_tmp + intercept
-                ax[index][1].plot(ra_tmp, line, c=color)
+                ax[1][index].plot(ra_tmp, line, c=color)
 
                 max_separation = {"r": 0, "d": -1, "separation": 0}
                 sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
@@ -424,34 +424,35 @@ def main(group_number, ddddd):
                        np.array(output, dtype=object), delimiter=", ", fmt='%s', header=",".join(header2))
 
         q2 = np.linspace(min(velocity), max(velocity), 10000)
-        ax[index][0].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
+        ax[0][index].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
-        ax[index][0].set_xlim(-7.2, -5.3)
-        ax[index][0].set_ylim(-0.5, 65)
-        ax[index][0].xaxis.set_minor_locator(minor_locator_level)
-        ax[index][0].text(-5.75, 5, date)
-        ax[index][1].set_aspect("equal", adjustable='box')
-        ax[index][1].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
+        ax[0][index].set_xlim(-7.2, -5.3)
+        ax[0][index].set_ylim(-0.5, 65)
+        ax[0][index].xaxis.set_minor_locator(minor_locator_level)
+        ax[0][index].set_title(date)
+        ax[1][index].set_aspect("equal", adjustable='box')
+        ax[1][index].set_xlim(np.mean((max(ra_max), min(ra_min))) - (coord_range / 2) - 0.5,
                               np.mean((max(ra_max), min(ra_min))) + (coord_range / 2) + 0.5)
-        ax[index][1].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
+        ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
                               np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
-        ax[index][1].invert_xaxis()
-        ax[index][1].set_ylabel('$\\Delta$ Dec (mas)')
-        ax[index][1].xaxis.set_minor_locator(minor_locatorx)
-        ax[index][1].yaxis.set_minor_locator(minor_locatory)
+        ax[1][index].invert_xaxis()
+        ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
+        ax[1][index].xaxis.set_minor_locator(minor_locatorx)
+        ax[1][index].yaxis.set_minor_locator(minor_locatory)
+        ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax2[index].legend(loc='upper left')
         ax2[index].set_title("Residuals for spectre")
 
+    '''
     for ax_index in range(0, len(input_files) - 1):
         ax[ax_index][1].axes.get_xaxis().set_visible(False)
         ax[ax_index][0].axes.get_xaxis().set_visible(False)
+    '''
 
-    ax[-1][1].set_xlabel('$\\Delta$ RA (mas)')
-    ax[-1][0].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
     ax[0][0].set_ylabel('Flux density (Jy)')
-    fig.subplots_adjust(top=0.947, bottom=0.07, left=0.03, right=1, hspace=0, wspace=0)
-    fig.tight_layout(pad=0)
+    ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
+    fig.subplots_adjust(top=0.947, bottom=0.07, left=0.03, right=1, hspace=0.3, wspace=0)
     fig.tight_layout(pad=0)
     plt.show()
 
