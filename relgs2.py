@@ -142,7 +142,7 @@ def main(group_number, epoch, ddddd):
 
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
-        ax[1].plot(ra, line, 'r')
+        ax[1].plot(ra, line, 'r', linewidth=10)
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
@@ -164,7 +164,7 @@ def main(group_number, epoch, ddddd):
                           [dec[max_separation["r"]], dec[max_separation["d"]]], 1)
         if ddddd:
             ax[1].plot([ra[max_separation["r"]], ra[max_separation["d"]]],
-                       [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
+                       [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--", linewidth=10)
 
         position_angle = 90 + np.degrees(np.arctan(m))
         print("position angle is ", position_angle)
@@ -244,7 +244,7 @@ def main(group_number, epoch, ddddd):
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k--')
+                            ax[0].plot(q, hist_fit, 'k--', linewidth=10)
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -265,7 +265,7 @@ def main(group_number, epoch, ddddd):
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
-                            ax[0].plot(q, hist_fit, 'k')
+                            ax[0].plot(q, hist_fit, 'k--', linewidth=10)
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
@@ -343,13 +343,13 @@ def main(group_number, epoch, ddddd):
                 hist_fits2.append(hist_fit2)
                 hist_fit3 = gauss(q2, *coeff)
                 hist_fits3.append(hist_fit3)
-                ax[0].plot(q, hist_fit, '--', c=color)
+                ax[0].plot(q, hist_fit, '--', c=color, linewidth=10)
 
                 ra_tmp = ra[index1:index2]
                 dec_tmp = dec[index1:index2]
                 slope, intercept, r_value, p_value, std_err = stats.linregress(ra_tmp, dec_tmp)
                 line = slope * ra_tmp + intercept
-                ax[1].plot(ra_tmp, line, c=color)
+                ax[1].plot(ra_tmp, line, c=color, linewidth=10)
 
                 max_separation = {"r": 0, "d": -1, "separation": 0}
                 sky_coords = [SkyCoord(ra_tmp[coord], dec_tmp[coord], unit=u.arcsec)
@@ -387,7 +387,7 @@ def main(group_number, epoch, ddddd):
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
         q2 = np.linspace(min(velocity), max(velocity), 10000)
-        ax[0].plot(q2, sum(hist_fits3), c="k")
+        ax[0].plot(q2, sum(hist_fits3), c="k", linewidth=10)
         ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
         ax[0].set_xlim(vel_min - 0.1, vel_max + 0.1)
