@@ -1,6 +1,5 @@
 import sys
 import argparse
-from random import random
 
 import numpy as np
 import matplotlib
@@ -316,6 +315,7 @@ def main(group_number, epoch, ddddd):
         hist_fits2 = list()
         hist_fits3 = list()
         q2 = np.linspace(min(velocity), max(velocity), 10000)
+        colors = ["r", "b", "y", "g"]
         for g in groups:
             index1 = g[0]
             index2 = g[1]
@@ -324,7 +324,7 @@ def main(group_number, epoch, ddddd):
             y = intensity[index1:index2]
             q = np.linspace(min(x), max(x), 10000)
             if len(x) >= 3:
-                color = (random(), random(), random())
+                color = colors[groups.index(g)]
                 p = ps[groups.index(g)]
 
                 '''
