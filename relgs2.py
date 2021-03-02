@@ -101,8 +101,6 @@ def main(group_number, epoch, ddddd):
         values = [(group_tmp[ch], velocity_tmp[ch], intensity_tmp[ch], ra_tmp[ch], dec_tmp[ch])
                   for ch in range(0, len(group_tmp))]
         data = np.array(values, dtype=dtype)
-        vel_max = max(data["velocity"])
-        vel_min = min(data["velocity"])
         data = np.sort(data, order=['group_nr', 'velocity'])
         data = data[data["group_nr"] == group_number]
 
@@ -115,13 +113,15 @@ def main(group_number, epoch, ddddd):
               "references velocity", references_velocity)
 
         velocity = data["velocity"]
+        vel_max = max(velocity)
+        vel_min = min(velocity)
         intensity = data["intensity"]
         ra = data["ra"]
         dec = data["dec"]
         ra -= references_ra
         dec -= references_dec
 
-        fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(16, 16), dpi=90)
+        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 16), dpi=90)
         fig2, ax2 = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=90)
         coord_range = max(max(ra) - min(ra), max(dec) - min(dec))
 
@@ -146,9 +146,7 @@ def main(group_number, epoch, ddddd):
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
-
         print("Distance between fit and points", line-dec)
-
         print("Pearsonr correlation", pearsonr(ra, line))
 
         max_separation = {"r": 0, "d": -1, "separation": 0}
@@ -388,14 +386,11 @@ def main(group_number, epoch, ddddd):
                 print("Distance between fit and points", line - dec_tmp)
                 print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
-        #hist_fits[0][-1] *= 0.5
-        #hist_fits[1][0] *= 0.5
-
         q2 = np.linspace(min(velocity), max(velocity), 10000)
         ax[0].plot(q2, sum(hist_fits3), c="k")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2.plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
-        ax[0].set_xlim(vel_min, vel_max)
+        ax[0].set_xlim(vel_min - 0.1, vel_max + 0.1)
         ax[0].set_ylim((min(intensity)) - 0.5, (max(intensity) + 0.5))
         ax[0].xaxis.set_minor_locator(minor_locator_level)
         ax[0].set_title(date)
