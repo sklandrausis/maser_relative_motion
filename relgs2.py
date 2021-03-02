@@ -141,7 +141,7 @@ def main(group_number, epoch, ddddd):
 
         slope, intercept, r_value, p_value, std_err = stats.linregress(ra, dec)
         line = slope * ra + intercept
-        ax[1].plot(ra, line, 'r', linewidth=10)
+        ax[1].plot(ra, line, 'm', linewidth=10)
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
         print("position angle from linear fit is ", position_angle2)
