@@ -140,6 +140,13 @@ def main(group_number, ddddd):
         dec_max.append(max(data["dec"]))
         dec_min.append(min(data["dec"]))
 
+    max_vel = []
+    min_vel = []
+    for index in range(0, len(input_files)):
+        velocity = data["velocity"]
+        max_vel.append(max(velocity))
+        min_vel.append(min(velocity))
+
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=120)
     fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
@@ -159,7 +166,7 @@ def main(group_number, ddddd):
             if velocity[v] < min(velocity) or velocity[v] > max(velocity):
                 c = (0, 0, 0)
             else:
-                c = cm.turbo((velocity[v] - min(velocity)) / (max(velocity) - min(velocity)), 1)
+                c = cm.turbo((velocity[v] - min(min_vel)) / (max(max_vel) - min(min_vel)), 1)
 
             color.append(c)
 
