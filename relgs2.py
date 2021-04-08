@@ -76,7 +76,7 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, epoch, ddddd):
-    groups = [[0, 5], [7, 19]]
+    groups = [[int(g.split(",")[0]), int(g.split(",")[1])] for g in get_configs("grouops", epoch).split(";")]
     output = []
 
     matplotlib.use('TkAgg')
@@ -320,6 +320,7 @@ def main(group_number, epoch, ddddd):
             index1 = g[0]
             index2 = g[1]
 
+            print("a", index1,index2)
             x = velocity[index1:index2]
             y = intensity[index1:index2]
             q = np.linspace(min(x), max(x), 10000)
