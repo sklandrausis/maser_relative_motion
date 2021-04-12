@@ -59,7 +59,7 @@ def main():
                 main_index = np.where(fit_amp == max(fit_amp))[0][0]
                 main_vel_fit = vel_fit[main_index]
                 main_fit_amp = fit_amp[main_index]
-                ax.scatter(date, main_vel_fit, s=100*main_fit_amp, color=color, alpha=0.9)
+                ax.scatter(date, main_vel_fit, s=100*main_fit_amp, edgecolor=color, alpha=0.9, facecolors='none')
 
     ax.set_xlabel("Observation epoch date")
     ax.set_ylabel("Velocity [km s$^{-1}$]")
