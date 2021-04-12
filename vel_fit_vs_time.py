@@ -47,7 +47,7 @@ def main():
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=120)
 
     for group in groups:
-        color = [random.uniform(0.4, 0.6), random.uniform(0.4, 0.6), random.uniform(0.4, 0.6)]
+        color = [random.uniform(0.3, 1.0), random.uniform(0.0, 0.3), random.uniform(0.0, 0.3)]
         cloudlet_sub_files_for_group = cloudlet_sub_files_for_all_groups[group]
         for file in cloudlet_sub_files_for_group:
             if file != 0:
