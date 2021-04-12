@@ -47,7 +47,7 @@ def main():
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=120)
 
     for group in groups:
-        color = [random.uniform(0.8, 1), random.uniform(0.0, 0.3), random.uniform(0.0, 0.3)]
+        color = [random.uniform(0.4, 0.6), random.uniform(0.4, 0.6), random.uniform(0.4, 0.6)]
         cloudlet_sub_files_for_group = cloudlet_sub_files_for_all_groups[group]
         for file in cloudlet_sub_files_for_group:
             if file != 0:
@@ -59,7 +59,7 @@ def main():
                 main_index = np.where(fit_amp == max(fit_amp))[0][0]
                 main_vel_fit = vel_fit[main_index]
                 main_fit_amp = fit_amp[main_index]
-                ax.scatter(date, main_vel_fit, s=10 * main_fit_amp, color=color, alpha=0.5)
+                ax.scatter(date, main_vel_fit, s=100*main_fit_amp, color=color, alpha=0.9)
 
     ax.set_xlabel("Observation epoch date")
     ax.set_ylabel("Velocity [km s$^{-1}$]")
