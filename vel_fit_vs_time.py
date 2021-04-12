@@ -1,7 +1,7 @@
 import sys
 import os
 import argparse
-from random import random
+import random
 
 import numpy as np
 from astropy.io import ascii
@@ -47,7 +47,7 @@ def main():
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=120)
 
     for group in groups:
-        color = [random(), random(), random()]
+        color = [random.uniform(0.8, 1), random.uniform(0.0, 0.3), random.uniform(0.0, 0.3)]
         cloudlet_sub_files_for_group = cloudlet_sub_files_for_all_groups[group]
         for file in cloudlet_sub_files_for_group:
             if file != 0:
