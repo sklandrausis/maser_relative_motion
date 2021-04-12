@@ -62,7 +62,7 @@ def main():
                 ax.scatter(date, main_vel_fit, s=10 * main_fit_amp, color=color, alpha=0.5)
 
     ax.set_xlabel("Observation epoch date")
-    ax.set_ylabel("Velocity")
+    ax.set_ylabel("Velocity [km s$^{-1}$]")
     plt.show()
 
 
