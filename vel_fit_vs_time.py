@@ -61,8 +61,8 @@ def main():
                 main_fit_amp = fit_amp[main_index]
                 ax.scatter(date, main_vel_fit, s=10 * main_fit_amp, color=color, alpha=0.5)
 
-    ax.set_xlabel("Velocity")
-    ax.set_ylabel("Observation epoch date")
+    ax.set_xlabel("Observation epoch date")
+    ax.set_ylabel("Velocity")
     plt.show()
 
 
