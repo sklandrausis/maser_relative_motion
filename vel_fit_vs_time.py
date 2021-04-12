@@ -59,8 +59,10 @@ def main():
                 main_index = np.where(fit_amp == max(fit_amp))[0][0]
                 main_vel_fit = vel_fit[main_index]
                 main_fit_amp = fit_amp[main_index]
-                ax.scatter(date, main_vel_fit, s=10 * main_fit_amp, color=color)
+                ax.scatter(date, main_vel_fit, s=10 * main_fit_amp, color=color, alpha=0.5)
 
+    ax.set_xlabel("Velocity")
+    ax.set_ylabel("Observation epoch date")
     plt.show()
 
 
