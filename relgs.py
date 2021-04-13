@@ -349,6 +349,7 @@ def main(group_number, ddddd):
         q2 = np.linspace(min(velocity), max(velocity), 10000)
 
         for g in groups:
+            sub_group_nr = groups.index(g)
             index1 = g[0]
             index2 = g[1]
 
@@ -402,11 +403,17 @@ def main(group_number, ddddd):
                                 max_separation["d"] = d
                                 max_separation["separation"] = separation
 
+                print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %s & %s & %s & %.3f("
+                      "%.3f & %.3f & %.3f & %.3f & %.3f)\\\\" %
+                      (sub_group_nr, ra_tmp[max_intensity_index], dec_tmp[max_intensity_index], x[max_intensity_index],
+                       coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
+                       "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
+                       (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2))
+
                 m, b = np.polyfit([ra_tmp[max_separation["r"]], ra_tmp[max_separation["d"]]],
                                   [dec_tmp[max_separation["r"]], dec_tmp[max_separation["d"]]], 1)
                 position_angle = 90 + np.degrees(np.arctan(m))
                 position_angle2 = 90 + np.degrees(np.arctan(slope))
-                sub_group_nr = groups.index(g)
 
                 output.append([sub_group_nr, ra_tmp[max_intensity_index], dec_tmp[max_intensity_index],
                                x[max_intensity_index], coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
@@ -430,7 +437,7 @@ def main(group_number, ddddd):
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
 
-        #ax[0][index].set_xlim(-7.2, -5.3)
+        ax[0][index].set_xlim(min(min_vel), max(max_vel))
         #ax[0][index].set_ylim(-0.5, 0.5)
         ax[0][index].xaxis.set_minor_locator(minor_locator_level)
         ax[0][index].set_title(date)
