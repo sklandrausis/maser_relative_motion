@@ -113,7 +113,6 @@ def main(group_number, ddddd):
     datas = dict()
 
     for index in range(0, len(input_files)):
-        output = []
         epoch = input_files[index].split(".")[0]
         input_file = "groups/" + epoch + ".groups"
         group_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
@@ -148,6 +147,7 @@ def main(group_number, ddddd):
     fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     for index in range(0, len(input_files)):
+        output = []
         epoch = input_files[index].split(".")[0]
         date = dates[epoch]
         groups = [[int(g.split(",")[0]), int(g.split(",")[1])] for g in get_configs("grouops", epoch).split(";")]
