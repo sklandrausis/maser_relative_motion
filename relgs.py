@@ -77,8 +77,6 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, ddddd):
-    output = []
-
     matplotlib.use('TkAgg')
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
@@ -110,9 +108,12 @@ def main(group_number, ddddd):
     ra_min = []
     dec_max = []
     dec_min = []
+    max_vel = []
+    min_vel = []
     datas = dict()
 
     for index in range(0, len(input_files)):
+        output = []
         epoch = input_files[index].split(".")[0]
         input_file = "groups/" + epoch + ".groups"
         group_tmp, velocity_tmp, intensity_tmp, ra_tmp, dec_tmp = \
@@ -131,6 +132,9 @@ def main(group_number, ddddd):
         data["ra"] -= references_ra
         data["dec"] -= references_dec
         datas[epoch] = data
+        velocity = data["velocity"]
+        max_vel.append(max(velocity))
+        min_vel.append(min(velocity))
 
         print("references ra", references_ra, "references dec", references_dec,
               "references velocity", references_velocity)
@@ -139,13 +143,6 @@ def main(group_number, ddddd):
         ra_min.append(min(data["ra"]))
         dec_max.append(max(data["dec"]))
         dec_min.append(min(data["dec"]))
-
-    max_vel = []
-    min_vel = []
-    for index in range(0, len(input_files)):
-        velocity = data["velocity"]
-        max_vel.append(max(velocity))
-        min_vel.append(min(velocity))
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=120)
     fig2, ax2 = plt.subplots(nrows=len(input_files), ncols=1, figsize=(16, 16), dpi=90)
@@ -278,7 +275,7 @@ def main(group_number, ddddd):
 
                         if len(coeff) == 6:
                             hist_fit = gauss2(q, *coeff)
-                            ax[0][index].plot(q, hist_fit, 'k--', label="Fit for all data")
+                            #ax[0][index].plot(q, hist_fit, 'k--', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
@@ -299,7 +296,7 @@ def main(group_number, ddddd):
 
                         elif len(coeff) == 3:
                             hist_fit = gauss(q, *coeff)
-                            ax[0][index].plot(q, hist_fit, 'k', label="Fit for all data")
+                            #ax[0][index].plot(q, hist_fit, 'k', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
@@ -365,14 +362,12 @@ def main(group_number, ddddd):
 
                 '''
                 if groups.index(g) == 0:
-                    coeff, var_matrix = curve_fit(gauss2, x, y, p0=p, method="lm", maxfev=100000)
-                    hist_fit = gauss2(q, *coeff)
+                    coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
+                    hist_fit = gauss(q, *coeff)
                 else:
                     coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                     hist_fit = gauss(q, *coeff)
-                    
                 '''
-
                 coeff, var_matrix = curve_fit(gauss, x, y, p0=p, method="lm", maxfev=100000)
                 hist_fit = gauss(q, *coeff)
                 hist_fit2 = gauss(velocity, *coeff)
@@ -429,13 +424,14 @@ def main(group_number, ddddd):
                        "position_angle", "position_angle2"]
             np.savetxt("cloudlet_sub_" + "_" + epoch + "_" + str(group_number) + "._sats.csv",
                        np.array(output, dtype=object), delimiter=", ", fmt='%s', header=",".join(header2))
-
+         
         q2 = np.linspace(min(velocity), max(velocity), 10000)
         ax[0][index].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k-")
         ax2[index].plot(velocity, intensity - sum(hist_fits2), "k.", markersize=20)
-        ax[0][index].set_xlim(-7.2, -5.3)
-        ax[0][index].set_ylim(-0.5, 65)
+
+        #ax[0][index].set_xlim(-7.2, -5.3)
+        #ax[0][index].set_ylim(-0.5, 0.5)
         ax[0][index].xaxis.set_minor_locator(minor_locator_level)
         ax[0][index].set_title(date)
         ax[1][index].set_aspect("equal", adjustable='box')
