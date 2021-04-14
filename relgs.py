@@ -1,5 +1,6 @@
 import sys
 import argparse
+import warnings
 from random import random
 
 import numpy as np
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, rcParams
 from matplotlib.patches import Circle
 from matplotlib.ticker import MultipleLocator
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, OptimizeWarning
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from scipy.stats import stats, pearsonr
@@ -78,6 +79,8 @@ def firs_exceeds(array, value):
 
 def main(group_number, ddddd):
     matplotlib.use('TkAgg')
+    warnings.filterwarnings("ignore")
+
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
         rcParams[key] = value
@@ -135,8 +138,8 @@ def main(group_number, ddddd):
         max_vel.append(max(velocity))
         min_vel.append(min(velocity))
 
-        print("references ra", references_ra, "references dec", references_dec,
-              "references velocity", references_velocity)
+        #print("references ra", references_ra, "references dec", references_dec,
+              #"references velocity", references_velocity)
 
         ra_max.append(max(data["ra"]))
         ra_min.append(min(data["ra"]))
@@ -177,9 +180,9 @@ def main(group_number, ddddd):
         ax[1][index].plot(ra, line, 'r')
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
-        print("position angle from linear fit is ", position_angle2)
-        print("Distance between fit and points", line - dec)
-        print("Pearsonr correlation", pearsonr(ra, line))
+        #print("position angle from linear fit is ", position_angle2)
+        #print("Distance between fit and points", line - dec)
+        #print("Pearsonr correlation", pearsonr(ra, line))
 
         max_separation = {"r": 0, "d": -1, "separation": 0}
         sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
@@ -199,7 +202,7 @@ def main(group_number, ddddd):
                               [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--")
 
         position_angle = 90 + np.degrees(np.arctan(m))
-        print("position angle is ", position_angle)
+        #print("position angle is ", position_angle)
 
         if len(velocity) >= 3:
             firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
@@ -278,7 +281,7 @@ def main(group_number, ddddd):
                             #ax[0][index].plot(q, hist_fit, 'k--', label="Fit for all data")
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
-                                  "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
+                                  "%.1f(%.1f) & %.3f(""%.3f)\\\\" %
                                   (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
                                    dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
@@ -349,6 +352,7 @@ def main(group_number, ddddd):
         q2 = np.linspace(min(velocity), max(velocity), 10000)
 
         for g in groups:
+            print("\n\n")
             sub_group_nr = groups.index(g)
             index1 = g[0]
             index2 = g[1]
@@ -404,7 +408,7 @@ def main(group_number, ddddd):
                                 max_separation["separation"] = separation
 
                 print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %s & %s & %s & %.3f("
-                      "%.3f & %.3f & %.3f & %.3f & %.3f)\\\\" %
+                      "%.3f) & %.3f(%.3f) & %.3f & %.3f)\\\\" %
                       (sub_group_nr, ra_tmp[max_intensity_index], dec_tmp[max_intensity_index], x[max_intensity_index],
                        coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
                        "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
@@ -420,10 +424,10 @@ def main(group_number, ddddd):
                                "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
                                (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2])
 
-                print("position angle is ", position_angle)
-                print("position angle from linear fit is ", position_angle2)
-                print("Distance between fit and points", line - dec_tmp)
-                print("Pearsonr correlation", pearsonr(ra_tmp, line))
+                #print("position angle is ", position_angle)
+                #print("position angle from linear fit is ", position_angle2)
+                #print("Distance between fit and points", line - dec_tmp)
+                #print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
             header2 = ["sub_group_nr", "ra", "dec", "velocity", "vel_fit", "sigma", "max_intensity", "fit_amp",
                        "vel_fit2",
@@ -451,7 +455,7 @@ def main(group_number, ddddd):
         ax[1][index].xaxis.set_minor_locator(minor_locatorx)
         ax[1][index].yaxis.set_minor_locator(minor_locatory)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
-        ax2[index].legend(loc='upper left')
+        #ax2[index].legend(loc='upper left')
         ax2[index].set_title("Residuals for spectre")
 
     '''
