@@ -351,9 +351,9 @@ def main(group_number, ddddd):
         hist_fits3 = list()
         q2 = np.linspace(min(velocity), max(velocity), 10000)
 
+        sub_group_nr = 0
         for g in groups:
             print("\n\n")
-            sub_group_nr = groups.index(g)
             index1 = g[0]
             index2 = g[1]
 
@@ -435,6 +435,7 @@ def main(group_number, ddddd):
                        "position_angle", "position_angle2"]
             np.savetxt("cloudlet_sub_" + "_" + epoch + "_" + str(group_number) + "._sats.csv",
                        np.array(output, dtype=object), delimiter=", ", fmt='%s', header=",".join(header2))
+            sub_group_nr += 1
          
         q2 = np.linspace(min(velocity), max(velocity), 10000)
         ax[0][index].plot(q2, sum(hist_fits3), c="k", label="Sum of all groups")
