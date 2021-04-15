@@ -108,8 +108,8 @@ def main(group_number, epoch, ddddd):
         references_ra = data["ra"][reference_index]
         references_dec = data["dec"][reference_index]
         references_velocity = data["velocity"][reference_index]
-        print("references ra", references_ra, "references dec", references_dec,
-              "references velocity", references_velocity)
+        #print("references ra", references_ra, "references dec", references_dec,
+              #"references velocity", references_velocity)
 
         velocity = data["velocity"]
         vel_max = max(velocity)
@@ -144,9 +144,9 @@ def main(group_number, epoch, ddddd):
         ax[1].plot(ra, line, 'm', linewidth=10)
 
         position_angle2 = 90 + np.degrees(np.arctan(slope))
-        print("position angle from linear fit is ", position_angle2)
-        print("Distance between fit and points", line-dec)
-        print("Pearsonr correlation", pearsonr(ra, line))
+        #print("position angle from linear fit is ", position_angle2)
+        #print("Distance between fit and points", line-dec)
+        #print("Pearsonr correlation", pearsonr(ra, line))
 
         max_separation = {"r": 0, "d": -1, "separation": 0}
         sky_coords = [SkyCoord(ra[coord], dec[coord], unit=u.arcsec) for coord in range(0, len(ra))]
@@ -166,7 +166,7 @@ def main(group_number, epoch, ddddd):
                        [m * ra[max_separation["r"]] + b, m * ra[max_separation["d"]] + b], "k--", linewidth=10)
 
         position_angle = 90 + np.degrees(np.arctan(m))
-        print("position angle is ", position_angle)
+        #print("position angle is ", position_angle)
 
         if len(velocity) >= 3:
             firs_exceeds_tmp = firs_exceeds(np.diff(velocity), 0.5)
@@ -247,10 +247,10 @@ def main(group_number, epoch, ddddd):
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.2f & %.2f & %.3f & "
                                   "%.1f(%.1f) & %.3f( ""%.3f)\\\\" %
-                                  (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
-                                   dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
-                                   coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
-                                   coeff[4], coeff[5] * 2, coeff[3],
+                                  (gauss_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ra,
+                                   dec_tmp[gauss_nr][max_intensity_index] + references_dec,
+                                   velocity[max_intensity_index], coeff[1], coeff[2] * 2,
+                                   intensity[max_intensity_index], coeff[0], coeff[4], coeff[5] * 2, coeff[3],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
@@ -268,14 +268,14 @@ def main(group_number, epoch, ddddd):
 
                             print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %.1f(%.1f) & %.3f("
                                   "%.3f)\\\\" %
-                                  (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
-                                   dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                                  (gauss_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ra,
+                                   dec_tmp[gauss_nr][max_intensity_index] + references_dec, velocity[max_intensity_index],
                                    coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0],
                                    max(size), max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) /
                                    max(size), (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
-                            output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
-                                           dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
+                            output.append([-1, ra_tmp[gauss_nr][max_intensity_index] + references_ra,
+                                           dec_tmp[gauss_nr][max_intensity_index] + references_dec, velocity[max_intensity_index],
                                            coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0], "-",
                                            "-", "-", max(size), max(size) * 1.64,
                                            (velocity[0] - velocity[len(velocity) - 1]) / max(size),
@@ -284,9 +284,9 @@ def main(group_number, epoch, ddddd):
                 else:
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
-                              (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
-                               dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index], "-",
-                               "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
+                              (gauss_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ra,
+                               dec_tmp[gauss_nr][max_intensity_index] + references_dec, velocity[max_intensity_index],
+                               "-", "-", intensity[max_intensity_index], "-", max(size), max(size) * 1.64,
                                (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
@@ -299,8 +299,8 @@ def main(group_number, epoch, ddddd):
 
                     else:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
-                              (gauss_nr, ra_tmp[gauss_nr][max_intensity_index],
-                               dec_tmp[gauss_nr][max_intensity_index],
+                              (gauss_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ra,
+                               dec_tmp[gauss_nr][max_intensity_index] + references_dec,
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
                         output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
@@ -320,7 +320,6 @@ def main(group_number, epoch, ddddd):
             index1 = g[0]
             index2 = g[1]
 
-            print("a", index1,index2)
             x = velocity[index1:index2]
             y = intensity[index1:index2]
             q = np.linspace(min(x), max(x), 10000)
@@ -382,10 +381,10 @@ def main(group_number, epoch, ddddd):
                                "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
                                (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2])
 
-                print("position angle is ", position_angle)
-                print("position angle from linear fit is ", position_angle2)
-                print("Distance between fit and points", line - dec_tmp)
-                print("Pearsonr correlation", pearsonr(ra_tmp, line))
+                #print("position angle is ", position_angle)
+                #print("position angle from linear fit is ", position_angle2)
+                #print("Distance between fit and points", line - dec_tmp)
+                #print("Pearsonr correlation", pearsonr(ra_tmp, line))
 
         q2 = np.linspace(min(velocity), max(velocity), 10000)
         ax[0].plot(q2, sum(hist_fits3), c="k", linewidth=10)
@@ -407,7 +406,6 @@ def main(group_number, epoch, ddddd):
         ax[1].set_xlabel('$\\Delta$ RA (mas)')
         ax[1].xaxis.set_minor_locator(minor_locatorx)
         ax[1].yaxis.set_minor_locator(minor_locatory)
-        ax2.legend(loc='upper left')
         ax2.set_title("Residuals for spectre")
         plt.tight_layout()
         plt.subplots_adjust(top=0.947, bottom=0.085, left=0.044, right=0.987, hspace=0.229, wspace=0.182)
