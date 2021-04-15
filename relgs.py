@@ -313,9 +313,10 @@ def main(group_number, ddddd):
                                    (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                    (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
 
-                            output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
-                                           dec_tmp[gauss_nr][max_intensity_index], velocity[max_intensity_index],
-                                           coeff[1], coeff[2] * 2, intensity[max_intensity_index], coeff[0], "-",
+                            output.append([-1, ra_tmp[gauss_nr][max_intensity_index] + references_ras[index],
+                                           dec_tmp[gauss_nr][max_intensity_index] + references_ras[index],
+                                           velocity[max_intensity_index], coeff[1], coeff[2] * 2,
+                                           intensity[max_intensity_index], coeff[0], "-",
                                            "-", "-", max(size), max(size) * 1.64,
                                            (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                            (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64),
@@ -324,7 +325,7 @@ def main(group_number, ddddd):
                     if len(size) > 0:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %.1f(%.1f) & %.3f(%.3f)\\\\" %
                               (gauss_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ras[index],
-                                   dec_tmp[gauss_nr][max_intensity_index] + references_decs[index],
+                               dec_tmp[gauss_nr][max_intensity_index] + references_decs[index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", max(size),
                                max(size) * 1.64, (velocity[0] - velocity[len(velocity) - 1]) / max(size),
                                (velocity[0] - velocity[len(velocity) - 1]) / (max(size) * 1.64)))
@@ -339,7 +340,7 @@ def main(group_number, ddddd):
                     else:
                         print("{\\it %d} & %.3f & %.3f & %.1f & %s & %s & %.3f & %s & %s & %s\\\\" %
                               (gauss_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ras[index],
-                                   dec_tmp[gauss_nr][max_intensity_index] + references_decs[index],
+                               dec_tmp[gauss_nr][max_intensity_index] + references_decs[index],
                                velocity[max_intensity_index], "-", "-", intensity[max_intensity_index], "-", "-", "-"))
 
                         output.append([-1, ra_tmp[gauss_nr][max_intensity_index],
@@ -413,8 +414,8 @@ def main(group_number, ddddd):
 
                 print("{\\it %d} & %.3f & %.3f & %.1f & %.2f & %.2f & %.3f & %.3f & %s & %s & %s & %.3f("
                       "%.3f) & %.3f(%.3f) & %.3f & %.3f)\\\\" %
-                      (sub_group_nr, ra_tmp[gauss_nr][max_intensity_index] + references_ras[index],
-                       dec_tmp[gauss_nr][max_intensity_index] + references_decs[index], x[max_intensity_index],
+                      (sub_group_nr, ra_tmp[max_intensity_index] + references_ras[index],
+                       dec_tmp[max_intensity_index] + references_decs[index], x[max_intensity_index],
                        coeff[1], coeff[2] * 2, y[max_intensity_index], coeff[0],
                        "-", "-", "-", max(size), max(size) * 1.64, (x[0] - x[len(x) - 1]) / max(size),
                        (x[0] - x[len(x) - 1]) / (max(size) * 1.64), position_angle, position_angle2))
