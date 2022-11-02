@@ -44,10 +44,11 @@ def create_mean_motion_data(spots_parameters, epoch_count, ra_differences, dec_d
 
 def main():
     plt.rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
-    output_file = "output2/output.dat"
-    output_data = ascii.read(output_file)
-    output_data_headers = output_data.keys()
-    velocity = output_data["vel"]
+    relative_motion_path = get_configs("paths", "relative_motion")
+    relative_motion_group_file = relative_motion_path + '/relative_motion_group.dat'
+    relative_motion_group_data = ascii.read(relative_motion_group_file)
+    output_data_headers = relative_motion_group_data.keys()
+    velocity = relative_motion_group_data["vel"]
     number_of_points = len(get_configs("parameters", "fileOrder").split(","))
     velocity_range = max(velocity) - min(velocity)
     ras = []
@@ -56,7 +57,7 @@ def main():
 
     tmp = 1
     for index in range(1, number_of_points * 3 + 1):
-        tmp_data = output_data[output_data_headers[index]]
+        tmp_data = relative_motion_group_data[output_data_headers[index]]
 
         if tmp == 1:
             ras.append(tmp_data)
@@ -71,7 +72,7 @@ def main():
     reference_ras = ras[0]
     reference_decs = decs[0]
 
-    groups_indexies = []
+    groups_indexes = []
     group_tmp = []
 
     for group_index in range(0, len(reference_ras) - 1):
@@ -83,8 +84,8 @@ def main():
             group_tmp.append(group_index + 1)
 
         else:
-            if sorted(group_tmp) not in groups_indexies:
-                groups_indexies.append(sorted(group_tmp))
+            if sorted(group_tmp) not in groups_indexes and len(sorted(group_tmp)) >0:
+                groups_indexes.append(sorted(group_tmp))
             group_tmp = []
 
     for group_index in range(len(reference_ras)-1, 0, -1):
@@ -96,12 +97,11 @@ def main():
             group_tmp.append(group_index - 1)
 
         else:
-            if sorted(group_tmp) not in groups_indexies:
-                groups_indexies.append(sorted(group_tmp))
+            if sorted(group_tmp) not in groups_indexes:
+                groups_indexes.append(sorted(group_tmp))
             group_tmp = []
 
-    groups_indexies = [set(g) for g in groups_indexies if len(g) > 0]
-    print("Groups ", groups_indexies)
+    groups_indexes = [set(g) for g in groups_indexes if len(g) > 0]
 
     plt.figure(figsize=(14, 10), dpi=100)
     sub_plots = [plt.subplot(i, aspect='equal') for i in [221, 222, 223, 224]]
@@ -117,7 +117,7 @@ def main():
     dec_differences = {}
     fluxes = []
     linearity = []
-    for group in groups_indexies:
+    for group in groups_indexes:
         number_of_elements_in_group = len(group)
         sum_of_ra_diffs = []
         sum_of_dec_diffs = []
@@ -180,7 +180,9 @@ def main():
         spots_parameters.append(spot_parameters)
 
         vector_parameters = {"sum_of_ra_diffs": sum_of_ra_diffs, "sum_of_dec_diffs": sum_of_dec_diffs,
-                             "sum_of_ras": np.array(sum_of_ras) / number_of_elements_in_group, "sum_of_decs": np.array(sum_of_decs)/ number_of_elements_in_group}
+                             "sum_of_ras": np.array(sum_of_ras) / number_of_elements_in_group,
+                             "sum_of_decs": np.array(sum_of_decs) / number_of_elements_in_group}
+
         vectors_parameters.append(vector_parameters)
 
     epoch_count = len(mean_ra_differences.keys())
@@ -190,23 +192,29 @@ def main():
                                                lengths, average_lengths, vectors_parameters, fluxes)
     header = ["vel", "ra1", "dec1", "ra_diff", "dec_diff",
               "avg_ra_diff", "avg_dec_diff", "length", "avg_length", "ra2", "dec2", "flux", "epoch"]
-    np.savetxt('output2/output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s", header=",".join(header))
+    np.savetxt(relative_motion_path + 'output_mean_motion.dat', mean_motion_data, delimiter=",", fmt="%s",
+               header=",".join(header))
     header2 = ["vel"]
     header2.extend(["x" + str(i) for i in range(0, len(sum_of_ras))])
     header2.extend(["y" + str(i) for i in range(0, len(sum_of_decs))])
     header2.extend(["i" + str(i) for i in range(0, len(sum_of_decs))])
-    np.savetxt("output2/positionanglemotion_linearity.dat", np.array(linearity), delimiter=",", header=",".join(header2))
+    np.savetxt(relative_motion_path + "position_angle_motion_linearity.dat", np.array(linearity), delimiter=",",
+               header=",".join(header2))
 
     vector_colors = ["black", "grey", "blue", "yellow"]
     vector_color_index = 0
     vector_count = len(vectors_parameters[0]["sum_of_ra_diffs"])
-    vector_names = [str(n) + "-1" for n in range(2, vector_count +2, +1)]
+    vector_names = [str(n) + "-1" for n in range(2, vector_count + 2, +1)]
 
     for epoch_index in range(0, len(vector_names)):
-        print("max lenght in epoch" + vector_names[epoch_index] + ": " + str(np.max(lengths[vector_names[epoch_index]])))
-        print("max average lenght in epoch" + vector_names[epoch_index] + ": " + str(np.max(average_lengths[vector_names[epoch_index]])))
-        print("mean value of ave RA shift epoch" + vector_names[epoch_index] + ": " + str(np.mean(mean_ra_differences[vector_names[epoch_index]])))
-        print("mean value of ave DEC shift epoch" + vector_names[epoch_index] + ": " + str(np.mean(mean_dec_differences[vector_names[epoch_index]])))
+        print("max length in epoch" + vector_names[epoch_index] + ": " +
+              str(np.max(lengths[vector_names[epoch_index]])))
+        print("max average length in epoch" + vector_names[epoch_index] + ": " +
+              str(np.max(average_lengths[vector_names[epoch_index]])))
+        print("mean value of ave RA shift epoch" + vector_names[epoch_index] + ": " +
+              str(np.mean(mean_ra_differences[vector_names[epoch_index]])))
+        print("mean value of ave DEC shift epoch" + vector_names[epoch_index] + ": " +
+              str(np.mean(mean_dec_differences[vector_names[epoch_index]])))
 
     for spt_index in range(0, len(spots_parameters)):
         spt = spots_parameters[spt_index]
@@ -223,23 +231,29 @@ def main():
             avedec = np.mean(mean_dec_differences[vector_names[vector_color_index]])
 
             sub_plots[0].annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
-                                  xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] + (20 * vect_dec[vec])),
-                                  textcoords='data',
-                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+                                  xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] +
+                                          (20 * vect_dec[vec])), textcoords='data',
+                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index],
+                                                  connectionstyle="arc3"))
 
             sub_plots[1].annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
-                                  xytext=((spt["coords"][0] + (20 * vect_ra[vec]) - 20 * avera), (spt["coords"][1] + (20 * vect_dec[vec]) - 20 * avedec)),
+                                  xytext=((spt["coords"][0] + (20 * vect_ra[vec]) - 20 * avera),
+                                          (spt["coords"][1] + (20 * vect_dec[vec]) - 20 * avedec)),
                                   textcoords='data',
-                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index],
+                                                  connectionstyle="arc3"))
 
             sub_plots[2].annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
-                                  xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] + (20 * vect_dec[vec])),
-                                  textcoords='data',
-                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+                                  xytext=(spt["coords"][0] + (20 * vect_ra[vec]), spt["coords"][1] +
+                                          (20 * vect_dec[vec])), textcoords='data',
+                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index],
+                                                  connectionstyle="arc3"))
 
             sub_plots[3].annotate(vector_names[vector_color_index], xy=spt["coords"], xycoords='data',
-                                  xytext=(spt["coords"][0] + (20 * vect_ra[vec] - 20 * avera), spt["coords"][1] + (20 * vect_dec[vec]) - 20 * avedec),
-                                  textcoords='data', arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index], connectionstyle="arc3"))
+                                  xytext=(spt["coords"][0] + (20 * vect_ra[vec] - 20 * avera), spt["coords"][1] +
+                                          (20 * vect_dec[vec]) - 20 * avedec), textcoords='data',
+                                  arrowprops=dict(arrowstyle="<-", color=vector_colors[vector_color_index],
+                                                  connectionstyle="arc3"))
 
             vector_color_index += 1
 
@@ -247,24 +261,24 @@ def main():
                 vector_color_index = 0
 
     # vector legend
-    #plot 1
+    # plot 1
     dates = [date.split("-")[1].strip() for date in get_configs("parameters", "dates").split(",")]
     sub_plots[0].annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
-                          arrowprops=dict( arrowstyle="<-", connectionstyle="arc3"))
+                          arrowprops=dict(arrowstyle="<-", connectionstyle="arc3"))
     sub_plots[0].text(105, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='k')
     sub_plots[0].text(110, -170, "5.8 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
     sub_plots[0].annotate("", xy=(-60, -150), xycoords='data', xytext=(-60 + (20 * 3), -150), textcoords='data',
-                          arrowprops=dict( arrowstyle="<-", color="grey", connectionstyle="arc3"))
+                          arrowprops=dict(arrowstyle="<-", color="grey", connectionstyle="arc3"))
     sub_plots[0].text(-5, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='grey')
     sub_plots[0].text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
     sub_plots[0].set_title("G78: SW excluded", size=12, y=1.0, pad=-14)
 
-    #plot 2
+    # plot 2
     sub_plots[1].text(105, -135, "Systemic motions", size=8)
 
-    #plot 3
+    # plot 3
     sub_plots[2].annotate("", xy=(50, -150), xycoords='data', xytext=(50 + (20 * 3), -150), textcoords='data',
-                          arrowprops=dict( arrowstyle="<-", connectionstyle="arc3"))
+                          arrowprops=dict(arrowstyle="<-", connectionstyle="arc3"))
     sub_plots[2].text(105, -135, "3 mas", size=8, rotation=0.0, ha="left", va="center", color='k')
     sub_plots[2].text(110, -170, "5.8 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='k')
     sub_plots[2].annotate("", xy=(-60, -150), xycoords='data', xytext=(-60 + (20 * 3), -150), textcoords='data',
@@ -273,7 +287,7 @@ def main():
     sub_plots[2].text(0, -170, "7.2 km s$^{-1}$", size=8, rotation=0.0, ha="left", va="center", color='grey')
     sub_plots[2].set_title("G78: SW and 2 largest exc.", size=12, y=1.0, pad=-14)
 
-    #plot 4
+    # plot 4
     sub_plots[3].text(105, -135, "Systemic motions", size=8)
 
     # for all plots
@@ -299,8 +313,8 @@ def main():
     plt.colorbar(p)
     plt.tight_layout()
     plt.show()
-    sys.exit(0)
 
 
 if __name__ == "__main__":
     main()
+    sys.exit(0)

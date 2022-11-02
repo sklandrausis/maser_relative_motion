@@ -26,7 +26,7 @@ def str2bool(v):
 
 
 def check_if_group_is_in_file(file, group):
-    input_file = "groups/" + "/" + file
+    input_file = file
     group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
 
     if group not in group_nr:
@@ -75,13 +75,15 @@ def firs_exceeds(array, value):
 
 
 def main(group_number, ddddd):
+    cloudlet_dir = get_configs("paths", "cloudlet")
+    groups_file_path = get_configs("paths", "groups")
     matplotlib.use('TkAgg')
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
         rcParams[key] = value
 
-    minor_locatorx = MultipleLocator(20)
-    minor_locatory = MultipleLocator(20)
+    minor_locator_x = MultipleLocator(20)
+    minor_locator_y = MultipleLocator(20)
     minor_locator_level = MultipleLocator(1)
 
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
@@ -95,7 +97,7 @@ def main(group_number, ddddd):
 
     bad_files = []
     for file in input_files:
-        if not check_if_group_is_in_file(file.split(".")[0] + ".groups", group_number):
+        if not check_if_group_is_in_file(groups_file_path + file.split(".")[0] + ".groups", group_number):
             bad_files.append(file)
             del dates[file.split(".")[0]]
     input_files = [file for file in input_files if file not in bad_files]
@@ -105,7 +107,7 @@ def main(group_number, ddddd):
     for index in range(0, len(input_files)):
         epoch = input_files[index].split(".")[0]
         data[epoch] = dict()
-        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
+        input_file = groups_file_path + input_files[index].split(".")[0] + ".groups"
         intensity = np.empty(0)
         channels = np.empty(0)
         ra = np.empty(0)
@@ -257,7 +259,8 @@ def main(group_number, ddddd):
                     perrs = []
                     coeffs = []
                     for p in ps:
-                        #if epoch == "ea063":
+                        print(p)
+                        # if epoch == "ea063":
                         #    p = [0.035, -7.75, 0.001]
                         try:
                             if len(p) == 3:
@@ -371,20 +374,21 @@ def main(group_number, ddddd):
         ax[1][index].set_ylim(np.mean((max(dec_max), min(dec_min))) - (coord_range / 2) - 0.5,
                               np.mean((max(dec_max), min(dec_min))) + (coord_range / 2) + 0.5)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
-        ax[1][index].xaxis.set_minor_locator(minor_locatorx)
-        ax[1][index].yaxis.set_minor_locator(minor_locatory)
+        ax[1][index].xaxis.set_minor_locator(minor_locator_x)
+        ax[1][index].yaxis.set_minor_locator(minor_locator_y)
         ax[1][index].invert_xaxis()
         ax[1][index].set_yscale('linear')
         ax[1][index].set_yscale('linear')
 
     header1 = ["epoch", "velocity", "intensity", "ra", "dec", "position_angle"]
-    header2 = ["epoch", "gauss_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*_2", "max_intensity", "coeff0", "coeff4",
-               "coeff5_*_2", "coeff3", "max_distance", "max_distance_au", "gradient", "gradient_au", "position_angle"]
+    header2 = ["epoch", "gauss_nr", "ra", "dec", "velocity", "coeff1", "coeff2_*_2", "max_intensity", "coeff0",
+               "coeff4", "coeff5_*_2", "coeff3", "max_distance", "max_distance_au", "gradient", "gradient_au",
+               "position_angle"]
 
-    np.savetxt("cloudlet_" + str(group_number) + "._coords.csv", np.array(output, dtype=object), delimiter=", ", fmt='%s',
-               header=",".join(header1))
-    np.savetxt("cloudlet_" + str(group_number) + "._sats.csv", np.array(output2, dtype=object), delimiter=", ", fmt='%s',
-               header=",".join(header2))
+    np.savetxt(cloudlet_dir + "cloudlet_" + str(group_number) + "._coords.csv", np.array(output, dtype=object),
+               delimiter=", ", fmt='%s', header=",".join(header1))
+    np.savetxt(cloudlet_dir + "cloudlet_" + str(group_number) + "._sats.csv", np.array(output2, dtype=object),
+               delimiter=", ", fmt='%s', header=",".join(header2))
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
     plt.tight_layout()

@@ -19,13 +19,12 @@ def gauss(x, *p):
 
 def gauss2(x, *p):
     a1, b1, c1, a2, b2, c2 = p
-    return a1*np.exp(-(x-b1)**2*np.log(2)/c1**2) + \
-           a2*np.exp(-(x-b2)**2*np.log(2)/c2**2)
+    return a1*np.exp(-(x-b1)**2*np.log(2)/c1**2) + a2*np.exp(-(x-b2)**2*np.log(2)/c2**2)
 
 
 def get_configs(section, key):
     """
-    :param section: configuration file secti
+    :param section: configuration file section
     :param key: configuration file sections
     :return: configuration file section key
     """
@@ -44,7 +43,7 @@ def get_configs_items():
 
 
 def check_if_group_is_in_file(file, group):
-    input_file = "groups/" + "/" + file
+    input_file = file
     group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
 
     if group not in group_nr:
@@ -54,13 +53,14 @@ def check_if_group_is_in_file(file, group):
 
 
 def main(group_number):
+    groups_file_path = get_configs("paths", "groups")
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
         rcParams[key] = value
 
-    minorLocatorx = MultipleLocator(20)
-    minorLocatory = MultipleLocator(20)
-    minorLocatorvel = MultipleLocator(1)
+    minor_locator_x = MultipleLocator(20)
+    minor_locator_y = MultipleLocator(20)
+    minor_locator_vel = MultipleLocator(1)
 
     gauss2_list = get_configs("parameters", "gauss").split(";")
     gauss2_dict = dict()
@@ -77,9 +77,19 @@ def main(group_number):
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
 
+    v_max = []
+    v_min = []
+    for index in range(0, len(input_files)):
+        input_file = groups_file_path + input_files[index].split(".")[0] + ".groups"
+        group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
+            input_file, unpack=True)
+
+        v_max.append(max(velocity_tmp))
+        v_min.append(min(velocity_tmp))
+
     bad_files = []
     for file in input_files:
-        if not check_if_group_is_in_file(file.split(".")[0] + ".groups", group_number):
+        if not check_if_group_is_in_file(groups_file_path + file.split(".")[0] + ".groups", group_number):
             bad_files.append(file)
             del dates[file.split(".")[0]]
     input_files = [file for file in input_files if file not in bad_files]
@@ -94,12 +104,10 @@ def main(group_number):
     min_ra = []
     min_dec = []
     max_dec = []
-    intensitys_max = []
+    intensity_max = []
     intensitys_min = []
-    v_maxs = []
-    v_mins = []
     for index in range(0, len(input_files)):
-        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
+        input_file = groups_file_path + input_files[index].split(".")[0] + ".groups"
         velocity = np.empty(0)
         intensity = np.empty(0)
         ra = np.empty(0)
@@ -113,9 +121,6 @@ def main(group_number):
                 ra = np.append(ra, ra_tmp[i])
                 dec = np.append(dec, dec_tmp[i])
 
-        v_maxs.append(max(velocity))
-        v_mins.append(min(velocity))
-
         if len(intensity) == 0:
             intensity = [0]
 
@@ -128,7 +133,7 @@ def main(group_number):
         decs.append(dec)
 
         if len(ra) != 0:
-            intensitys_max.append(max(intensity))
+            intensity_max.append(max(intensity))
             intensitys_min.append(min(intensity))
             max_ra.append(np.max(ra))
             min_ra.append(np.min(ra))
@@ -137,8 +142,6 @@ def main(group_number):
 
     coord_range = max(max(max_ra) - min(min_ra), max(max_dec) - min(min_dec))
     for index in range(0, len(input_files)):
-        v_max = v_maxs[index]
-        v_min = v_mins[index]
         velocity = velocitys[index]
         intensity = intensitys[index]
         dec = decs[index]
@@ -158,7 +161,6 @@ def main(group_number):
                     ax[0][index].plot(q, hist_fit, 'k')
                 except:
                     pass
-
             else:
                 try:
                     coeff, var_matrix = curve_fit(gauss, velocity, intensity, p0=p1, maxfev=100000)
@@ -169,31 +171,32 @@ def main(group_number):
 
         rel = []
         for i in range(len(velocity) - 1):
-            if velocity[i] < v_min or velocity[i] > v_max:
+            if velocity[i] < min(v_min) or velocity[i] > max(v_max):
                 c = (0, 0, 0)
             else:
-                c = cm.turbo((velocity[i] - v_min) / (v_max - v_min), 1)
+                c = cm.jet((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
 
             ax[0][index].scatter((velocity[i], velocity[i + 1]), (intensity[i], intensity[i + 1]), color=c, lw=2)
             ax[0][index].set_xlim(min(velocity) - 0.5, max(velocity) + 0.5)
-            ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
+            ax[0][index].xaxis.set_minor_locator(minor_locator_vel)
             ax[0][index].set_title(title)
             ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
 
             el = Circle((ra[i], dec[i]), radius=0.1 * np.sqrt(intensity[i]), angle=0, lw=2)
             ax[1][index].add_artist(el)
+            c = cm.jet((velocity[i] - min(v_min)) / (max(v_max) - min(v_min)), 1)
             el.set_facecolor(c)
             rel.append([ra[i], dec[i], velocity[i]])
 
-        ax[0][index].set_ylim((min(intensitys_min)) - 0.1, (max(intensitys_max) + 0.1))
+        ax[0][index].set_ylim((min(intensitys_min)) - 0.1, (max(intensity_max) + 0.1))
         ax[1][index].set_aspect("equal", adjustable='box')
-        ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range / 2) - 0.5,
-                              (np.mean((max(max_ra), min(min_ra))) - (coord_range / 2) - 0.5) + 12)
-        ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range / 2) - 0.5,
-                              np.mean((max(max_dec), min(min_dec))) + (coord_range / 2) + 0.5 + 12)
+        ax[1][index].set_xlim(np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5,
+                              (np.mean((max(max_ra), min(min_ra))) - (coord_range/2) - 0.5) + 12)
+        ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range/2) - 0.5,
+                              np.mean((max(max_dec), min(min_dec))) + (coord_range/2) + 0.5 + 12)
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
-        ax[1][index].xaxis.set_minor_locator(minorLocatorx)
-        ax[1][index].yaxis.set_minor_locator(minorLocatory)
+        ax[1][index].xaxis.set_minor_locator(minor_locator_x)
+        ax[1][index].yaxis.set_minor_locator(minor_locator_y)
         ax[1][index].invert_xaxis()
 
     ax[0][0].set_ylabel('Flux density (Jy)')

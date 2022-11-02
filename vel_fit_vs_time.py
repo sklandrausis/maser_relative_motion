@@ -37,7 +37,8 @@ def get_cloudlet_sub_files_for_group(cloudlet_sub_files, group):
 
 
 def main():
-    cloudlet_sub_files = [file for file in os.listdir("./") if file.startswith("cloudlet_sub")]
+    cloudlet_dir = get_configs("paths", "cloudlet")
+    cloudlet_sub_files = [file for file in os.listdir(cloudlet_dir) if file.startswith("cloudlet_sub")]
     groups = sorted(list(set([int(f.split("_")[4].replace(".", "")) for f in cloudlet_sub_files])))
     cloudlet_sub_files_for_all_groups = {g: get_cloudlet_sub_files_for_group(cloudlet_sub_files, g) for g in groups}
 
@@ -53,7 +54,7 @@ def main():
             if file != 0:
                 epoch = file.split("_")[3]
                 date = dates[epoch]
-                cloudlet_sub_data = ascii.read(file)
+                cloudlet_sub_data = ascii.read(cloudlet_dir + file)
                 vel_fit = np.array(cloudlet_sub_data["vel_fit"], dtype=np.float)
                 fit_amp = np.array(cloudlet_sub_data["fit_amp"], dtype=np.float)
                 main_index = np.where(fit_amp == max(fit_amp))[0][0]

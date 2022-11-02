@@ -1,5 +1,4 @@
 import sys
-import argparse
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib import rc
@@ -22,30 +21,34 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
-def main(ispec_files_dir, input_files_dir):
+def main():
     rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
-    minorLocatorx = MultipleLocator(20)
-    minorLocatory = MultipleLocator(20)
-    minorLocatorvel = MultipleLocator(1)
+    minor_locator_x = MultipleLocator(20)
+    minor_locator_y = MultipleLocator(20)
+    minor_locator_vel = MultipleLocator(1)
+
+    ispec_files_dir = get_configs("paths", "ispec")
+    data_files_dir = get_configs("paths", "dataFiles")
 
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
     ispec_files = []
-    input_files = []
+    data_files = []
     file_pairs = []
     for file in file_order:
         ispec_files.append(file.split(".")[0].upper() + "_FRING.ISPEC")
-        input_files.append(file)
+        data_files.append(file)
         file_pairs.append((file.split(".")[0].upper() + "_FRING.ISPEC", file))
 
-    dates = {file.split("-")[0].strip():file.split("-")[1].strip() for file in get_configs("parameters", "dates").split(",")}
+    dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
+             get_configs("parameters", "dates").split(",")}
 
-    fig, ax = plt.subplots(nrows=2, ncols=5, figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
+    fig, ax = plt.subplots(nrows=2, ncols=len(data_files), figsize=(16, 16), gridspec_kw={'height_ratios': [2, 2]})
 
     max_ra = []
     min_ra = []
     min_dec = []
     max_dec = []
-    v_s =[]
+    v_s = []
     vms = []
     vxs = []
     dvs = []
@@ -56,9 +59,9 @@ def main(ispec_files_dir, input_files_dir):
     i1s = []
     for index in range(0, len(file_pairs)):
         ispec_file = ispec_files_dir + "/" + file_pairs[index][0]
-        input_file = input_files_dir + "/" + file_pairs[index][1]
+        data_file = data_files_dir + "/" + file_pairs[index][1]
 
-        ch, v10, i1, i2, ra, dec = np.loadtxt(input_file, unpack=True)
+        ch, v10, i1, i2, ra, dec = np.loadtxt(data_file, unpack=True)
         v1 = v10 / 1000.
         dv = (v1.max() - v1.min())
         vm = v1.min()
@@ -66,7 +69,6 @@ def main(ispec_files_dir, input_files_dir):
 
         nu, v, s = np.loadtxt(ispec_file, unpack=True)
         v = v / 1000.0
-        sm = s.max()
         v_s.append(v)
         vms.append(vm)
         vxs.append(vx)
@@ -101,7 +103,7 @@ def main(ispec_files_dir, input_files_dir):
 
             ax[0][index].plot((v[i], v[i + 1]), (s[i], s[i + 1]), c=c, lw=2)
             ax[0][index].set_xlim(-12, -2)
-            ax[0][index].xaxis.set_minor_locator(minorLocatorvel)
+            ax[0][index].xaxis.set_minor_locator(minor_locator_vel)
             ax[0][index].set_title(title, size=12)
             ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)', fontsize=12)
 
@@ -123,8 +125,8 @@ def main(ispec_files_dir, input_files_dir):
         ax[1][index].set_ylim(np.mean((max(max_dec), min(min_dec))) - (coord_range / 2) - 10*np.sqrt(max(i1)),
                               np.mean((max(max_dec), min(min_dec))) + (coord_range / 2) + 10*np.sqrt(max(i1)))
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
-        ax[1][index].xaxis.set_minor_locator(minorLocatorx)
-        ax[1][index].yaxis.set_minor_locator(minorLocatory)
+        ax[1][index].xaxis.set_minor_locator(minor_locator_x)
+        ax[1][index].yaxis.set_minor_locator(minor_locator_y)
         ax[1][index].invert_xaxis()
 
     plt.tight_layout()
@@ -133,9 +135,5 @@ def main(ispec_files_dir, input_files_dir):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='plot ispec')
-    parser.add_argument('ispec_dir', type=str, help='ispec files directory.')
-    parser.add_argument('input_file_dir', type=str, help='Input files directory')
-    args = parser.parse_args()
-    main(args.ispec_dir, args.input_file_dir)
+    main()
     sys.exit(0)

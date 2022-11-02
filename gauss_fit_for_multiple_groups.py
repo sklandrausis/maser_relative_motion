@@ -43,7 +43,7 @@ def get_configs_items():
 
 
 def check_if_group_is_in_file(file, group):
-    input_file = "groups/" + "/" + file
+    input_file = file
     group_nr = np.loadtxt(input_file, unpack=True, usecols=0)
 
     if group not in group_nr:
@@ -53,19 +53,20 @@ def check_if_group_is_in_file(file, group):
 
 
 def main(group_numbers):
+    groups_file_path = get_configs("paths", "groups")
     configuration_items = get_configs_items()
     for key, value in configuration_items.items():
         rcParams[key] = value
 
-    minor_locatorx = MultipleLocator(20)
-    minor_locatory = MultipleLocator(20)
-    minor_locatorvel = MultipleLocator(1)
+    minor_locator_x = MultipleLocator(20)
+    minor_locator_y = MultipleLocator(20)
+    minor_locator_vel = MultipleLocator(1)
 
-    gauss2_list = get_configs("parameters", "gauss").split(";")
-    gauss2_dict = dict()
+    gauss_list = get_configs("parameters", "gauss").split(";")
+    gauss_dict = dict()
 
-    for epoch in gauss2_list:
-        gauss2_dict[epoch.split(":")[0]] = epoch.split(":")[1].split(",")
+    for epoch in gauss_list:
+        gauss_dict[epoch.split(":")[0]] = epoch.split(":")[1].split(",")
 
     file_order = [file.strip() for file in get_configs("parameters", "fileOrder").split(",")]
     input_files = []
@@ -76,7 +77,7 @@ def main(group_numbers):
     v_max = []
     v_min = []
     for index in range(0, len(input_files)):
-        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
+        input_file = groups_file_path + input_files[index].split(".")[0] + ".groups"
         group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
             input_file, unpack=True)
 
@@ -89,7 +90,7 @@ def main(group_numbers):
     bad_epoch_dict = {}
     for g in group_numbers:
         for file in input_files:
-            if not check_if_group_is_in_file(file.split(".")[0] + ".groups", g):
+            if not check_if_group_is_in_file(groups_file_path + file.split(".")[0] + ".groups", g):
                 if file not in bad_epoch_dict.keys():
                     bad_epoch_dict[file] = 1
                 else:
@@ -107,10 +108,10 @@ def main(group_numbers):
     ra_min = []
     dec_max = []
     dec_min = []
-    intensitys_max = []
-    intensitys_min = []
+    intensity_max = []
+    intensity_min = []
     for index in range(0, len(input_files)):
-        input_file = "groups/" + "/" + input_files[index].split(".")[0] + ".groups"
+        input_file = groups_file_path + input_files[index].split(".")[0] + ".groups"
 
         group_tmp, channel_tmp, velocity_tmp, intensity_tmp, integral_intensity_tmp, ra_tmp, dec_tmp = np.loadtxt(
             input_file, unpack=True)
@@ -130,8 +131,8 @@ def main(group_numbers):
                 if group_tmp[i] == int(j):
                     velocity = np.append(velocity, velocity_tmp[i])
                     intensity = np.append(intensity, intensity_tmp[i])
-                    intensitys_max.append(max(intensity))
-                    intensitys_min.append(min(intensity))
+                    intensity_max.append(max(intensity))
+                    intensity_min.append(min(intensity))
                     ra = np.append(ra, ra_tmp[i])
                     dec = np.append(dec, dec_tmp[i])
 
@@ -161,7 +162,7 @@ def main(group_numbers):
                       max(intensity) / 4, min(velocity) + 0.5 * (max(velocity) - min(velocity)), 0.1]
                 q = np.linspace(min(velocity), max(velocity), 1000)
 
-                gauss2_groups_for_epoch = gauss2_dict[input_files[index].split(".")[0].upper()]
+                gauss2_groups_for_epoch = gauss_dict[input_files[index].split(".")[0].upper()]
                 if str(j) in gauss2_groups_for_epoch:
                     try:
                         coeff, var_matrix = curve_fit(gauss2, velocity, intensity, p0=p2, maxfev=100000)
@@ -189,15 +190,15 @@ def main(group_numbers):
                                      color=c, lw=2, marker=symbol)
 
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
-        ax[0][index].xaxis.set_minor_locator(minor_locatorvel)
+        ax[0][index].xaxis.set_minor_locator(minor_locator_vel)
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
         ax[1][index].set_aspect("equal", adjustable='box')
         ax[1][index].set_xlabel('$\\Delta$ RA (mas)')
-        ax[1][index].xaxis.set_minor_locator(minor_locatorx)
-        ax[1][index].yaxis.set_minor_locator(minor_locatory)
+        ax[1][index].xaxis.set_minor_locator(minor_locator_x)
+        ax[1][index].yaxis.set_minor_locator(minor_locator_y)
         ax[0][index].set_xlim(min(v_min) - 0.5, max(v_max) + 0.5)
-        ax[0][index].set_ylim((min(intensitys_min)) - 0.1, (max(intensitys_max) + 0.1))
+        ax[0][index].set_ylim((min(intensity_min)) - 0.1, (max(intensity_max) + 0.1))
         centre = (np.mean([max(ra_max), min(ra_min)]), np.mean([max(dec_max), min(dec_min)]))
         ax[1][index].set_xlim(centre[0] - coord_range/2 - 10, centre[0] + coord_range/2 + 10)
         ax[1][index].set_ylim(centre[1] - coord_range/2 - 10, centre[1] + coord_range/2 + 10)
