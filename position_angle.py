@@ -7,32 +7,40 @@ import matplotlib.cm as cm
 from matplotlib.collections import PatchCollection
 import numpy as np
 
+from parsers.configparser_ import ConfigParser
+
+
+def get_configs(section, key):
+    """
+
+    :param section: configuration file section
+    :param key: configuration file sections
+    :return: configuration file section key
+    """
+    config_file_path = "config/config.cfg"
+    config = ConfigParser(config_file_path)
+    return config.get_config(section, key)
+
 
 def main():
-    output_file = "output2/linearity_errors_fitted_cm.dat"
-    output_data = ascii.read(output_file)
-    v1 = output_data["vel"]
-    f = output_data["f"]
-    x1 = output_data["x1"]
-    y1 = output_data["y1"]
-    x2 = output_data["x2"]
-    y2 = output_data["y2"]
-    errxmin = output_data["errxmin"]
-    errymin = output_data["errymin"]
-    errxmax = output_data["errxmax"]
-    errymax = output_data["errymax"]
-    xlong2 = output_data["xlong2"]
-    ylong2 = output_data["ylong2"]
-    errxminlong = output_data["errxminlong"]
-    erryminlong = output_data["erryminlong"]
-    errxmaxlong = output_data["errxmaxlong"]
-    errymaxlong = output_data["errymaxlong"]
+    relative_motion_path = get_configs("paths", "relative_motion")
+    input_file = relative_motion_path + "linearity_errors_fitted_cm.dat"
+    input_data = ascii.read(input_file)
+    v1 = input_data["vel"]
+    f = input_data["f"]
+    x1 = input_data["x1"]
+    y1 = input_data["y1"]
+    x2 = input_data["x2"]
+    y2 = input_data["y2"]
+    xlong2 = input_data["xlong2"]
+    ylong2 = input_data["ylong2"]
+    errxminlong = input_data["errxminlong"]
+    erryminlong = input_data["erryminlong"]
+    errxmaxlong = input_data["errxmaxlong"]
+    errymaxlong = input_data["errymaxlong"]
 
     dv = (v1.max() - v1.min())
     v1mi = v1.min()
-    v1mx = v1.max()
-
-    print(v1mi, v1mx)
 
     rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
     plt.figure(figsize=(7, 5), dpi=100)
@@ -50,7 +58,8 @@ def main():
         ax1.annotate("", xy=(x1[i], y1[i]), xycoords='data', xytext=(errxminlong[i], erryminlong[i]), textcoords='data',
                      arrowprops=dict( arrowstyle="-", color="grey", connectionstyle="arc3", alpha=0.5))
         ax1.annotate("", xy=(errxminlong[i], erryminlong[i]), xycoords='data', xytext=(errxmaxlong[i], errymaxlong[i]),
-                     textcoords='data', arrowprops=dict(arrowstyle="-", color="grey", connectionstyle="arc3", alpha=0.5))
+                     textcoords='data', arrowprops=dict(arrowstyle="-", color="grey", connectionstyle="arc3",
+                                                        alpha=0.5))
         ax1.annotate("", xy=(x1[i], y1[i]), xycoords='data', xytext=(xlong2[i], ylong2[i]), textcoords='data', size=7,
                      arrowprops=dict(arrowstyle="<-", color="black", connectionstyle="arc3"))
         el = Circle((x1[i], y1[i]), radius=3 * np.log10(f[i] * 1000.), angle=0, lw=0.5)

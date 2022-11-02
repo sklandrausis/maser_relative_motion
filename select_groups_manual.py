@@ -1,3 +1,4 @@
+import argparse
 import sys
 from random import random
 
@@ -22,15 +23,16 @@ def get_configs(section, key):
     return config.get_config(section, key)
 
 
-def main():
+def main(input_file):
     rc('font', family='serif', style='normal', variant='normal', weight='normal', stretch='normal', size=12)
-    minorLocatorx = MultipleLocator(20)
-    minorLocatory = MultipleLocator(20)
-    minorLocatorvel = MultipleLocator(1)
-    file = "data_files3/ea063.out"
+    minor_locator_x = MultipleLocator(20)
+    minor_locator_y = MultipleLocator(20)
+    minor_locator_vel = MultipleLocator(1)
+    data_file_path = get_configs("paths", "dataFiles")
+    file = data_file_path + input_file
     dates = {file.split("-")[0].strip(): file.split("-")[1].strip() for file in
              get_configs("parameters", "dates").split(",")}
-    title = file.split("/")[1].split(".")[0].upper() + "-" + dates[file.split("/")[1].split(".")[0]]
+    title = input_file.split(".")[0].upper() + "-" + dates[input_file.split(".")[0]]
     channel, velocity, intensity, integral_intensity, ra, dec = np.loadtxt(file, unpack=True)
     velocity = velocity/1000
 
@@ -43,10 +45,10 @@ def main():
     ax[0].set_xlim(-200, 200)
     ax[0].set_ylim(-50, 345)
     ax[0].set_xlabel('$\\Delta$ RA (mas)', fontsize=12)
-    ax[0].xaxis.set_minor_locator(minorLocatorx)
-    ax[0].yaxis.set_minor_locator(minorLocatory)
+    ax[0].xaxis.set_minor_locator(minor_locator_x)
+    ax[0].yaxis.set_minor_locator(minor_locator_y)
     ax[0].invert_xaxis()
-    ax[0].xaxis.set_minor_locator(minorLocatorvel)
+    ax[0].xaxis.set_minor_locator(minor_locator_vel)
     ax[0].set_title(title, size=12)
 
     def create_labels1(velocity, intensity):
@@ -73,7 +75,7 @@ def main():
     group_indexes = [group_index]
     scatter2 = ax[1].scatter(velocity, intensity, picker=True)
     ax[1].set_xlabel('$V_{\\rm LSR}$ [km s$^{-1}$]', fontsize=12)
-    ax[1].xaxis.set_minor_locator(minorLocatorvel)
+    ax[1].xaxis.set_minor_locator(minor_locator_vel)
     ax[1].set_ylabel('Flux density [Jy]', fontsize=12)
     cursor2 = mplcursors.cursor(scatter2, hover=True, highlight=True)
     labels2 = create_labels2(ra, dec)
@@ -85,11 +87,14 @@ def main():
     def onpick1(event):
         global group_index
         ind = event.ind[0]
-        if [group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]] not in selected_points:
-            selected_points.append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
+        if [group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]] \
+                not in selected_points:
+            selected_points.append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind],
+                                    ra[ind], dec[ind]])
             ax[1].plot(velocity[ind], intensity[ind],"x", markersize=10, c=colors[group_index])
             ax[0].plot(ra[ind], dec[ind], "x", markersize=10, c=colors[group_index])
-            groups[group_index].append([group_index, channel[ind], velocity[ind], intensity[ind], integral_intensity[ind], ra[ind], dec[ind]])
+            groups[group_index].append([group_index, channel[ind], velocity[ind], intensity[ind],
+                                        integral_intensity[ind], ra[ind], dec[ind]])
             event.canvas.draw()
 
     def press(event):
@@ -131,8 +136,9 @@ def main():
     plt.tight_layout()
 
     plt.show()
-    print("Output file ", file.split("/")[1].split(".")[0] + ".groups")
-    with open(file.split("/")[1].split(".")[0] + ".groups", "w") as output_file:
+    groups_file_path = get_configs("paths", "groups")
+    print(groups_file_path + input_file.split(".")[0] + ".groups")
+    with open(groups_file_path + input_file.split(".")[0] + ".groups", "w") as output_file:
         for group in groups:
             for chann in group:
                 for i in chann:
@@ -141,5 +147,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='create group file')
+    parser.add_argument('input_file', type=str, help='input file')
+    args = parser.parse_args()
+    main(args.input_file)
     sys.exit(0)

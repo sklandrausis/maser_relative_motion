@@ -4,16 +4,30 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from parsers.configparser_ import ConfigParser
+
+
+def get_configs(section, key):
+    """
+    :param section: configuration file section
+    :param key: configuration file sections
+    :return: configuration file section key
+    """
+    config_file_path = "config/config.cfg"
+    config = ConfigParser(config_file_path)
+    return config.get_config(section, key)
+
 
 def main():
-    files = os.listdir("groups")
+    groups_file_path = get_configs("paths", "groups")
+    files = os.listdir(groups_file_path)
 
     data = dict()
     global_groups = []
     global_epochs = []
 
     for file in files:
-        file_name = "groups/" + file
+        file_name = groups_file_path + file
         epoch = file.split(".")[0]
         group, channel, velocity, ra, dec = np.loadtxt(file_name, unpack=True, usecols=(0, 1, 2, 5, 6))
         groups = list(set(group))

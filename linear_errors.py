@@ -32,18 +32,17 @@ def convert_datetime_object_to_mjd(time):
 
 
 def main():
-    output_file = "output2/positionanglemotion_linearity.dat"
-    output_data = ascii.read(output_file)
-    output_data_headers = output_data.keys()
-    velocity = output_data["vel"]
+    relative_motion_path = get_configs("paths", "relative_motion")
+    input_file = relative_motion_path + "position_angle_motion_linearity.dat"
+    input_data = ascii.read(input_file)
+    input_data_headers = input_data.keys()
+    velocity = input_data["vel"]
     mjd = np.array([convert_datetime_object_to_mjd(datetime.strptime(date.split("-")[1].strip(), '%d.%m.%Y')) for date
                     in get_configs("parameters", "dates").split(",")])
     mjd = mjd - mjd[0]
-    x = np.array([output_data[header] for header in output_data_headers if "x" in header]).T
-    y = np.array([output_data[header] for header in output_data_headers if "y" in header]).T
-    i = np.array([output_data[header] for header in output_data_headers if "i" in header]).T
-
-    print(x.shape)
+    x = np.array([input_data[header] for header in input_data_headers if "x" in header]).T
+    y = np.array([input_data[header] for header in input_data_headers if "y" in header]).T
+    i = np.array([input_data[header] for header in input_data_headers if "i" in header]).T
 
     print('PM relative to centres:')
     for epoch in range(0, x.shape[1]):
@@ -75,12 +74,16 @@ def main():
         a1[r][0].plot(mjd[-1], mjd[-1] * c[0] + c[1], ls="", marker="x")
         a1[r][1].plot(mjd[-1], mjd[-1] * cdec[0] + cdec[1], ls="", marker="x")
         a1[r][0].plot(mjd[-1], mjd[-1] * (c[0] + np.sqrt(np.diag(m)[0])) + c[1], ls="", marker="x", color="grey")
-        a1[r][1].plot(mjd[-1], mjd[-1] * (cdec[0] + np.sqrt(np.diag(mdec)[0])) + cdec[1], ls="", marker="x", color="grey")
+        a1[r][1].plot(mjd[-1], mjd[-1] * (cdec[0] + np.sqrt(np.diag(mdec)[0])) + cdec[1], ls="", marker="x",
+                      color="grey")
         a1[r][0].plot(mjd[-1], mjd[-1] * (c[0] - np.sqrt(np.diag(m)[0])) + c[1], ls="", marker="x", color="grey")
-        a1[r][1].plot(mjd[-1], mjd[-1] * (cdec[0] - np.sqrt(np.diag(mdec)[0])) + cdec[1], ls="", marker="x", color="grey")
+        a1[r][1].plot(mjd[-1], mjd[-1] * (cdec[0] - np.sqrt(np.diag(mdec)[0])) + cdec[1], ls="", marker="x",
+                      color="grey")
         a1[r][1].plot(mjd, fun(mjd, cdec[0], cdec[1]), lw=1, c="g")
-        a1[r][0].text(100, np.max(x[r]), "Vlsr %.3f   a_RA %.6f   err_a_RA: %.6f: " % (velocity[r], c[0], np.sqrt(np.diag(m)[0])))
-        a1[r][1].text(100, np.min(y[r]), "Vlsr %.3f   a_Dec %.6f  err_a_Dec: %.6f: " % (velocity[r], cdec[0], np.sqrt(np.diag(mdec)[0])))
+        a1[r][0].text(100, np.max(x[r]), "Vlsr %.3f   a_RA %.6f   err_a_RA: %.6f: " % (velocity[r], c[0],
+                                                                                       np.sqrt(np.diag(m)[0])))
+        a1[r][1].text(100, np.min(y[r]), "Vlsr %.3f   a_Dec %.6f  err_a_Dec: %.6f: " % (velocity[r], cdec[0],
+                                                                                        np.sqrt(np.diag(mdec)[0])))
         a1[r][0].text(3000, np.max(x[r]), "Feature %i" % (r + 1))
 
         lsvel.append([np.sqrt(((mjd[-1] * c[0] + c[1] - x[r]) / (3886.0 / 365.0)) ** 2 +
@@ -114,9 +117,10 @@ def main():
     lstexsort = sorted(lstex, key=lambda lstex: lstex[0])
     header1 = ["vel", "f", "x1", "y1", "x2", "y2", "errxmin", "errymin", "errxmax", "errymax", "xlong2", "ylong2",
                "errxminlong", "erryminlong", "errxmaxlong", "errymaxlong"]
-    np.savetxt("output2/linearity_errors_fitted_cm.dat", np.array(ls), delimiter=",", fmt="%s", header=",".join(header1))
-    np.savetxt("output2/linearity_errors_fitted_tex_cm.dat", np.array(lstex))
-    np.savetxt("output2/linearity_errors_fitted_tex_sort.dat", np.array(lstexsort))
+    np.savetxt(relative_motion_path + "linearity_errors_fitted_cm.dat", np.array(ls), delimiter=",", fmt="%s",
+               header=",".join(header1))
+    np.savetxt(relative_motion_path + "linearity_errors_fitted_tex_cm.dat", np.array(lstex))
+    np.savetxt(relative_motion_path + "linearity_errors_fitted_tex_sort.dat", np.array(lstexsort))
 
     plt.show()
     sys.exit(0)
