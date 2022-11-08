@@ -102,6 +102,7 @@ def main(group_numbers):
             del dates[file.split(".")[0]]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(input_files), figsize=(16, 16), dpi=90)
+    fig2, ax2 = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=90)
 
     data_dict = dict()
     ra_max = []
@@ -148,11 +149,15 @@ def main(group_numbers):
 
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
+
+    max_intensity = []
+    epochs = []
     for index in range(0, len(input_files)):
         for j in group_numbers:
             symbol = symbols[group_numbers.index(j)]
             velocity = data_dict[j][0][index]
             intensity = data_dict[j][1][index]
+            max_intensity.append(np.max(intensity))
             ra = data_dict[j][2][index]
             dec = data_dict[j][3][index]
 
@@ -190,6 +195,7 @@ def main(group_numbers):
                                      color=c, lw=2, marker=symbol)
 
         title = input_files[index].split(".")[0].upper() + "-" + dates[input_files[index].split(".")[0]]
+        epochs.append(dates[input_files[index].split(".")[0]])
         ax[0][index].xaxis.set_minor_locator(minor_locator_vel)
         ax[0][index].set_title(title)
         ax[0][index].set_xlabel('$V_{\\rm LSR}$ (km s$^{-1}$)')
@@ -206,8 +212,17 @@ def main(group_numbers):
 
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
+
+    ax2.scatter(epochs, max_intensity)
+    ax2.set_ylabel('Flux density (Jy)')
+    ax2.set_ylabel('Epohs')
+
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
+
+    fig2.tight_layout()
+    #fig.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
+
     plt.show()
 
 
