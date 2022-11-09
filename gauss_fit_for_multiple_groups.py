@@ -214,14 +214,14 @@ def main(group_numbers):
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
 
     ax2.scatter(epochs, max_intensity)
+    ax2.set_xlabel('Epohs')
     ax2.set_ylabel('Flux density (Jy)')
-    ax2.set_ylabel('Epohs')
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
 
     fig2.tight_layout()
-    #fig.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
+    fig2.subplots_adjust(top=0.991, bottom=0.047, left=0.036, right=0.991, hspace=0.2, wspace=0.2)
 
     plt.show()
 
