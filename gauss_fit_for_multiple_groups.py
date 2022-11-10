@@ -148,16 +148,23 @@ def main(group_numbers):
                 dec_min.append(np.min(dec))
 
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
-    symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4"]
+    symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4", ".", ",", "s", "p", "h", "+"]
 
-    max_intensity = []
+    max_intensity = dict()
     epochs = []
     for index in range(0, len(input_files)):
         for j in group_numbers:
-            symbol = symbols[group_numbers.index(j)]
             velocity = data_dict[j][0][index]
+
+            if len(velocity) == 0:
+                continue
+
+            symbol = symbols[group_numbers.index(j)]
             intensity = data_dict[j][1][index]
-            max_intensity.append(np.max(intensity))
+            if j not in max_intensity.keys():
+                max_intensity[j] = []
+
+            max_intensity[j].append(np.max(intensity))
             ra = data_dict[j][2][index]
             dec = data_dict[j][3][index]
 
@@ -213,7 +220,14 @@ def main(group_numbers):
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
 
-    ax2.scatter(epochs, max_intensity)
+    for j in group_numbers:
+        if j in max_intensity.keys():
+            if len(epochs) == len(max_intensity[j]):
+                ax2.scatter(epochs, max_intensity[j], label=str(j))
+            else:
+                ax2.scatter(epochs[0:len(max_intensity[j])], max_intensity[j], label=str(j))
+
+    ax2.legend()
     ax2.set_xlabel('Epohs')
     ax2.set_ylabel('Flux density (Jy)')
 
@@ -228,7 +242,16 @@ def main(group_numbers):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='plot group')
-    parser.add_argument('group_numbers', type=int, help='group numbers',  nargs='+',)
+    parser.add_argument('--group_numbers', type=str, default='all', help='group numbers',  nargs='+',)
     args = parser.parse_args()
-    main(args.group_numbers)
+
+    group_numbers = []
+    if args.group_numbers == "all":
+        group_numbers = get_configs("parameters", "all_groups").split(",")
+        group_numbers = [int(gn) for gn in group_numbers]
+    else:
+        group_numbers = args.group_numbers
+
+    group_numbers = [int(gn) for gn in group_numbers]
+    main(group_numbers)
     sys.exit(0)
