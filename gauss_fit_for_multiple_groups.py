@@ -150,7 +150,7 @@ def main(group_numbers):
     coord_range = max(max(ra_max) - min(ra_min), max(dec_max) - min(dec_min))
     symbols = ["o", "*", "v", "^", "<", ">", "1", "2", "3", "4", ".", ",", "s", "p", "h", "+"]
 
-    max_intensity = dict()
+    areas_of_intensity = dict()
     epochs = []
     for index in range(0, len(input_files)):
         for j in group_numbers:
@@ -161,10 +161,10 @@ def main(group_numbers):
 
             symbol = symbols[group_numbers.index(j)]
             intensity = data_dict[j][1][index]
-            if j not in max_intensity.keys():
-                max_intensity[j] = []
+            if j not in areas_of_intensity.keys():
+                areas_of_intensity[j] = []
 
-            max_intensity[j].append(np.max(intensity))
+            areas_of_intensity[j].append(np.trapz(intensity, velocity))
             ra = data_dict[j][2][index]
             dec = data_dict[j][3][index]
 
@@ -221,15 +221,16 @@ def main(group_numbers):
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
 
     for j in group_numbers:
-        if j in max_intensity.keys():
-            if len(epochs) == len(max_intensity[j]):
-                ax2.scatter(epochs, max_intensity[j], label=str(j))
+        if j in areas_of_intensity.keys():
+            if len(epochs) == len(areas_of_intensity[j]):
+                ax2.scatter(epochs, areas_of_intensity[j], label=str(j))
             else:
-                ax2.scatter(epochs[0:len(max_intensity[j])], max_intensity[j], label=str(j))
+                ax2.scatter(epochs[0:len(areas_of_intensity[j])], areas_of_intensity[j], label=str(j))
 
     ax2.legend()
     ax2.set_xlabel('Epohs')
-    ax2.set_ylabel('Flux density (Jy)')
+    ax2.set_ylabel('Integral flux density (Jy)')
+    ax2.set_yscale('log')
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.97, bottom=0, wspace=0.15, hspace=0, left=0.04, right=0.99)
