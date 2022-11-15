@@ -161,10 +161,12 @@ def main(group_numbers):
 
             symbol = symbols[group_numbers.index(j)]
             intensity = data_dict[j][1][index]
+            if dates[input_files[index].split(".")[0]] not in areas_of_intensity.keys():
+                areas_of_intensity[dates[input_files[index].split(".")[0]]] = dict()
             if j not in areas_of_intensity.keys():
-                areas_of_intensity[j] = []
+                areas_of_intensity[dates[input_files[index].split(".")[0]]][j] = []
 
-            areas_of_intensity[j].append(np.trapz(intensity, velocity))
+            areas_of_intensity[dates[input_files[index].split(".")[0]]][j].append(np.trapz(intensity, velocity))
             ra = data_dict[j][2][index]
             dec = data_dict[j][3][index]
 
@@ -220,14 +222,30 @@ def main(group_numbers):
     ax[0][0].set_ylabel('Flux density (Jy)')
     ax[1][0].set_ylabel('$\\Delta$ Dec (mas)')
 
-    for j in group_numbers:
-        if j in areas_of_intensity.keys():
-            if len(epochs) == len(areas_of_intensity[j]):
-                ax2.scatter(epochs, areas_of_intensity[j], label=str(j))
-            else:
-                ax2.scatter(epochs[0:len(areas_of_intensity[j])], areas_of_intensity[j], label=str(j))
+    symbols = ["*", "o", "v", "^", "<", ">", "1", "2", "3", "4", "s", "p", "+", "D", "d", "h", "X", "|", "_", "."]
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', '#FF00FF', '#FF4500', '#FF81C0', '#00FFFF', '#653700',
+              '#C0C0C0', '#7E1E9C', '#C79FEF', '#D1B26F', '#FFD700', '#80800']
 
-    ax2.legend()
+    handles_ = []
+    labels_ = []
+    for epoch in areas_of_intensity:
+        for j in areas_of_intensity[epoch]:
+            i = group_numbers.index(j)
+            scatter = ax2.scatter(epoch, areas_of_intensity[epoch][j], label=str(j), c=colors[i], marker=symbols[i])
+            handles, labels = scatter.legend_elements(prop="colors")
+            #print(handles)
+            handles_.extend(handles)
+            labels_.extend(labels)
+
+    #print(handles_)
+
+    handles_ = set(handles_)
+    labels_ = set(labels_)
+
+    #print(handles_)
+
+    ax2.legend(handles_, labels_)
+    ax2.legend(labels=group_numbers)
     ax2.set_xlabel('Epohs')
     ax2.set_ylabel('Integral flux density (Jy)')
     ax2.set_yscale('log')
