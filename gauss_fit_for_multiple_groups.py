@@ -226,25 +226,11 @@ def main(group_numbers):
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', '#FF00FF', '#FF4500', '#FF81C0', '#00FFFF', '#653700',
               '#C0C0C0', '#7E1E9C', '#C79FEF', '#D1B26F', '#FFD700', '#80800']
 
-    handles_ = []
-    labels_ = []
     for epoch in areas_of_intensity:
         for j in areas_of_intensity[epoch]:
             i = group_numbers.index(j)
-            scatter = ax2.scatter(epoch, areas_of_intensity[epoch][j], label=str(j), c=colors[i], marker=symbols[i])
-            handles, labels = scatter.legend_elements(prop="colors")
-            #print(handles)
-            handles_.extend(handles)
-            labels_.extend(labels)
+            ax2.scatter(epoch, areas_of_intensity[epoch][j], label=str(j), c=colors[i], marker=symbols[i])
 
-    #print(handles_)
-
-    handles_ = set(handles_)
-    labels_ = set(labels_)
-
-    #print(handles_)
-
-    ax2.legend(handles_, labels_)
     ax2.legend(labels=group_numbers)
     ax2.set_xlabel('Epohs')
     ax2.set_ylabel('Integral flux density (Jy)')
