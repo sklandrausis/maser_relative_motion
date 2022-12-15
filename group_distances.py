@@ -115,12 +115,14 @@ def main():
             ra2 = g2[3]
             dec1 = g1[4]
             dec2 = g2[4]
-            distances[g].append(compute_distance(ra1, ra2, dec1, dec2))
+            distances[g].append({epoch:compute_distance(ra1, ra2, dec1, dec2)})
 
     for g in distances.keys():
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 16), dpi=100)
-        if len(epochs) == len(distances[g]):
-            ax.scatter(dates_, distances[g], s=100)
+
+        for e in distances[g]:
+            ax.scatter(dates[list(e.keys())[0]], e.values(), s=100)
+
         ax.set_title(g)
 
     plt.show()
